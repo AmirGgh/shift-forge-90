@@ -259,7 +259,7 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-4 md:p-8" dir="rtl">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">ניהול משמרת</h1>
           <Button
@@ -272,296 +272,292 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
           </Button>
         </div>
 
-        {/* Section 1: Guards Bank */}
-        <Collapsible
-          open={openSections.guards}
-          onOpenChange={(open) => setOpenSections(prev => ({ ...prev, guards: open }))}
-        >
-          <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
-            <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-              <h2 className="text-xl font-semibold text-foreground">בנק מאבטחים</h2>
-              <ChevronDown className={`w-5 h-5 transition-transform ${openSections.guards ? "rotate-180" : ""}`} />
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="px-6 pb-6">
-                <div className="flex flex-wrap gap-2">
-                  {availableGuards.map((guard) => (
+        {/* Guards Bank - Always visible */}
+        <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-4">בנק מאבטחים</h2>
+            <div className="flex flex-wrap gap-2">
+              {availableGuards.map((guard) => (
+                <div
+                  key={guard}
+                  draggable
+                  onDragStart={() => handleDragStart(guard)}
+                  style={{ 
+                    backgroundColor: `${getGuardColor(guard)}20`,
+                    borderColor: getGuardColor(guard),
+                    color: getGuardColor(guard)
+                  }}
+                  className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium"
+                >
+                  {guard}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        {/* Horizontal Layout for 3 sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Section 1: Tasks - Posts and Patrols */}
+          <Collapsible
+            open={openSections.tasks}
+            onOpenChange={(open) => setOpenSections(prev => ({ ...prev, tasks: open }))}
+            className="lg:col-span-1"
+          >
+            <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
+              <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
+                <h2 className="text-xl font-semibold text-foreground">משימות</h2>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openSections.tasks ? "rotate-180" : ""}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="p-6">
+                  <Carousel className="w-full" opts={{ align: "start", direction: "rtl" }}>
+                    <CarouselContent>
+                      {/* Posts Slide */}
+                      <CarouselItem>
+                        <Card className="p-6 border-border/30 bg-background/30">
+                          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
+                            <MapPin className="w-5 h-5 text-primary" />
+                            עמדות
+                          </h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b border-border/50">
+                                  <th className="text-right p-3 font-semibold text-foreground">עמדה</th>
+                                  <th className="text-right p-3 font-semibold text-foreground">מאבטחים</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {POSTS.map((post) => (
+                                  <tr key={post} className="border-b border-border/30 hover:bg-background/50 transition-colors">
+                                    <td className="p-3 font-medium text-foreground">{post}</td>
+                                    <td
+                                      className="p-3"
+                                      onDragOver={handleDragOver}
+                                      onDrop={() => handleDropPost(post)}
+                                    >
+                                      <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-primary/50 transition-colors">
+                                        {getAssignmentsForPost(post).map((assignment, idx) => (
+                                          <div
+                                            key={idx}
+                                            onMouseDown={() => handleLongPressStart(assignment.guard, post, "post")}
+                                            onMouseUp={handleLongPressEnd}
+                                            onMouseLeave={handleLongPressEnd}
+                                            onTouchStart={() => handleLongPressStart(assignment.guard, post, "post")}
+                                            onTouchEnd={handleLongPressEnd}
+                                            style={{ 
+                                              backgroundColor: `${getGuardColor(assignment.guard)}30`,
+                                              borderColor: getGuardColor(assignment.guard),
+                                              color: getGuardColor(assignment.guard)
+                                            }}
+                                            className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                          >
+                                            <span className="font-medium">{assignment.guard}</span>
+                                            <span className="text-xs opacity-70">{formatTime(assignment.time)}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </Card>
+                      </CarouselItem>
+
+                      {/* Patrols Slide */}
+                      <CarouselItem>
+                        <Card className="p-6 border-border/30 bg-background/30">
+                          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
+                            <Clock className="w-5 h-5 text-accent" />
+                            פטרולים
+                          </h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b border-border/50">
+                                  <th className="text-right p-3 font-semibold text-foreground">שם פטרול</th>
+                                  <th className="text-right p-3 font-semibold text-foreground">מאבטחים</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {PATROLS.map((patrol) => (
+                                  <tr key={patrol} className="border-b border-border/30 hover:bg-background/50 transition-colors">
+                                    <td className="p-3 font-medium text-foreground">{patrol}</td>
+                                    <td
+                                      className="p-3"
+                                      onDragOver={handleDragOver}
+                                      onDrop={() => handleDropPatrol(patrol)}
+                                    >
+                                      <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-accent/50 transition-colors">
+                                        {getAssignmentsForPatrol(patrol).map((assignment, idx) => (
+                                          <div
+                                            key={idx}
+                                            onMouseDown={() => handleLongPressStart(assignment.guard, patrol, "patrol")}
+                                            onMouseUp={handleLongPressEnd}
+                                            onMouseLeave={handleLongPressEnd}
+                                            onTouchStart={() => handleLongPressStart(assignment.guard, patrol, "patrol")}
+                                            onTouchEnd={handleLongPressEnd}
+                                            style={{ 
+                                              backgroundColor: `${getGuardColor(assignment.guard)}30`,
+                                              borderColor: getGuardColor(assignment.guard),
+                                              color: getGuardColor(assignment.guard)
+                                            }}
+                                            className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                          >
+                                            <span className="font-medium">{assignment.guard}</span>
+                                            <span className="text-xs opacity-70">{formatTime(assignment.time)}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </Card>
+                      </CarouselItem>
+                    </CarouselContent>
+                    <CarouselPrevious className="right-12" />
+                    <CarouselNext className="left-12" />
+                  </Carousel>
+                </div>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
+          {/* Section 2: History */}
+          <Collapsible
+            open={openSections.history}
+            onOpenChange={(open) => setOpenSections(prev => ({ ...prev, history: open }))}
+            className="lg:col-span-1"
+          >
+            <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
+              <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
+                <h2 className="text-xl font-semibold text-foreground">היסטוריה</h2>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openSections.history ? "rotate-180" : ""}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="px-6 pb-6">
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {assignments.length === 0 && patrols.length === 0 && (
+                      <p className="text-muted-foreground text-center py-4">אין היסטוריה עדיין</p>
+                    )}
+                    {[...assignments, ...patrols.map(p => ({ ...p, post: p.patrol }))]
+                      .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+                      .map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-3 bg-background/30 rounded-lg border border-border/30"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: getGuardColor(item.guard) }}
+                            />
+                            <span className="text-foreground font-medium">{item.guard}</span>
+                            <span className="text-muted-foreground">←</span>
+                            <span className="text-foreground">{item.post}</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">{formatTime(item.time)}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
+          {/* Section 3: Meals and Breaks */}
+          <Collapsible
+            open={openSections.mealBreak}
+            onOpenChange={(open) => setOpenSections(prev => ({ ...prev, mealBreak: open }))}
+            className="lg:col-span-1"
+          >
+            <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
+              <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
+                <h2 className="text-xl font-semibold text-foreground">אוכל והפסקות</h2>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openSections.mealBreak ? "rotate-180" : ""}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="p-6 space-y-6">
+                  {/* Meals Table */}
+                  <Card className="p-4 border-border/30 bg-background/30">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
+                      <UtensilsCrossed className="w-5 h-5 text-primary" />
+                      אוכל
+                    </h3>
                     <div
-                      key={guard}
-                      draggable
-                      onDragStart={() => handleDragStart(guard)}
-                      style={{ 
-                        backgroundColor: `${getGuardColor(guard)}20`,
-                        borderColor: getGuardColor(guard),
-                        color: getGuardColor(guard)
-                      }}
-                      className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium"
+                      onDragOver={handleDragOver}
+                      onDrop={handleDropMeal}
+                      className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-primary/50 transition-colors"
                     >
-                      {guard}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
-
-        {/* Section 2: Tasks - Posts and Patrols */}
-        <Collapsible
-          open={openSections.tasks}
-          onOpenChange={(open) => setOpenSections(prev => ({ ...prev, tasks: open }))}
-        >
-          <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
-            <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-              <h2 className="text-xl font-semibold text-foreground">משימות - עמדות ופטרולים</h2>
-              <ChevronDown className={`w-5 h-5 transition-transform ${openSections.tasks ? "rotate-180" : ""}`} />
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="p-6">
-                <Carousel className="w-full" opts={{ align: "start", direction: "rtl" }}>
-                  <CarouselContent>
-                    {/* Posts Slide */}
-                    <CarouselItem>
-                      <Card className="p-6 border-border/30 bg-background/30">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
-                          <MapPin className="w-5 h-5 text-primary" />
-                          עמדות
-                        </h3>
-                        <div className="overflow-x-auto">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="border-b border-border/50">
-                                <th className="text-right p-3 font-semibold text-foreground">עמדה</th>
-                                <th className="text-right p-3 font-semibold text-foreground">מאבטחים</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {POSTS.map((post) => (
-                                <tr key={post} className="border-b border-border/30 hover:bg-background/50 transition-colors">
-                                  <td className="p-3 font-medium text-foreground">{post}</td>
-                                  <td
-                                    className="p-3"
-                                    onDragOver={handleDragOver}
-                                    onDrop={() => handleDropPost(post)}
-                                  >
-                                    <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-primary/50 transition-colors">
-                                      {getAssignmentsForPost(post).map((assignment, idx) => (
-                                        <div
-                                          key={idx}
-                                          onMouseDown={() => handleLongPressStart(assignment.guard, post, "post")}
-                                          onMouseUp={handleLongPressEnd}
-                                          onMouseLeave={handleLongPressEnd}
-                                          onTouchStart={() => handleLongPressStart(assignment.guard, post, "post")}
-                                          onTouchEnd={handleLongPressEnd}
-                                          style={{ 
-                                            backgroundColor: `${getGuardColor(assignment.guard)}30`,
-                                            borderColor: getGuardColor(assignment.guard),
-                                            color: getGuardColor(assignment.guard)
-                                          }}
-                                          className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
-                                        >
-                                          <span className="font-medium">{assignment.guard}</span>
-                                          <span className="text-xs opacity-70">{formatTime(assignment.time)}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </Card>
-                    </CarouselItem>
-
-                    {/* Patrols Slide */}
-                    <CarouselItem>
-                      <Card className="p-6 border-border/30 bg-background/30">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
-                          <Clock className="w-5 h-5 text-accent" />
-                          פטרולים
-                        </h3>
-                        <div className="overflow-x-auto">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="border-b border-border/50">
-                                <th className="text-right p-3 font-semibold text-foreground">שם פטרול</th>
-                                <th className="text-right p-3 font-semibold text-foreground">מאבטחים</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {PATROLS.map((patrol) => (
-                                <tr key={patrol} className="border-b border-border/30 hover:bg-background/50 transition-colors">
-                                  <td className="p-3 font-medium text-foreground">{patrol}</td>
-                                  <td
-                                    className="p-3"
-                                    onDragOver={handleDragOver}
-                                    onDrop={() => handleDropPatrol(patrol)}
-                                  >
-                                    <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-accent/50 transition-colors">
-                                      {getAssignmentsForPatrol(patrol).map((assignment, idx) => (
-                                        <div
-                                          key={idx}
-                                          onMouseDown={() => handleLongPressStart(assignment.guard, patrol, "patrol")}
-                                          onMouseUp={handleLongPressEnd}
-                                          onMouseLeave={handleLongPressEnd}
-                                          onTouchStart={() => handleLongPressStart(assignment.guard, patrol, "patrol")}
-                                          onTouchEnd={handleLongPressEnd}
-                                          style={{ 
-                                            backgroundColor: `${getGuardColor(assignment.guard)}30`,
-                                            borderColor: getGuardColor(assignment.guard),
-                                            color: getGuardColor(assignment.guard)
-                                          }}
-                                          className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
-                                        >
-                                          <span className="font-medium">{assignment.guard}</span>
-                                          <span className="text-xs opacity-70">{formatTime(assignment.time)}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </Card>
-                    </CarouselItem>
-                  </CarouselContent>
-                  <CarouselPrevious className="right-12" />
-                  <CarouselNext className="left-12" />
-                </Carousel>
-              </div>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
-
-        {/* Section 3: History */}
-        <Collapsible
-          open={openSections.history}
-          onOpenChange={(open) => setOpenSections(prev => ({ ...prev, history: open }))}
-        >
-          <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
-            <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-              <h2 className="text-xl font-semibold text-foreground">היסטוריה</h2>
-              <ChevronDown className={`w-5 h-5 transition-transform ${openSections.history ? "rotate-180" : ""}`} />
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="px-6 pb-6">
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {assignments.length === 0 && patrols.length === 0 && (
-                    <p className="text-muted-foreground text-center py-4">אין היסטוריה עדיין</p>
-                  )}
-                  {[...assignments, ...patrols.map(p => ({ ...p, post: p.patrol }))]
-                    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-                    .map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between p-3 bg-background/30 rounded-lg border border-border/30"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div 
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: getGuardColor(item.guard) }}
-                          />
-                          <span className="text-foreground font-medium">{item.guard}</span>
-                          <span className="text-muted-foreground">←</span>
-                          <span className="text-foreground">{item.post}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{formatTime(item.time)}</span>
+                      <div className="space-y-2">
+                        {meals.map((meal, idx) => (
+                          <div
+                            key={idx}
+                            onMouseDown={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
+                            onMouseUp={handleLongPressEnd}
+                            onMouseLeave={handleLongPressEnd}
+                            onTouchStart={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
+                            onTouchEnd={handleLongPressEnd}
+                            style={{ 
+                              backgroundColor: `${getGuardColor(meal.guard)}30`,
+                              borderColor: getGuardColor(meal.guard),
+                              color: getGuardColor(meal.guard)
+                            }}
+                            className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                          >
+                            <span className="font-medium">{meal.guard}</span>
+                            <span className="text-xs opacity-70">{formatTime(meal.time)}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  </Card>
+
+                  {/* Breaks Table */}
+                  <Card className="p-4 border-border/30 bg-background/30">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
+                      <Coffee className="w-5 h-5 text-accent" />
+                      הפסקות
+                    </h3>
+                    <div
+                      onDragOver={handleDragOver}
+                      onDrop={handleDropBreak}
+                      className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-accent/50 transition-colors"
+                    >
+                      <div className="space-y-2">
+                        {breaks.map((breakItem, idx) => (
+                          <div
+                            key={idx}
+                            onMouseDown={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
+                            onMouseUp={handleLongPressEnd}
+                            onMouseLeave={handleLongPressEnd}
+                            onTouchStart={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
+                            onTouchEnd={handleLongPressEnd}
+                            style={{ 
+                              backgroundColor: `${getGuardColor(breakItem.guard)}30`,
+                              borderColor: getGuardColor(breakItem.guard),
+                              color: getGuardColor(breakItem.guard)
+                            }}
+                            className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                          >
+                            <span className="font-medium">{breakItem.guard}</span>
+                            <span className="text-xs opacity-70">{formatTime(breakItem.time)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </Card>
                 </div>
-              </div>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
-
-        {/* Section 4: Meals and Breaks */}
-        <Collapsible
-          open={openSections.mealBreak}
-          onOpenChange={(open) => setOpenSections(prev => ({ ...prev, mealBreak: open }))}
-        >
-          <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
-            <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-              <h2 className="text-xl font-semibold text-foreground">אוכל והפסקות</h2>
-              <ChevronDown className={`w-5 h-5 transition-transform ${openSections.mealBreak ? "rotate-180" : ""}`} />
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="p-6 grid md:grid-cols-2 gap-6">
-                {/* Meals Table */}
-                <Card className="p-4 border-border/30 bg-background/30">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
-                    <UtensilsCrossed className="w-5 h-5 text-primary" />
-                    אוכל
-                  </h3>
-                  <div
-                    onDragOver={handleDragOver}
-                    onDrop={handleDropMeal}
-                    className="min-h-[200px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-primary/50 transition-colors"
-                  >
-                    <div className="space-y-2">
-                      {meals.map((meal, idx) => (
-                        <div
-                          key={idx}
-                          onMouseDown={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
-                          onMouseUp={handleLongPressEnd}
-                          onMouseLeave={handleLongPressEnd}
-                          onTouchStart={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
-                          onTouchEnd={handleLongPressEnd}
-                          style={{ 
-                            backgroundColor: `${getGuardColor(meal.guard)}30`,
-                            borderColor: getGuardColor(meal.guard),
-                            color: getGuardColor(meal.guard)
-                          }}
-                          className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                        >
-                          <span className="font-medium">{meal.guard}</span>
-                          <span className="text-xs opacity-70">{formatTime(meal.time)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Breaks Table */}
-                <Card className="p-4 border-border/30 bg-background/30">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
-                    <Coffee className="w-5 h-5 text-accent" />
-                    הפסקות
-                  </h3>
-                  <div
-                    onDragOver={handleDragOver}
-                    onDrop={handleDropBreak}
-                    className="min-h-[200px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-accent/50 transition-colors"
-                  >
-                    <div className="space-y-2">
-                      {breaks.map((breakItem, idx) => (
-                        <div
-                          key={idx}
-                          onMouseDown={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
-                          onMouseUp={handleLongPressEnd}
-                          onMouseLeave={handleLongPressEnd}
-                          onTouchStart={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
-                          onTouchEnd={handleLongPressEnd}
-                          style={{ 
-                            backgroundColor: `${getGuardColor(breakItem.guard)}30`,
-                            borderColor: getGuardColor(breakItem.guard),
-                            color: getGuardColor(breakItem.guard)
-                          }}
-                          className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                        >
-                          <span className="font-medium">{breakItem.guard}</span>
-                          <span className="text-xs opacity-70">{formatTime(breakItem.time)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+        </div>
       </div>
 
       {/* Confirmation Dialog */}
