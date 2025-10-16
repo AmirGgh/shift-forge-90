@@ -9,22 +9,26 @@ export interface Assignment {
   guard: string;
   post: string;
   time: string;
+  actualTime?: string;
 }
 
 export interface PatrolAssignment {
   guard: string;
   patrol: string;
   time: string;
+  actualTime?: string;
 }
 
 export interface MealAssignment {
   guard: string;
   time: string;
+  actualTime?: string;
 }
 
 export interface BreakAssignment {
   guard: string;
   time: string;
+  actualTime?: string;
 }
 
 export interface GuardsData {

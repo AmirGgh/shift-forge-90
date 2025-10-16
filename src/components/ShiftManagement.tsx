@@ -237,6 +237,51 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     });
   };
 
+  const handleSetActualTime = (guard: string, target: string, type: "post" | "patrol" | "meal" | "break") => {
+    const data = getGuardsData();
+    const now = new Date().toISOString();
+
+    if (type === "post") {
+      const updatedAssignments = assignments.map(a =>
+        a.guard === guard && a.post === target
+          ? { ...a, actualTime: now }
+          : a
+      );
+      setAssignments(updatedAssignments);
+      data.assignments = updatedAssignments;
+      toast.success(`זמן ביצוע נרשם עבור ${guard} ב${target}`);
+    } else if (type === "patrol") {
+      const updatedPatrols = patrols.map(p =>
+        p.guard === guard && p.patrol === target
+          ? { ...p, actualTime: now }
+          : p
+      );
+      setPatrols(updatedPatrols);
+      data.patrols = updatedPatrols;
+      toast.success(`זמן ביצוע נרשם עבור ${guard} ב${target}`);
+    } else if (type === "meal") {
+      const updatedMeals = meals.map(m =>
+        m.guard === guard
+          ? { ...m, actualTime: now }
+          : m
+      );
+      setMeals(updatedMeals);
+      data.meals = updatedMeals;
+      toast.success(`זמן ביצוע נרשם עבור ${guard} באוכל`);
+    } else if (type === "break") {
+      const updatedBreaks = breaks.map(b =>
+        b.guard === guard
+          ? { ...b, actualTime: now }
+          : b
+      );
+      setBreaks(updatedBreaks);
+      data.breaks = updatedBreaks;
+      toast.success(`זמן ביצוע נרשם עבור ${guard} בהפסקה`);
+    }
+
+    saveGuardsData(data);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-4 md:p-8" dir="rtl">
       <div className="max-w-full mx-auto space-y-6">
@@ -342,6 +387,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                           >
                                             <span className="font-medium">{assignment.guard}</span>
                                             <span className="text-xs opacity-70">{formatTime(assignment.time)}</span>
+                                            <Clock 
+                                              className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${assignment.actualTime ? 'fill-current' : ''}`}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleSetActualTime(assignment.guard, post, "post");
+                                              }}
+                                            />
                                           </div>
                                         ))}
                                       </div>
@@ -392,6 +444,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                           >
                                             <span className="font-medium">{assignment.guard}</span>
                                             <span className="text-xs opacity-70">{formatTime(assignment.time)}</span>
+                                            <Clock 
+                                              className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${assignment.actualTime ? 'fill-current' : ''}`}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleSetActualTime(assignment.guard, patrol, "patrol");
+                                              }}
+                                            />
                                           </div>
                                         ))}
                                       </div>
@@ -428,51 +487,80 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     )}
                     {(() => {
                       const allItems = [
-                        ...assignments,
-                        ...patrols.map(p => ({ ...p, post: p.patrol })),
-                        ...meals.map(m => ({ ...m, guard: m.guard, post: "אוכל", time: m.time })),
-                        ...breaks.map(b => ({ ...b, guard: b.guard, post: "הפסקה", time: b.time }))
+                        ...assignments.map(a => ({ ...a, post: a.post, actualTime: a.actualTime })),
+                        ...patrols.map(p => ({ ...p, post: p.patrol, actualTime: p.actualTime })),
+                        ...meals.map(m => ({ ...m, guard: m.guard, post: "אוכל", time: m.time, actualTime: m.actualTime })),
+                        ...breaks.map(b => ({ ...b, guard: b.guard, post: "הפסקה", time: b.time, actualTime: b.actualTime }))
                       ].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
                       
                       // Group by guard to show their journey
-                      const guardJourneys = new Map<string, Array<{post: string, time: string}>>();
+                      const guardJourneys = new Map<string, Array<{post: string, time: string, actualTime?: string}>>();
                       
                       allItems.forEach(item => {
                         if (!guardJourneys.has(item.guard)) {
                           guardJourneys.set(item.guard, []);
                         }
-                        guardJourneys.get(item.guard)!.push({ post: item.post, time: item.time });
+                        guardJourneys.get(item.guard)!.push({ post: item.post, time: item.time, actualTime: item.actualTime });
                       });
 
-                      return Array.from(guardJourneys.entries()).map(([guard, journey]) => (
-                        <div 
-                          key={guard}
-                          className="p-4 bg-background/30 rounded-lg border border-border/30"
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <div 
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: getGuardColor(guard) }}
-                            />
-                            <span className="text-foreground font-bold">{guard}</span>
+                      return Array.from(guardJourneys.entries()).map(([guard, journey]) => {
+                        const completedJourney = journey.filter(task => task.actualTime);
+                        const plannedJourney = journey.filter(task => !task.actualTime);
+                        
+                        return (
+                          <div 
+                            key={guard}
+                            className="p-4 bg-background/30 rounded-lg border border-border/30"
+                          >
+                            <div className="flex items-center gap-2 mb-2">
+                              <div 
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: getGuardColor(guard) }}
+                              />
+                              <span className="text-foreground font-bold">{guard}</span>
+                            </div>
+                            
+                            {/* Completed tasks */}
+                            {completedJourney.length > 0 && (
+                              <div className="flex items-center gap-2 flex-wrap text-sm mb-2">
+                                {completedJourney.map((task, idx) => (
+                                  <>
+                                    <div key={`${idx}-task`} className="flex items-center gap-2 bg-background/50 px-3 py-1 rounded border border-border/30">
+                                      {task.post === "אוכל" && <UtensilsCrossed className="w-3 h-3" />}
+                                      {task.post === "הפסקה" && <Coffee className="w-3 h-3" />}
+                                      <span className="text-foreground font-medium">{task.post}</span>
+                                      <span className="text-xs text-muted-foreground">{formatTime(task.actualTime!)}</span>
+                                    </div>
+                                    {idx < completedJourney.length - 1 && (
+                                      <span key={`${idx}-arrow`} className="text-muted-foreground">←</span>
+                                    )}
+                                  </>
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Planned tasks */}
+                            {plannedJourney.length > 0 && (
+                              <div className="flex items-center gap-2 flex-wrap text-sm">
+                                <span className="text-xs text-muted-foreground font-semibold">מתוכנן:</span>
+                                {plannedJourney.map((task, idx) => (
+                                  <>
+                                    <div key={`${idx}-planned`} className="flex items-center gap-2 bg-background/30 px-3 py-1 rounded border border-dashed border-border/40 opacity-60">
+                                      {task.post === "אוכל" && <UtensilsCrossed className="w-3 h-3" />}
+                                      {task.post === "הפסקה" && <Coffee className="w-3 h-3" />}
+                                      <span className="text-foreground font-medium">{task.post}</span>
+                                      <span className="text-xs text-muted-foreground">{formatTime(task.time)}</span>
+                                    </div>
+                                    {idx < plannedJourney.length - 1 && (
+                                      <span key={`${idx}-arrow-planned`} className="text-muted-foreground opacity-60">←</span>
+                                    )}
+                                  </>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-2 flex-wrap text-sm">
-                            {journey.map((task, idx) => (
-                              <>
-                                <div key={`${idx}-task`} className="flex items-center gap-2 bg-background/50 px-3 py-1 rounded border border-border/30">
-                                  {task.post === "אוכל" && <UtensilsCrossed className="w-3 h-3" />}
-                                  {task.post === "הפסקה" && <Coffee className="w-3 h-3" />}
-                                  <span className="text-foreground font-medium">{task.post}</span>
-                                  <span className="text-xs text-muted-foreground">{formatTime(task.time)}</span>
-                                </div>
-                                {idx < journey.length - 1 && (
-                                  <span key={`${idx}-arrow`} className="text-muted-foreground">←</span>
-                                )}
-                              </>
-                            ))}
-                          </div>
-                        </div>
-                      ));
+                        );
+                      });
                     })()}
                   </div>
                 </div>
@@ -538,8 +626,17 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               }}
                               className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
-                              <span className="font-medium">{meal.guard}</span>
-                              <span className="text-xs opacity-70">{formatTime(meal.time)}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{meal.guard}</span>
+                                <span className="text-xs opacity-70">{formatTime(meal.time)}</span>
+                              </div>
+                              <Clock 
+                                className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${meal.actualTime ? 'fill-current' : ''}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSetActualTime(meal.guard, "אוכל", "meal");
+                                }}
+                              />
                             </div>
                           ))}
                         </div>
@@ -571,8 +668,17 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               }}
                               className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
-                              <span className="font-medium">{breakItem.guard}</span>
-                              <span className="text-xs opacity-70">{formatTime(breakItem.time)}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{breakItem.guard}</span>
+                                <span className="text-xs opacity-70">{formatTime(breakItem.time)}</span>
+                              </div>
+                              <Clock 
+                                className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${breakItem.actualTime ? 'fill-current' : ''}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSetActualTime(breakItem.guard, "הפסקה", "break");
+                                }}
+                              />
                             </div>
                           ))}
                         </div>
