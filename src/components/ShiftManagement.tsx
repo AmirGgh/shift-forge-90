@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/carousel";
 import { getGuardsData, saveGuardsData } from "@/utils/storage";
 import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
-import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee } from "lucide-react";
+import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ShiftManagementProps {}
@@ -242,41 +242,53 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     const now = new Date().toISOString();
 
     if (type === "post") {
+      const currentAssignment = assignments.find(a => a.guard === guard && a.post === target);
+      const isRemoving = !!currentAssignment?.actualTime;
+      
       const updatedAssignments = assignments.map(a =>
         a.guard === guard && a.post === target
-          ? { ...a, actualTime: now }
+          ? { ...a, actualTime: isRemoving ? undefined : now }
           : a
       );
       setAssignments(updatedAssignments);
       data.assignments = updatedAssignments;
-      toast.success(`זמן ביצוע נרשם עבור ${guard} ב${target}`);
+      toast.success(isRemoving ? `זמן ביצוע בוטל עבור ${guard} ב${target}` : `זמן ביצוע נרשם עבור ${guard} ב${target}`);
     } else if (type === "patrol") {
+      const currentPatrol = patrols.find(p => p.guard === guard && p.patrol === target);
+      const isRemoving = !!currentPatrol?.actualTime;
+      
       const updatedPatrols = patrols.map(p =>
         p.guard === guard && p.patrol === target
-          ? { ...p, actualTime: now }
+          ? { ...p, actualTime: isRemoving ? undefined : now }
           : p
       );
       setPatrols(updatedPatrols);
       data.patrols = updatedPatrols;
-      toast.success(`זמן ביצוע נרשם עבור ${guard} ב${target}`);
+      toast.success(isRemoving ? `זמן ביצוע בוטל עבור ${guard} ב${target}` : `זמן ביצוע נרשם עבור ${guard} ב${target}`);
     } else if (type === "meal") {
+      const currentMeal = meals.find(m => m.guard === guard);
+      const isRemoving = !!currentMeal?.actualTime;
+      
       const updatedMeals = meals.map(m =>
         m.guard === guard
-          ? { ...m, actualTime: now }
+          ? { ...m, actualTime: isRemoving ? undefined : now }
           : m
       );
       setMeals(updatedMeals);
       data.meals = updatedMeals;
-      toast.success(`זמן ביצוע נרשם עבור ${guard} באוכל`);
+      toast.success(isRemoving ? `זמן ביצוע בוטל עבור ${guard} באוכל` : `זמן ביצוע נרשם עבור ${guard} באוכל`);
     } else if (type === "break") {
+      const currentBreak = breaks.find(b => b.guard === guard);
+      const isRemoving = !!currentBreak?.actualTime;
+      
       const updatedBreaks = breaks.map(b =>
         b.guard === guard
-          ? { ...b, actualTime: now }
+          ? { ...b, actualTime: isRemoving ? undefined : now }
           : b
       );
       setBreaks(updatedBreaks);
       data.breaks = updatedBreaks;
-      toast.success(`זמן ביצוע נרשם עבור ${guard} בהפסקה`);
+      toast.success(isRemoving ? `זמן ביצוע בוטל עבור ${guard} בהפסקה` : `זמן ביצוע נרשם עבור ${guard} בהפסקה`);
     }
 
     saveGuardsData(data);
@@ -383,18 +395,26 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                               borderColor: getGuardColor(assignment.guard),
                                               color: getGuardColor(assignment.guard)
                                             }}
-                                            className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                             className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
                                              <span className="font-medium">{assignment.guard}</span>
-                                             <Clock 
-                                               className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${assignment.actualTime ? 'fill-current' : ''}`}
-                                               onClick={(e) => {
-                                                 e.stopPropagation();
-                                                 if (!assignment.actualTime) {
+                                             {assignment.actualTime ? (
+                                               <CheckCircle2 
+                                                 className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
                                                    handleSetActualTime(assignment.guard, post, "post");
-                                                 }
-                                               }}
-                                             />
+                                                 }}
+                                               />
+                                             ) : (
+                                               <Clock 
+                                                 className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   handleSetActualTime(assignment.guard, post, "post");
+                                                 }}
+                                               />
+                                             )}
                                              {assignment.actualTime && (
                                                <span className="text-xs opacity-70">{formatTime(assignment.actualTime)}</span>
                                              )}
@@ -444,18 +464,26 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                               borderColor: getGuardColor(assignment.guard),
                                               color: getGuardColor(assignment.guard)
                                             }}
-                                            className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                             className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
                                              <span className="font-medium">{assignment.guard}</span>
-                                             <Clock 
-                                               className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${assignment.actualTime ? 'fill-current' : ''}`}
-                                               onClick={(e) => {
-                                                 e.stopPropagation();
-                                                 if (!assignment.actualTime) {
+                                             {assignment.actualTime ? (
+                                               <CheckCircle2 
+                                                 className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
                                                    handleSetActualTime(assignment.guard, patrol, "patrol");
-                                                 }
-                                               }}
-                                             />
+                                                 }}
+                                               />
+                                             ) : (
+                                               <Clock 
+                                                 className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   handleSetActualTime(assignment.guard, patrol, "patrol");
+                                                 }}
+                                               />
+                                             )}
                                              {assignment.actualTime && (
                                                <span className="text-xs opacity-70">{formatTime(assignment.actualTime)}</span>
                                              )}
@@ -631,19 +659,27 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 borderColor: getGuardColor(meal.guard),
                                 color: getGuardColor(meal.guard)
                               }}
-                              className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                               className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
                                <div className="flex items-center gap-2">
                                  <span className="font-medium">{meal.guard}</span>
-                                 <Clock 
-                                   className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${meal.actualTime ? 'fill-current' : ''}`}
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     if (!meal.actualTime) {
+                                 {meal.actualTime ? (
+                                   <CheckCircle2 
+                                     className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
+                                     onClick={(e) => {
+                                       e.stopPropagation();
                                        handleSetActualTime(meal.guard, "אוכל", "meal");
-                                     }
-                                   }}
-                                 />
+                                     }}
+                                   />
+                                 ) : (
+                                   <Clock 
+                                     className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       handleSetActualTime(meal.guard, "אוכל", "meal");
+                                     }}
+                                   />
+                                 )}
                                  {meal.actualTime && (
                                    <span className="text-xs opacity-70">{formatTime(meal.actualTime)}</span>
                                  )}
@@ -677,19 +713,27 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 borderColor: getGuardColor(breakItem.guard),
                                 color: getGuardColor(breakItem.guard)
                               }}
-                              className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                               className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
                                <div className="flex items-center gap-2">
                                  <span className="font-medium">{breakItem.guard}</span>
-                                 <Clock 
-                                   className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${breakItem.actualTime ? 'fill-current' : ''}`}
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     if (!breakItem.actualTime) {
+                                 {breakItem.actualTime ? (
+                                   <CheckCircle2 
+                                     className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
+                                     onClick={(e) => {
+                                       e.stopPropagation();
                                        handleSetActualTime(breakItem.guard, "הפסקה", "break");
-                                     }
-                                   }}
-                                 />
+                                     }}
+                                   />
+                                 ) : (
+                                   <Clock 
+                                     className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       handleSetActualTime(breakItem.guard, "הפסקה", "break");
+                                     }}
+                                   />
+                                 )}
                                  {breakItem.actualTime && (
                                    <span className="text-xs opacity-70">{formatTime(breakItem.actualTime)}</span>
                                  )}
