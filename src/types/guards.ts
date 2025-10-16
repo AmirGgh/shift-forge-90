@@ -1,6 +1,7 @@
 export interface Guard {
   name: string;
   certified: boolean;
+  color?: string;
 }
 
 export interface Assignment {

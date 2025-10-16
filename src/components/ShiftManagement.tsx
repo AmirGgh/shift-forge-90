@@ -30,27 +30,14 @@ interface ShiftManagementProps {
   onReset: () => void;
 }
 
-// Generate consistent colors for guards
-const getGuardColor = (guard: string) => {
-  const colors = [
-    "hsl(var(--primary))",
-    "hsl(var(--accent))",
-    "hsl(210, 100%, 60%)", // blue
-    "hsl(340, 80%, 60%)", // pink
-    "hsl(160, 80%, 50%)", // teal
-    "hsl(280, 70%, 60%)", // purple
-    "hsl(30, 90%, 60%)", // orange
-    "hsl(120, 60%, 50%)", // green
-  ];
-  
-  let hash = 0;
-  for (let i = 0; i < guard.length; i++) {
-    hash = guard.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
-
 const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
+  const data = getGuardsData();
+  
+  // Get guard color from stored data
+  const getGuardColor = (guardName: string) => {
+    const guard = data.guards.find(g => g.name === guardName);
+    return guard?.color || "hsl(var(--primary))";
+  };
   const [availableGuards, setAvailableGuards] = useState<string[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [patrols, setPatrols] = useState<PatrolAssignment[]>([]);
@@ -297,12 +284,12 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
         </Card>
 
         {/* Horizontal Layout for 3 sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Section 1: Tasks - Posts and Patrols */}
           <Collapsible
             open={openSections.tasks}
             onOpenChange={(open) => setOpenSections(prev => ({ ...prev, tasks: open }))}
-            className="lg:col-span-1"
+            className="md:col-span-1"
           >
             <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
               <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
@@ -433,7 +420,7 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
           <Collapsible
             open={openSections.history}
             onOpenChange={(open) => setOpenSections(prev => ({ ...prev, history: open }))}
-            className="lg:col-span-1"
+            className="md:col-span-1"
           >
             <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
               <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
@@ -475,7 +462,7 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
           <Collapsible
             open={openSections.mealBreak}
             onOpenChange={(open) => setOpenSections(prev => ({ ...prev, mealBreak: open }))}
-            className="lg:col-span-1"
+            className="md:col-span-1"
           >
             <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
               <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">

@@ -12,6 +12,19 @@ interface GuardsSetupProps {
   onComplete: () => void;
 }
 
+const GUARD_COLORS = [
+  "hsl(140, 70%, 50%)", // Green
+  "hsl(200, 80%, 50%)", // Blue
+  "hsl(180, 70%, 50%)", // Cyan
+  "hsl(280, 70%, 60%)", // Purple
+  "hsl(30, 80%, 55%)",  // Orange
+  "hsl(300, 65%, 55%)", // Magenta
+  "hsl(60, 70%, 50%)",  // Yellow
+  "hsl(340, 75%, 55%)", // Pink
+  "hsl(160, 65%, 50%)", // Teal
+  "hsl(20, 75%, 55%)",  // Red-Orange
+];
+
 const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
   const [name, setName] = useState("");
   const [certified, setCertified] = useState(false);
@@ -28,9 +41,12 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
       return;
     }
 
+    const color = GUARD_COLORS[guards.length % GUARD_COLORS.length];
+
     const newGuard: Guard = {
       name: name.trim(),
-      certified
+      certified,
+      color
     };
 
     setGuards([...guards, newGuard]);
@@ -112,10 +128,11 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
               {guards.map((guard, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border/30 hover:border-primary/50 transition-colors"
+                  className="flex items-center justify-between p-3 bg-background/50 rounded-lg border transition-colors"
+                  style={{ borderColor: guard.color }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: guard.color }} />
                     <span className="font-medium text-foreground">{guard.name}</span>
                     {guard.certified && (
                       <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded-full">
