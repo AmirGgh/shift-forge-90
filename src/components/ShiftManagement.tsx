@@ -266,10 +266,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         </Card>
 
         {/* Carousel for 3 sections */}
-        <Carousel className="w-full" opts={{ align: "start", direction: "rtl" }}>
-          <CarouselContent>
+        <Carousel className="w-full max-w-full overflow-hidden" opts={{ align: "start", direction: "rtl" }}>
+          <CarouselContent className="-ml-2 md:-ml-4">
             {/* Section 1: Tasks - Posts and Patrols */}
-            <CarouselItem>
+            <CarouselItem className="pl-2 md:pl-4">
               <Collapsible
                 open={openSections.tasks}
                 onOpenChange={(open) => setOpenSections(prev => ({ ...prev, tasks: open }))}
@@ -407,7 +407,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             </CarouselItem>
 
             {/* Section 2: History */}
-            <CarouselItem>
+            <CarouselItem className="pl-2 md:pl-4">
               <Collapsible
                 open={openSections.history}
                 onOpenChange={(open) => setOpenSections(prev => ({ ...prev, history: open }))}
@@ -420,12 +420,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
               <CollapsibleContent>
                 <div className="px-6 pb-6">
                   <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {assignments.length === 0 && patrols.length === 0 && (
+                    {assignments.length === 0 && patrols.length === 0 && meals.length === 0 && breaks.length === 0 && (
                       <p className="text-muted-foreground text-center py-4">אין היסטוריה עדיין</p>
                     )}
                     {(() => {
-                      const allItems = [...assignments, ...patrols.map(p => ({ ...p, post: p.patrol }))]
-                        .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+                      const allItems = [
+                        ...assignments,
+                        ...patrols.map(p => ({ ...p, post: p.patrol })),
+                        ...meals.map(m => ({ ...m, guard: m.guard, post: "אוכל", time: m.time })),
+                        ...breaks.map(b => ({ ...b, guard: b.guard, post: "הפסקה", time: b.time }))
+                      ].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
                       
                       // Group by guard to show their journey
                       const guardJourneys = new Map<string, Array<{post: string, time: string}>>();
@@ -453,6 +457,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             {journey.map((task, idx) => (
                               <>
                                 <div key={`${idx}-task`} className="flex items-center gap-2 bg-background/50 px-3 py-1 rounded border border-border/30">
+                                  {task.post === "אוכל" && <UtensilsCrossed className="w-3 h-3" />}
+                                  {task.post === "הפסקה" && <Coffee className="w-3 h-3" />}
                                   <span className="text-foreground font-medium">{task.post}</span>
                                   <span className="text-xs text-muted-foreground">{formatTime(task.time)}</span>
                                 </div>
@@ -473,7 +479,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
           </CarouselItem>
 
           {/* Section 3: Meals and Breaks */}
-          <CarouselItem>
+          <CarouselItem className="pl-2 md:pl-4">
             <Collapsible
               open={openSections.mealBreak}
               onOpenChange={(open) => setOpenSections(prev => ({ ...prev, mealBreak: open }))}
