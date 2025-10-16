@@ -26,22 +26,16 @@ export const resetGuardsData = (): void => {
 
 export const resetEveningShift = (): void => {
   const data = getGuardsData();
-  const currentGuardNames = data.guards.map(g => g.name);
-  const tamachGuards = data.guards.filter(g => g.shiftType?.includes("תמך")).map(g => g.name);
   
-  // Keep only assignments for guards that are in current list AND are "תמך"
-  data.assignments = data.assignments.filter(a => 
-    currentGuardNames.includes(a.guard) && tamachGuards.includes(a.guard)
-  );
-  data.patrols = data.patrols.filter(p => 
-    currentGuardNames.includes(p.guard) && tamachGuards.includes(p.guard)
-  );
-  data.meals = data.meals.filter(m => 
-    currentGuardNames.includes(m.guard) && tamachGuards.includes(m.guard)
-  );
-  data.breaks = data.breaks.filter(b => 
-    currentGuardNames.includes(b.guard) && tamachGuards.includes(b.guard)
-  );
+  // Keep only guards with "תמך" shift type
+  data.guards = data.guards.filter(g => g.shiftType?.includes("תמך"));
+  const tamachGuards = data.guards.map(g => g.name);
+  
+  // Keep only assignments for "תמך" guards
+  data.assignments = data.assignments.filter(a => tamachGuards.includes(a.guard));
+  data.patrols = data.patrols.filter(p => tamachGuards.includes(p.guard));
+  data.meals = data.meals.filter(m => tamachGuards.includes(m.guard));
+  data.breaks = data.breaks.filter(b => tamachGuards.includes(b.guard));
   
   saveGuardsData(data);
 };

@@ -103,6 +103,7 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
     }
     
     setEditingIndex(index);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     toast.info("עורך מאבטח - עדכן את הפרטים ולחץ על הכפתור");
   };
 
