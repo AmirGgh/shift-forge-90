@@ -58,6 +58,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     history: true,
     mealBreak: true,
   });
+  const [tasksView, setTasksView] = useState<"posts" | "patrols">("posts");
+  const [mealBreakView, setMealBreakView] = useState<"meals" | "breaks">("meals");
   
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -279,15 +281,29 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <div className="p-6">
-                  <Carousel className="w-full" opts={{ align: "start", direction: "rtl" }}>
-                    <CarouselContent>
-                      {/* Posts Slide */}
-                      <CarouselItem>
+                      {/* Toggle Buttons */}
+                      <div className="flex gap-2 mb-4">
+                        <Button
+                          variant={tasksView === "posts" ? "default" : "outline"}
+                          onClick={() => setTasksView("posts")}
+                          className="flex-1"
+                        >
+                          <MapPin className="w-4 h-4 ml-2" />
+                          עמדות
+                        </Button>
+                        <Button
+                          variant={tasksView === "patrols" ? "default" : "outline"}
+                          onClick={() => setTasksView("patrols")}
+                          className="flex-1"
+                        >
+                          <Clock className="w-4 h-4 ml-2" />
+                          פטרולים
+                        </Button>
+                      </div>
+
+                      {/* Posts Table */}
+                      {tasksView === "posts" && (
                         <Card className="p-6 border-border/30 bg-background/30">
-                          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
-                            <MapPin className="w-5 h-5 text-primary" />
-                            עמדות
-                          </h3>
                           <div className="overflow-x-auto">
                             <table className="w-full">
                               <thead>
@@ -333,15 +349,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             </table>
                           </div>
                         </Card>
-                      </CarouselItem>
+                      )}
 
-                      {/* Patrols Slide */}
-                      <CarouselItem>
+                      {/* Patrols Table */}
+                      {tasksView === "patrols" && (
                         <Card className="p-6 border-border/30 bg-background/30">
-                          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
-                            <Clock className="w-5 h-5 text-accent" />
-                            פטרולים
-                          </h3>
                           <div className="overflow-x-auto">
                             <table className="w-full">
                               <thead>
@@ -387,11 +399,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             </table>
                           </div>
                         </Card>
-                      </CarouselItem>
-                    </CarouselContent>
-                    <CarouselPrevious className="right-12" />
-                    <CarouselNext className="left-12" />
-                  </Carousel>
+                      )}
                     </div>
                   </CollapsibleContent>
                 </Card>
@@ -411,29 +419,52 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="px-6 pb-6">
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
                     {assignments.length === 0 && patrols.length === 0 && (
                       <p className="text-muted-foreground text-center py-4">אין היסטוריה עדיין</p>
                     )}
-                    {[...assignments, ...patrols.map(p => ({ ...p, post: p.patrol }))]
-                      .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-                      .map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between p-3 bg-background/30 rounded-lg border border-border/30"
+                    {(() => {
+                      const allItems = [...assignments, ...patrols.map(p => ({ ...p, post: p.patrol }))]
+                        .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+                      
+                      // Group by guard to show their journey
+                      const guardJourneys = new Map<string, Array<{post: string, time: string}>>();
+                      
+                      allItems.forEach(item => {
+                        if (!guardJourneys.has(item.guard)) {
+                          guardJourneys.set(item.guard, []);
+                        }
+                        guardJourneys.get(item.guard)!.push({ post: item.post, time: item.time });
+                      });
+
+                      return Array.from(guardJourneys.entries()).map(([guard, journey]) => (
+                        <div 
+                          key={guard}
+                          className="p-4 bg-background/30 rounded-lg border border-border/30"
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 mb-2">
                             <div 
                               className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: getGuardColor(item.guard) }}
+                              style={{ backgroundColor: getGuardColor(guard) }}
                             />
-                            <span className="text-foreground font-medium">{item.guard}</span>
-                            <span className="text-muted-foreground">←</span>
-                            <span className="text-foreground">{item.post}</span>
+                            <span className="text-foreground font-bold">{guard}</span>
                           </div>
-                          <span className="text-sm text-muted-foreground">{formatTime(item.time)}</span>
+                          <div className="flex items-center gap-2 flex-wrap text-sm">
+                            {journey.map((task, idx) => (
+                              <>
+                                <div key={`${idx}-task`} className="flex items-center gap-2 bg-background/50 px-3 py-1 rounded border border-border/30">
+                                  <span className="text-foreground font-medium">{task.post}</span>
+                                  <span className="text-xs text-muted-foreground">{formatTime(task.time)}</span>
+                                </div>
+                                {idx < journey.length - 1 && (
+                                  <span key={`${idx}-arrow`} className="text-muted-foreground">←</span>
+                                )}
+                              </>
+                            ))}
+                          </div>
                         </div>
-                      ))}
+                      ));
+                    })()}
                   </div>
                 </div>
                 </CollapsibleContent>
@@ -453,76 +484,92 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                 <ChevronDown className={`w-5 h-5 transition-transform ${openSections.mealBreak ? "rotate-180" : ""}`} />
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="p-6 space-y-6">
-                  {/* Meals Table */}
-                  <Card className="p-4 border-border/30 bg-background/30">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
-                      <UtensilsCrossed className="w-5 h-5 text-primary" />
+                <div className="p-6">
+                  {/* Toggle Buttons */}
+                  <div className="flex gap-2 mb-4">
+                    <Button
+                      variant={mealBreakView === "meals" ? "default" : "outline"}
+                      onClick={() => setMealBreakView("meals")}
+                      className="flex-1"
+                    >
+                      <UtensilsCrossed className="w-4 h-4 ml-2" />
                       אוכל
-                    </h3>
-                    <div
-                      onDragOver={handleDragOver}
-                      onDrop={handleDropMeal}
-                      className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-primary/50 transition-colors"
+                    </Button>
+                    <Button
+                      variant={mealBreakView === "breaks" ? "default" : "outline"}
+                      onClick={() => setMealBreakView("breaks")}
+                      className="flex-1"
                     >
-                      <div className="space-y-2">
-                        {meals.map((meal, idx) => (
-                          <div
-                            key={idx}
-                            onMouseDown={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
-                            onMouseUp={handleLongPressEnd}
-                            onMouseLeave={handleLongPressEnd}
-                            onTouchStart={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
-                            onTouchEnd={handleLongPressEnd}
-                            style={{ 
-                              backgroundColor: `${getGuardColor(meal.guard)}30`,
-                              borderColor: getGuardColor(meal.guard),
-                              color: getGuardColor(meal.guard)
-                            }}
-                            className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                          >
-                            <span className="font-medium">{meal.guard}</span>
-                            <span className="text-xs opacity-70">{formatTime(meal.time)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* Breaks Table */}
-                  <Card className="p-4 border-border/30 bg-background/30">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
-                      <Coffee className="w-5 h-5 text-accent" />
+                      <Coffee className="w-4 h-4 ml-2" />
                       הפסקות
-                    </h3>
-                    <div
-                      onDragOver={handleDragOver}
-                      onDrop={handleDropBreak}
-                      className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-accent/50 transition-colors"
-                    >
-                      <div className="space-y-2">
-                        {breaks.map((breakItem, idx) => (
-                          <div
-                            key={idx}
-                            onMouseDown={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
-                            onMouseUp={handleLongPressEnd}
-                            onMouseLeave={handleLongPressEnd}
-                            onTouchStart={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
-                            onTouchEnd={handleLongPressEnd}
-                            style={{ 
-                              backgroundColor: `${getGuardColor(breakItem.guard)}30`,
-                              borderColor: getGuardColor(breakItem.guard),
-                              color: getGuardColor(breakItem.guard)
-                            }}
-                            className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                          >
-                            <span className="font-medium">{breakItem.guard}</span>
-                            <span className="text-xs opacity-70">{formatTime(breakItem.time)}</span>
-                          </div>
-                        ))}
+                    </Button>
+                  </div>
+
+                  {/* Meals View */}
+                  {mealBreakView === "meals" && (
+                    <Card className="p-4 border-border/30 bg-background/30">
+                      <div
+                        onDragOver={handleDragOver}
+                        onDrop={handleDropMeal}
+                        className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-primary/50 transition-colors"
+                      >
+                        <div className="space-y-2">
+                          {meals.map((meal, idx) => (
+                            <div
+                              key={idx}
+                              onMouseDown={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
+                              onMouseUp={handleLongPressEnd}
+                              onMouseLeave={handleLongPressEnd}
+                              onTouchStart={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
+                              onTouchEnd={handleLongPressEnd}
+                              style={{ 
+                                backgroundColor: `${getGuardColor(meal.guard)}30`,
+                                borderColor: getGuardColor(meal.guard),
+                                color: getGuardColor(meal.guard)
+                              }}
+                              className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                            >
+                              <span className="font-medium">{meal.guard}</span>
+                              <span className="text-xs opacity-70">{formatTime(meal.time)}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  )}
+
+                  {/* Breaks View */}
+                  {mealBreakView === "breaks" && (
+                    <Card className="p-4 border-border/30 bg-background/30">
+                      <div
+                        onDragOver={handleDragOver}
+                        onDrop={handleDropBreak}
+                        className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-accent/50 transition-colors"
+                      >
+                        <div className="space-y-2">
+                          {breaks.map((breakItem, idx) => (
+                            <div
+                              key={idx}
+                              onMouseDown={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
+                              onMouseUp={handleLongPressEnd}
+                              onMouseLeave={handleLongPressEnd}
+                              onTouchStart={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
+                              onTouchEnd={handleLongPressEnd}
+                              style={{ 
+                                backgroundColor: `${getGuardColor(breakItem.guard)}30`,
+                                borderColor: getGuardColor(breakItem.guard),
+                                color: getGuardColor(breakItem.guard)
+                              }}
+                              className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                            >
+                              <span className="font-medium">{breakItem.guard}</span>
+                              <span className="text-xs opacity-70">{formatTime(breakItem.time)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </Card>
+                  )}
                 </div>
                 </CollapsibleContent>
               </Card>
