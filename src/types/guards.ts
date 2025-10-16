@@ -15,10 +15,22 @@ export interface PatrolAssignment {
   time: string;
 }
 
+export interface MealAssignment {
+  guard: string;
+  time: string;
+}
+
+export interface BreakAssignment {
+  guard: string;
+  time: string;
+}
+
 export interface GuardsData {
   guards: Guard[];
   assignments: Assignment[];
   patrols: PatrolAssignment[];
+  meals: MealAssignment[];
+  breaks: BreakAssignment[];
 }
 
 export const POSTS = [

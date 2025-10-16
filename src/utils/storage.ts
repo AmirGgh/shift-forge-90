@@ -10,7 +10,9 @@ export const getGuardsData = (): GuardsData => {
   return {
     guards: [],
     assignments: [],
-    patrols: []
+    patrols: [],
+    meals: [],
+    breaks: []
   };
 };
 
