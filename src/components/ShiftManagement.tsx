@@ -21,16 +21,14 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { getGuardsData, saveGuardsData, resetGuardsData } from "@/utils/storage";
+import { getGuardsData, saveGuardsData } from "@/utils/storage";
 import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
-import { RefreshCw, Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee } from "lucide-react";
+import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee } from "lucide-react";
 import { toast } from "sonner";
 
-interface ShiftManagementProps {
-  onReset: () => void;
-}
+interface ShiftManagementProps {}
 
-const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
+const ShiftManagement = ({}: ShiftManagementProps) => {
   const data = getGuardsData();
   
   // Get guard color from stored data
@@ -57,8 +55,8 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
   const [openSections, setOpenSections] = useState({
     guards: true,
     tasks: true,
-    history: false,
-    mealBreak: false,
+    history: true,
+    mealBreak: true,
   });
   
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
@@ -221,13 +219,6 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
     setPendingAssignment(null);
   };
 
-  const handleReset = () => {
-    if (confirm("האם אתה בטוח שברצונך לאפס את כל המשמרת?")) {
-      resetGuardsData();
-      toast.success("המשמרת אופסה");
-      onReset();
-    }
-  };
 
   const getAssignmentsForPost = (post: string) => {
     return assignments.filter(a => a.post === post);
@@ -247,17 +238,6 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-4 md:p-8" dir="rtl">
       <div className="max-w-full mx-auto space-y-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">ניהול משמרת</h1>
-          <Button
-            onClick={handleReset}
-            variant="outline"
-            className="border-destructive/50 hover:bg-destructive/20 hover:text-destructive transition-colors"
-          >
-            <RefreshCw className="w-4 h-4 ml-2" />
-            איפוס משמרת
-          </Button>
-        </div>
 
         {/* Guards Bank - Always visible */}
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
