@@ -385,15 +385,19 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                             }}
                                             className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
-                                            <span className="font-medium">{assignment.guard}</span>
-                                            <span className="text-xs opacity-70">{formatTime(assignment.time)}</span>
-                                            <Clock 
-                                              className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${assignment.actualTime ? 'fill-current' : ''}`}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleSetActualTime(assignment.guard, post, "post");
-                                              }}
-                                            />
+                                             <span className="font-medium">{assignment.guard}</span>
+                                             <Clock 
+                                               className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${assignment.actualTime ? 'fill-current' : ''}`}
+                                               onClick={(e) => {
+                                                 e.stopPropagation();
+                                                 if (!assignment.actualTime) {
+                                                   handleSetActualTime(assignment.guard, post, "post");
+                                                 }
+                                               }}
+                                             />
+                                             {assignment.actualTime && (
+                                               <span className="text-xs opacity-70">{formatTime(assignment.actualTime)}</span>
+                                             )}
                                           </div>
                                         ))}
                                       </div>
@@ -442,15 +446,19 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                             }}
                                             className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
-                                            <span className="font-medium">{assignment.guard}</span>
-                                            <span className="text-xs opacity-70">{formatTime(assignment.time)}</span>
-                                            <Clock 
-                                              className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${assignment.actualTime ? 'fill-current' : ''}`}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleSetActualTime(assignment.guard, patrol, "patrol");
-                                              }}
-                                            />
+                                             <span className="font-medium">{assignment.guard}</span>
+                                             <Clock 
+                                               className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${assignment.actualTime ? 'fill-current' : ''}`}
+                                               onClick={(e) => {
+                                                 e.stopPropagation();
+                                                 if (!assignment.actualTime) {
+                                                   handleSetActualTime(assignment.guard, patrol, "patrol");
+                                                 }
+                                               }}
+                                             />
+                                             {assignment.actualTime && (
+                                               <span className="text-xs opacity-70">{formatTime(assignment.actualTime)}</span>
+                                             )}
                                           </div>
                                         ))}
                                       </div>
@@ -539,25 +547,24 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               </div>
                             )}
                             
-                            {/* Planned tasks */}
-                            {plannedJourney.length > 0 && (
-                              <div className="flex items-center gap-2 flex-wrap text-sm">
-                                <span className="text-xs text-muted-foreground font-semibold">מתוכנן:</span>
-                                {plannedJourney.map((task, idx) => (
-                                  <>
-                                    <div key={`${idx}-planned`} className="flex items-center gap-2 bg-background/30 px-3 py-1 rounded border border-dashed border-border/40 opacity-60">
-                                      {task.post === "אוכל" && <UtensilsCrossed className="w-3 h-3" />}
-                                      {task.post === "הפסקה" && <Coffee className="w-3 h-3" />}
-                                      <span className="text-foreground font-medium">{task.post}</span>
-                                      <span className="text-xs text-muted-foreground">{formatTime(task.time)}</span>
-                                    </div>
-                                    {idx < plannedJourney.length - 1 && (
-                                      <span key={`${idx}-arrow-planned`} className="text-muted-foreground opacity-60">←</span>
-                                    )}
-                                  </>
-                                ))}
-                              </div>
-                            )}
+                             {/* Planned tasks */}
+                             {plannedJourney.length > 0 && (
+                               <div className="flex items-center gap-2 flex-wrap text-sm">
+                                 <span className="text-xs text-muted-foreground font-semibold">מתוכנן:</span>
+                                 {plannedJourney.map((task, idx) => (
+                                   <>
+                                     <div key={`${idx}-planned`} className="flex items-center gap-2 bg-background/30 px-3 py-1 rounded border border-dashed border-border/40 opacity-60">
+                                       {task.post === "אוכל" && <UtensilsCrossed className="w-3 h-3" />}
+                                       {task.post === "הפסקה" && <Coffee className="w-3 h-3" />}
+                                       <span className="text-foreground font-medium">{task.post}</span>
+                                     </div>
+                                     {idx < plannedJourney.length - 1 && (
+                                       <span key={`${idx}-arrow-planned`} className="text-muted-foreground opacity-60">←</span>
+                                     )}
+                                   </>
+                                 ))}
+                               </div>
+                             )}
                           </div>
                         );
                       });
@@ -626,17 +633,21 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               }}
                               className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{meal.guard}</span>
-                                <span className="text-xs opacity-70">{formatTime(meal.time)}</span>
-                              </div>
-                              <Clock 
-                                className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${meal.actualTime ? 'fill-current' : ''}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSetActualTime(meal.guard, "אוכל", "meal");
-                                }}
-                              />
+                               <div className="flex items-center gap-2">
+                                 <span className="font-medium">{meal.guard}</span>
+                                 <Clock 
+                                   className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${meal.actualTime ? 'fill-current' : ''}`}
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     if (!meal.actualTime) {
+                                       handleSetActualTime(meal.guard, "אוכל", "meal");
+                                     }
+                                   }}
+                                 />
+                                 {meal.actualTime && (
+                                   <span className="text-xs opacity-70">{formatTime(meal.actualTime)}</span>
+                                 )}
+                               </div>
                             </div>
                           ))}
                         </div>
@@ -668,17 +679,21 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               }}
                               className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{breakItem.guard}</span>
-                                <span className="text-xs opacity-70">{formatTime(breakItem.time)}</span>
-                              </div>
-                              <Clock 
-                                className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${breakItem.actualTime ? 'fill-current' : ''}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSetActualTime(breakItem.guard, "הפסקה", "break");
-                                }}
-                              />
+                               <div className="flex items-center gap-2">
+                                 <span className="font-medium">{breakItem.guard}</span>
+                                 <Clock 
+                                   className={`w-4 h-4 cursor-pointer hover:scale-110 transition-transform ${breakItem.actualTime ? 'fill-current' : ''}`}
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     if (!breakItem.actualTime) {
+                                       handleSetActualTime(breakItem.guard, "הפסקה", "break");
+                                     }
+                                   }}
+                                 />
+                                 {breakItem.actualTime && (
+                                   <span className="text-xs opacity-70">{formatTime(breakItem.actualTime)}</span>
+                                 )}
+                               </div>
                             </div>
                           ))}
                         </div>
