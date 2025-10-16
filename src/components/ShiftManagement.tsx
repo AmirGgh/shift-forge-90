@@ -244,23 +244,26 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         {/* Guards Bank - Always visible */}
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
           <div className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">בנק מאבטחים</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">מאבטחים במשמרת</h2>
             <div className="flex flex-wrap gap-2">
-              {availableGuards.map((guard) => (
-                <div
-                  key={guard}
-                  draggable
-                  onDragStart={() => handleDragStart(guard)}
-                  style={{ 
-                    backgroundColor: `${getGuardColor(guard)}20`,
-                    borderColor: getGuardColor(guard),
-                    color: getGuardColor(guard)
-                  }}
-                  className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium"
-                >
-                  {guard}
-                </div>
-              ))}
+              {data.guards.map((guard) => {
+                const isTamach = guard.shiftType?.includes("תמך");
+                return (
+                  <div
+                    key={guard.name}
+                    draggable
+                    onDragStart={() => handleDragStart(guard.name)}
+                    style={{ 
+                      backgroundColor: isTamach ? guard.color : `${guard.color}20`,
+                      borderColor: guard.color,
+                      color: isTamach ? 'hsl(var(--background))' : guard.color
+                    }}
+                    className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium"
+                  >
+                    {guard.name}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </Card>

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getGuardsData, saveGuardsData } from "@/utils/storage";
 import { Guard } from "@/types/guards";
 import { Trash2, UserPlus, Save, Shield } from "lucide-react";
@@ -25,9 +26,20 @@ const GUARD_COLORS = [
   "hsl(20, 75%, 55%)",  // Red-Orange
 ];
 
+const SHIFT_TYPES = [
+  "בוקר 6-14",
+  "בוקר 7-15",
+  "תמך 7-19",
+  "תמך 8-20",
+  "ערב 14-22",
+  "ערב 15-23"
+];
+
 const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
   const [name, setName] = useState("");
-  const [certified, setCertified] = useState(false);
+  const [certified, setCertified] = useState(true);
+  const [shiftType, setShiftType] = useState("בוקר 7-15");
+  const [customShiftType, setCustomShiftType] = useState("");
   const [guards, setGuards] = useState<Guard[]>([]);
 
   useEffect(() => {
@@ -42,16 +54,20 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
     }
 
     const color = GUARD_COLORS[guards.length % GUARD_COLORS.length];
+    const finalShiftType = customShiftType.trim() || shiftType;
 
     const newGuard: Guard = {
       name: name.trim(),
       certified,
-      color
+      color,
+      shiftType: finalShiftType
     };
 
     setGuards([...guards, newGuard]);
     setName("");
-    setCertified(false);
+    setCertified(true);
+    setShiftType("בוקר 7-15");
+    setCustomShiftType("");
     toast.success("מאבטח נוסף לרשימה");
   };
 
@@ -111,6 +127,33 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
               </label>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-2 text-foreground">סוג משמרת</label>
+              <Select value={shiftType} onValueChange={setShiftType}>
+                <SelectTrigger className="bg-background/50 border-border/50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SHIFT_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-foreground">ערך אחר (אופציונלי)</label>
+              <Input
+                type="text"
+                value={customShiftType}
+                onChange={(e) => setCustomShiftType(e.target.value)}
+                placeholder="הכנס סוג משמרת מותאם"
+                className="bg-background/50 border-border/50 focus:border-primary transition-colors"
+              />
+            </div>
+
             <Button
               onClick={handleAdd}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-[var(--shadow-glow)]"
@@ -125,31 +168,52 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
           <Card className="p-6 shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
             <h2 className="text-xl font-semibold mb-4 text-foreground">רשימת מאבטחים ({guards.length})</h2>
             <div className="space-y-2">
-              {guards.map((guard, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-background/50 rounded-lg border transition-colors"
-                  style={{ borderColor: guard.color }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: guard.color }} />
-                    <span className="font-medium text-foreground">{guard.name}</span>
-                    {guard.certified && (
-                      <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded-full">
-                        מוסמך
-                      </span>
-                    )}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(index)}
-                    className="hover:bg-destructive/20 hover:text-destructive transition-colors"
+              {guards.map((guard, index) => {
+                const isTamach = guard.shiftType?.includes("תמך");
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-background/50 rounded-lg border transition-colors"
+                    style={{ 
+                      borderColor: guard.color,
+                      backgroundColor: isTamach ? guard.color : undefined
+                    }}
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: guard.color }} />
+                      <span className={`font-medium ${isTamach ? 'text-background' : 'text-foreground'}`}>
+                        {guard.name}
+                      </span>
+                      {guard.certified && (
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          isTamach ? 'bg-background/20 text-background' : 'bg-accent/20 text-accent'
+                        }`}>
+                          מוסמך
+                        </span>
+                      )}
+                      {guard.shiftType && (
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          isTamach ? 'bg-background/20 text-background' : 'bg-primary/20 text-primary'
+                        }`}>
+                          {guard.shiftType}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(index)}
+                      className={`transition-colors ${
+                        isTamach 
+                          ? 'hover:bg-background/20 text-background hover:text-background' 
+                          : 'hover:bg-destructive/20 hover:text-destructive'
+                      }`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
 
             <Button
