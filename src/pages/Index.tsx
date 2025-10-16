@@ -10,7 +10,7 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import GuardsSetup from "@/components/GuardsSetup";
 import ShiftManagement from "@/components/ShiftManagement";
-import { getGuardsData, resetGuardsData } from "@/utils/storage";
+import { getGuardsData, resetGuardsData, resetEveningShift } from "@/utils/storage";
 import { Users, Calendar, Menu, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +35,13 @@ const Index = () => {
       resetGuardsData();
       toast.success("המשמרת אופסה");
       handleReset();
+    }
+  };
+
+  const handleEveningShiftReset = () => {
+    if (confirm("האם אתה בטוח שברצונך לאפס למשמרת ערב? זה ימחק היסטוריה של מאבטחים שאינם במשמרת תמך.")) {
+      resetEveningShift();
+      toast.success("המשמרת אופסה למשמרת ערב");
     }
   };
 
@@ -72,12 +79,20 @@ const Index = () => {
                   ניהול משמרת
                 </Button>
                 <Button
+                  onClick={handleEveningShiftReset}
+                  variant="ghost"
+                  className="w-full justify-start hover:bg-accent/20 hover:text-accent"
+                >
+                  <RefreshCw className="w-4 h-4 ml-2" />
+                  איפוס למשמרת ערב
+                </Button>
+                <Button
                   onClick={handleShiftReset}
                   variant="ghost"
                   className="w-full justify-start border-destructive/50 hover:bg-destructive/20 hover:text-destructive"
                 >
                   <RefreshCw className="w-4 h-4 ml-2" />
-                  איפוס משמרת
+                  איפוס משמרת מלא
                 </Button>
                 <div className="border-t border-border/50 my-2" />
                 <ThemeToggle />
