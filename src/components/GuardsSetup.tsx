@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getGuardsData, saveGuardsData } from "@/utils/storage";
 import { Guard } from "@/types/guards";
-import { Trash2, UserPlus, Save, Shield } from "lucide-react";
+import { Trash2, UserPlus, Save, Shield, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface GuardsSetupProps {
@@ -41,6 +41,7 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
   const [shiftType, setShiftType] = useState("בוקר 7-15");
   const [customShiftType, setCustomShiftType] = useState("");
   const [guards, setGuards] = useState<Guard[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const data = getGuardsData();
@@ -53,28 +54,77 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
       return;
     }
 
-    const color = GUARD_COLORS[guards.length % GUARD_COLORS.length];
     const finalShiftType = customShiftType.trim() || shiftType;
 
-    const newGuard: Guard = {
-      name: name.trim(),
-      certified,
-      color,
-      shiftType: finalShiftType
-    };
+    if (editingIndex !== null) {
+      // Update existing guard
+      const updatedGuards = [...guards];
+      updatedGuards[editingIndex] = {
+        ...updatedGuards[editingIndex],
+        name: name.trim(),
+        certified,
+        shiftType: finalShiftType
+      };
+      setGuards(updatedGuards);
+      setEditingIndex(null);
+      toast.success("מאבטח עודכן בהצלחה");
+    } else {
+      // Add new guard
+      const color = GUARD_COLORS[guards.length % GUARD_COLORS.length];
+      const newGuard: Guard = {
+        name: name.trim(),
+        certified,
+        color,
+        shiftType: finalShiftType
+      };
+      setGuards([...guards, newGuard]);
+      toast.success("מאבטח נוסף לרשימה");
+    }
 
-    setGuards([...guards, newGuard]);
     setName("");
     setCertified(true);
     setShiftType("בוקר 7-15");
     setCustomShiftType("");
-    toast.success("מאבטח נוסף לרשימה");
+  };
+
+  const handleEdit = (index: number) => {
+    const guard = guards[index];
+    setName(guard.name);
+    setCertified(guard.certified);
+    
+    // Check if shiftType is in predefined list
+    const isPreDefinedShift = SHIFT_TYPES.includes(guard.shiftType || "");
+    if (isPreDefinedShift) {
+      setShiftType(guard.shiftType || "בוקר 7-15");
+      setCustomShiftType("");
+    } else {
+      setShiftType(SHIFT_TYPES[0]);
+      setCustomShiftType(guard.shiftType || "");
+    }
+    
+    setEditingIndex(index);
+    toast.info("עורך מאבטח - עדכן את הפרטים ולחץ על הכפתור");
   };
 
   const handleDelete = (index: number) => {
+    if (editingIndex === index) {
+      setEditingIndex(null);
+      setName("");
+      setCertified(true);
+      setShiftType("בוקר 7-15");
+      setCustomShiftType("");
+    }
     const newGuards = guards.filter((_, i) => i !== index);
     setGuards(newGuards);
     toast.success("מאבטח הוסר מהרשימה");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setName("");
+    setCertified(true);
+    setShiftType("בוקר 7-15");
+    setCustomShiftType("");
   };
 
   const handleSave = () => {
@@ -154,13 +204,33 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
               />
             </div>
 
-            <Button
-              onClick={handleAdd}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-[var(--shadow-glow)]"
-            >
-              <UserPlus className="w-4 h-4 ml-2" />
-              הוסף מאבטח
-            </Button>
+            <div className="space-y-2">
+              <Button
+                onClick={handleAdd}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-[var(--shadow-glow)]"
+              >
+                {editingIndex !== null ? (
+                  <>
+                    <Save className="w-4 h-4 ml-2" />
+                    עדכן מאבטח
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4 ml-2" />
+                    הוסף מאבטח
+                  </>
+                )}
+              </Button>
+              {editingIndex !== null && (
+                <Button
+                  onClick={handleCancelEdit}
+                  variant="outline"
+                  className="w-full"
+                >
+                  ביטול עריכה
+                </Button>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -175,8 +245,9 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
                     key={index}
                     className="flex items-center justify-between p-3 bg-background/50 rounded-lg border transition-colors"
                     style={{ 
-                      borderColor: guard.color,
-                      backgroundColor: isTamach ? guard.color : undefined
+                      borderColor: editingIndex === index ? 'hsl(var(--primary))' : guard.color,
+                      backgroundColor: isTamach ? guard.color : (editingIndex === index ? 'hsl(var(--accent) / 0.1)' : undefined),
+                      borderWidth: editingIndex === index ? '2px' : '1px'
                     }}
                   >
                     <div className="flex items-center gap-3 flex-wrap">
@@ -199,18 +270,32 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
                         </span>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(index)}
-                      className={`transition-colors ${
-                        isTamach 
-                          ? 'hover:bg-background/20 text-background hover:text-background' 
-                          : 'hover:bg-destructive/20 hover:text-destructive'
-                      }`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(index)}
+                        className={`transition-colors ${
+                          isTamach 
+                            ? 'hover:bg-background/20 text-background hover:text-background' 
+                            : 'hover:bg-accent/20 hover:text-accent'
+                        }`}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(index)}
+                        className={`transition-colors ${
+                          isTamach 
+                            ? 'hover:bg-background/20 text-background hover:text-background' 
+                            : 'hover:bg-destructive/20 hover:text-destructive'
+                        }`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
