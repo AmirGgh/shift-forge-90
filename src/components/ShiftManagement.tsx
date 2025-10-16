@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { getGuardsData, saveGuardsData, resetGuardsData } from "@/utils/storage";
 import { Assignment, PatrolAssignment, POSTS, PATROLS } from "@/types/guards";
 import { RefreshCw, Clock, MapPin } from "lucide-react";
@@ -15,6 +23,11 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [patrols, setPatrols] = useState<PatrolAssignment[]>([]);
   const [draggedGuard, setDraggedGuard] = useState<string | null>(null);
+  const [pendingAssignment, setPendingAssignment] = useState<{
+    guard: string;
+    target: string;
+    type: "post" | "patrol";
+  } | null>(null);
 
   useEffect(() => {
     loadData();
@@ -37,42 +50,53 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
 
   const handleDropPost = (post: string) => {
     if (!draggedGuard) return;
-
-    const newAssignment: Assignment = {
+    setPendingAssignment({
       guard: draggedGuard,
-      post,
-      time: new Date().toISOString()
-    };
-
-    const newAssignments = [...assignments, newAssignment];
-    setAssignments(newAssignments);
-
-    const data = getGuardsData();
-    data.assignments = newAssignments;
-    saveGuardsData(data);
-
+      target: post,
+      type: "post"
+    });
     setDraggedGuard(null);
-    toast.success(`${draggedGuard} הוצב ב${post}`);
   };
 
   const handleDropPatrol = (patrol: string) => {
     if (!draggedGuard) return;
-
-    const newPatrol: PatrolAssignment = {
+    setPendingAssignment({
       guard: draggedGuard,
-      patrol,
-      time: new Date().toISOString()
-    };
+      target: patrol,
+      type: "patrol"
+    });
+    setDraggedGuard(null);
+  };
 
-    const newPatrols = [...patrols, newPatrol];
-    setPatrols(newPatrols);
+  const handleConfirmAssignment = () => {
+    if (!pendingAssignment) return;
 
     const data = getGuardsData();
-    data.patrols = newPatrols;
-    saveGuardsData(data);
 
-    setDraggedGuard(null);
-    toast.success(`${draggedGuard} הוצב ב${patrol}`);
+    if (pendingAssignment.type === "post") {
+      const newAssignment: Assignment = {
+        guard: pendingAssignment.guard,
+        post: pendingAssignment.target,
+        time: new Date().toISOString()
+      };
+      const newAssignments = [...assignments, newAssignment];
+      setAssignments(newAssignments);
+      data.assignments = newAssignments;
+      toast.success(`${pendingAssignment.guard} הוצב ב${pendingAssignment.target}`);
+    } else {
+      const newPatrol: PatrolAssignment = {
+        guard: pendingAssignment.guard,
+        patrol: pendingAssignment.target,
+        time: new Date().toISOString()
+      };
+      const newPatrols = [...patrols, newPatrol];
+      setPatrols(newPatrols);
+      data.patrols = newPatrols;
+      toast.success(`${pendingAssignment.guard} הוצב ב${pendingAssignment.target}`);
+    }
+
+    saveGuardsData(data);
+    setPendingAssignment(null);
   };
 
   const handleReset = () => {
@@ -232,6 +256,35 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
           </div>
         </Card>
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!pendingAssignment} onOpenChange={(open) => !open && setPendingAssignment(null)}>
+        <AlertDialogContent className="bg-card border-border/50">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground text-right">אישור הצבה</AlertDialogTitle>
+            <AlertDialogDescription className="text-right text-lg">
+              {pendingAssignment && (
+                <span className="text-foreground font-medium">
+                  המאבטח <span className="text-primary font-bold">{pendingAssignment.guard}</span> במשימה{" "}
+                  <span className="text-accent font-bold">{pendingAssignment.target}</span>
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <Button onClick={handleConfirmAssignment} className="flex-1">
+              אישור
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setPendingAssignment(null)}
+              className="flex-1"
+            >
+              ביטול
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
