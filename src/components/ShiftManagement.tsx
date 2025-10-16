@@ -283,21 +283,22 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
           </div>
         </Card>
 
-        {/* Horizontal Layout for 3 sections */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Section 1: Tasks - Posts and Patrols */}
-          <Collapsible
-            open={openSections.tasks}
-            onOpenChange={(open) => setOpenSections(prev => ({ ...prev, tasks: open }))}
-            className="md:col-span-1"
-          >
-            <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
-              <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-                <h2 className="text-xl font-semibold text-foreground">משימות</h2>
-                <ChevronDown className={`w-5 h-5 transition-transform ${openSections.tasks ? "rotate-180" : ""}`} />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="p-6">
+        {/* Carousel for 3 sections */}
+        <Carousel className="w-full" opts={{ align: "start", direction: "rtl" }}>
+          <CarouselContent>
+            {/* Section 1: Tasks - Posts and Patrols */}
+            <CarouselItem>
+              <Collapsible
+                open={openSections.tasks}
+                onOpenChange={(open) => setOpenSections(prev => ({ ...prev, tasks: open }))}
+              >
+                <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
+                  <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
+                    <h2 className="text-xl font-semibold text-foreground">משימות</h2>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${openSections.tasks ? "rotate-180" : ""}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="p-6">
                   <Carousel className="w-full" opts={{ align: "start", direction: "rtl" }}>
                     <CarouselContent>
                       {/* Posts Slide */}
@@ -411,17 +412,18 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
                     <CarouselPrevious className="right-12" />
                     <CarouselNext className="left-12" />
                   </Carousel>
-                </div>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+                    </div>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            </CarouselItem>
 
-          {/* Section 2: History */}
-          <Collapsible
-            open={openSections.history}
-            onOpenChange={(open) => setOpenSections(prev => ({ ...prev, history: open }))}
-            className="md:col-span-1"
-          >
+            {/* Section 2: History */}
+            <CarouselItem>
+              <Collapsible
+                open={openSections.history}
+                onOpenChange={(open) => setOpenSections(prev => ({ ...prev, history: open }))}
+              >
             <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
               <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
                 <h2 className="text-xl font-semibold text-foreground">היסטוריה</h2>
@@ -454,16 +456,17 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
                       ))}
                   </div>
                 </div>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          </CarouselItem>
 
           {/* Section 3: Meals and Breaks */}
-          <Collapsible
-            open={openSections.mealBreak}
-            onOpenChange={(open) => setOpenSections(prev => ({ ...prev, mealBreak: open }))}
-            className="md:col-span-1"
-          >
+          <CarouselItem>
+            <Collapsible
+              open={openSections.mealBreak}
+              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, mealBreak: open }))}
+            >
             <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
               <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
                 <h2 className="text-xl font-semibold text-foreground">אוכל והפסקות</h2>
@@ -541,10 +544,14 @@ const ShiftManagement = ({ onReset }: ShiftManagementProps) => {
                     </div>
                   </Card>
                 </div>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
-        </div>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          </CarouselItem>
+        </CarouselContent>
+        <CarouselPrevious className="right-12" />
+        <CarouselNext className="left-12" />
+      </Carousel>
       </div>
 
       {/* Confirmation Dialog */}
