@@ -124,9 +124,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     setDraggedGuard(null);
   };
 
-  const handleLongPressStart = (guard: string, target: string, type: "post" | "patrol" | "meal" | "break") => {
+  const handleLongPressStart = (id: string, guard: string, type: "post" | "patrol" | "meal" | "break") => {
     longPressTimer.current = setTimeout(() => {
-      setDeleteTarget({ guard, target, type });
+      setDeleteTarget({ guard, target: id, type });
     }, 500);
   };
 
@@ -144,25 +144,25 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
 
     if (deleteTarget.type === "post") {
       const newAssignments = assignments.filter(
-        a => !(a.guard === deleteTarget.guard && a.post === deleteTarget.target)
+        a => a.id !== deleteTarget.target
       );
       setAssignments(newAssignments);
       data.assignments = newAssignments;
-      toast.success(`${deleteTarget.guard} הוסר מ${deleteTarget.target}`);
+      toast.success(`${deleteTarget.guard} הוסר`);
     } else if (deleteTarget.type === "patrol") {
       const newPatrols = patrols.filter(
-        p => !(p.guard === deleteTarget.guard && p.patrol === deleteTarget.target)
+        p => p.id !== deleteTarget.target
       );
       setPatrols(newPatrols);
       data.patrols = newPatrols;
-      toast.success(`${deleteTarget.guard} הוסר מ${deleteTarget.target}`);
+      toast.success(`${deleteTarget.guard} הוסר`);
     } else if (deleteTarget.type === "meal") {
-      const newMeals = meals.filter(m => m.guard !== deleteTarget.guard);
+      const newMeals = meals.filter(m => m.id !== deleteTarget.target);
       setMeals(newMeals);
       data.meals = newMeals;
       toast.success(`${deleteTarget.guard} הוסר מאוכל`);
     } else if (deleteTarget.type === "break") {
-      const newBreaks = breaks.filter(b => b.guard !== deleteTarget.guard);
+      const newBreaks = breaks.filter(b => b.id !== deleteTarget.target);
       setBreaks(newBreaks);
       data.breaks = newBreaks;
       toast.success(`${deleteTarget.guard} הוסר מהפסקה`);
@@ -179,6 +179,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
 
     if (pendingAssignment.type === "post") {
       const newAssignment: Assignment = {
+        id: `${Date.now()}-${Math.random()}`,
         guard: pendingAssignment.guard,
         post: pendingAssignment.target,
         time: new Date().toISOString()
@@ -189,6 +190,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       toast.success(`${pendingAssignment.guard} הוצב ב${pendingAssignment.target}`);
     } else if (pendingAssignment.type === "patrol") {
       const newPatrol: PatrolAssignment = {
+        id: `${Date.now()}-${Math.random()}`,
         guard: pendingAssignment.guard,
         patrol: pendingAssignment.target,
         time: new Date().toISOString()
@@ -199,6 +201,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       toast.success(`${pendingAssignment.guard} הוצב ב${pendingAssignment.target}`);
     } else if (pendingAssignment.type === "meal") {
       const newMeal: MealAssignment = {
+        id: `${Date.now()}-${Math.random()}`,
         guard: pendingAssignment.guard,
         time: new Date().toISOString()
       };
@@ -208,6 +211,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       toast.success(`${pendingAssignment.guard} הוצב באוכל`);
     } else if (pendingAssignment.type === "break") {
       const newBreak: BreakAssignment = {
+        id: `${Date.now()}-${Math.random()}`,
         guard: pendingAssignment.guard,
         time: new Date().toISOString()
       };
@@ -237,58 +241,58 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     });
   };
 
-  const handleSetActualTime = (guard: string, target: string, type: "post" | "patrol" | "meal" | "break") => {
+  const handleSetActualTime = (id: string, type: "post" | "patrol" | "meal" | "break") => {
     const data = getGuardsData();
     const now = new Date().toISOString();
 
     if (type === "post") {
-      const currentAssignment = assignments.find(a => a.guard === guard && a.post === target);
+      const currentAssignment = assignments.find(a => a.id === id);
       const isRemoving = !!currentAssignment?.actualTime;
       
       const updatedAssignments = assignments.map(a =>
-        a.guard === guard && a.post === target
+        a.id === id
           ? { ...a, actualTime: isRemoving ? undefined : now }
           : a
       );
       setAssignments(updatedAssignments);
       data.assignments = updatedAssignments;
-      toast.success(isRemoving ? `זמן ביצוע בוטל עבור ${guard} ב${target}` : `זמן ביצוע נרשם עבור ${guard} ב${target}`);
+      toast.success(isRemoving ? `זמן ביצוע בוטל` : `זמן ביצוע נרשם`);
     } else if (type === "patrol") {
-      const currentPatrol = patrols.find(p => p.guard === guard && p.patrol === target);
+      const currentPatrol = patrols.find(p => p.id === id);
       const isRemoving = !!currentPatrol?.actualTime;
       
       const updatedPatrols = patrols.map(p =>
-        p.guard === guard && p.patrol === target
+        p.id === id
           ? { ...p, actualTime: isRemoving ? undefined : now }
           : p
       );
       setPatrols(updatedPatrols);
       data.patrols = updatedPatrols;
-      toast.success(isRemoving ? `זמן ביצוע בוטל עבור ${guard} ב${target}` : `זמן ביצוע נרשם עבור ${guard} ב${target}`);
+      toast.success(isRemoving ? `זמן ביצוע בוטל` : `זמן ביצוע נרשם`);
     } else if (type === "meal") {
-      const currentMeal = meals.find(m => m.guard === guard);
+      const currentMeal = meals.find(m => m.id === id);
       const isRemoving = !!currentMeal?.actualTime;
       
       const updatedMeals = meals.map(m =>
-        m.guard === guard
+        m.id === id
           ? { ...m, actualTime: isRemoving ? undefined : now }
           : m
       );
       setMeals(updatedMeals);
       data.meals = updatedMeals;
-      toast.success(isRemoving ? `זמן ביצוע בוטל עבור ${guard} באוכל` : `זמן ביצוע נרשם עבור ${guard} באוכל`);
+      toast.success(isRemoving ? `זמן ביצוע בוטל` : `זמן ביצוע נרשם`);
     } else if (type === "break") {
-      const currentBreak = breaks.find(b => b.guard === guard);
+      const currentBreak = breaks.find(b => b.id === id);
       const isRemoving = !!currentBreak?.actualTime;
       
       const updatedBreaks = breaks.map(b =>
-        b.guard === guard
+        b.id === id
           ? { ...b, actualTime: isRemoving ? undefined : now }
           : b
       );
       setBreaks(updatedBreaks);
       data.breaks = updatedBreaks;
-      toast.success(isRemoving ? `זמן ביצוע בוטל עבור ${guard} בהפסקה` : `זמן ביצוע נרשם עבור ${guard} בהפסקה`);
+      toast.success(isRemoving ? `זמן ביצוע בוטל` : `זמן ביצוע נרשם`);
     }
 
     saveGuardsData(data);
@@ -382,13 +386,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                       onDrop={() => handleDropPost(post)}
                                     >
                                       <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-primary/50 transition-colors">
-                                        {getAssignmentsForPost(post).map((assignment, idx) => (
+                                        {getAssignmentsForPost(post).map((assignment) => (
                                           <div
-                                            key={idx}
-                                            onMouseDown={() => handleLongPressStart(assignment.guard, post, "post")}
+                                            key={assignment.id}
+                                            onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "post")}
                                             onMouseUp={handleLongPressEnd}
                                             onMouseLeave={handleLongPressEnd}
-                                            onTouchStart={() => handleLongPressStart(assignment.guard, post, "post")}
+                                            onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "post")}
                                             onTouchEnd={handleLongPressEnd}
                                             style={{ 
                                               backgroundColor: `${getGuardColor(assignment.guard)}30`,
@@ -403,7 +407,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                  className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
                                                  onClick={(e) => {
                                                    e.stopPropagation();
-                                                   handleSetActualTime(assignment.guard, post, "post");
+                                                   handleSetActualTime(assignment.id, "post");
                                                  }}
                                                />
                                              ) : (
@@ -411,7 +415,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                  className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
                                                  onClick={(e) => {
                                                    e.stopPropagation();
-                                                   handleSetActualTime(assignment.guard, post, "post");
+                                                   handleSetActualTime(assignment.id, "post");
                                                  }}
                                                />
                                              )}
@@ -451,13 +455,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                       onDrop={() => handleDropPatrol(patrol)}
                                     >
                                       <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-accent/50 transition-colors">
-                                        {getAssignmentsForPatrol(patrol).map((assignment, idx) => (
+                                        {getAssignmentsForPatrol(patrol).map((assignment) => (
                                           <div
-                                            key={idx}
-                                            onMouseDown={() => handleLongPressStart(assignment.guard, patrol, "patrol")}
+                                            key={assignment.id}
+                                            onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
                                             onMouseUp={handleLongPressEnd}
                                             onMouseLeave={handleLongPressEnd}
-                                            onTouchStart={() => handleLongPressStart(assignment.guard, patrol, "patrol")}
+                                            onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
                                             onTouchEnd={handleLongPressEnd}
                                             style={{ 
                                               backgroundColor: `${getGuardColor(assignment.guard)}30`,
@@ -472,7 +476,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                  className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
                                                  onClick={(e) => {
                                                    e.stopPropagation();
-                                                   handleSetActualTime(assignment.guard, patrol, "patrol");
+                                                   handleSetActualTime(assignment.id, "patrol");
                                                  }}
                                                />
                                              ) : (
@@ -480,7 +484,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                  className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
                                                  onClick={(e) => {
                                                    e.stopPropagation();
-                                                   handleSetActualTime(assignment.guard, patrol, "patrol");
+                                                   handleSetActualTime(assignment.id, "patrol");
                                                  }}
                                                />
                                              )}
@@ -646,13 +650,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-primary/50 transition-colors"
                       >
                         <div className="space-y-2">
-                          {meals.map((meal, idx) => (
+                          {meals.map((meal) => (
                             <div
-                              key={idx}
-                              onMouseDown={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
+                              key={meal.id}
+                              onMouseDown={() => handleLongPressStart(meal.id, meal.guard, "meal")}
                               onMouseUp={handleLongPressEnd}
                               onMouseLeave={handleLongPressEnd}
-                              onTouchStart={() => handleLongPressStart(meal.guard, "אוכל", "meal")}
+                              onTouchStart={() => handleLongPressStart(meal.id, meal.guard, "meal")}
                               onTouchEnd={handleLongPressEnd}
                               style={{ 
                                 backgroundColor: `${getGuardColor(meal.guard)}30`,
@@ -668,7 +672,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                      className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
                                      onClick={(e) => {
                                        e.stopPropagation();
-                                       handleSetActualTime(meal.guard, "אוכל", "meal");
+                                       handleSetActualTime(meal.id, "meal");
                                      }}
                                    />
                                  ) : (
@@ -676,7 +680,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                      className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
                                      onClick={(e) => {
                                        e.stopPropagation();
-                                       handleSetActualTime(meal.guard, "אוכל", "meal");
+                                       handleSetActualTime(meal.id, "meal");
                                      }}
                                    />
                                  )}
@@ -700,13 +704,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-accent/50 transition-colors"
                       >
                         <div className="space-y-2">
-                          {breaks.map((breakItem, idx) => (
+                          {breaks.map((breakItem) => (
                             <div
-                              key={idx}
-                              onMouseDown={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
+                              key={breakItem.id}
+                              onMouseDown={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
                               onMouseUp={handleLongPressEnd}
                               onMouseLeave={handleLongPressEnd}
-                              onTouchStart={() => handleLongPressStart(breakItem.guard, "הפסקה", "break")}
+                              onTouchStart={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
                               onTouchEnd={handleLongPressEnd}
                               style={{ 
                                 backgroundColor: `${getGuardColor(breakItem.guard)}30`,
@@ -722,7 +726,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                      className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
                                      onClick={(e) => {
                                        e.stopPropagation();
-                                       handleSetActualTime(breakItem.guard, "הפסקה", "break");
+                                       handleSetActualTime(breakItem.id, "break");
                                      }}
                                    />
                                  ) : (
@@ -730,7 +734,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                      className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
                                      onClick={(e) => {
                                        e.stopPropagation();
-                                       handleSetActualTime(breakItem.guard, "הפסקה", "break");
+                                       handleSetActualTime(breakItem.id, "break");
                                      }}
                                    />
                                  )}

@@ -6,6 +6,7 @@ export interface Guard {
 }
 
 export interface Assignment {
+  id: string;
   guard: string;
   post: string;
   time: string;
@@ -13,6 +14,7 @@ export interface Assignment {
 }
 
 export interface PatrolAssignment {
+  id: string;
   guard: string;
   patrol: string;
   time: string;
@@ -20,12 +22,14 @@ export interface PatrolAssignment {
 }
 
 export interface MealAssignment {
+  id: string;
   guard: string;
   time: string;
   actualTime?: string;
 }
 
 export interface BreakAssignment {
+  id: string;
   guard: string;
   time: string;
   actualTime?: string;
