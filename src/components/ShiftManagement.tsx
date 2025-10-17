@@ -36,6 +36,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     const guard = data.guards.find(g => g.name === guardName);
     return guard?.color || "hsl(var(--primary))";
   };
+
+  // Check if guard is Tamach
+  const isGuardTamach = (guardName: string) => {
+    const guard = data.guards.find(g => g.name === guardName);
+    return guard?.shiftType?.includes("תמך") || false;
+  };
   const [availableGuards, setAvailableGuards] = useState<string[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [patrols, setPatrols] = useState<PatrolAssignment[]>([]);
@@ -386,7 +392,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                       onDrop={() => handleDropPost(post)}
                                     >
                                       <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-primary/50 transition-colors">
-                                        {getAssignmentsForPost(post).map((assignment) => (
+                                        {getAssignmentsForPost(post).map((assignment) => {
+                                          const isTamach = isGuardTamach(assignment.guard);
+                                          return (
                                           <div
                                             key={assignment.id}
                                             onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "post")}
@@ -395,9 +403,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                             onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "post")}
                                             onTouchEnd={handleLongPressEnd}
                                             style={{ 
-                                              backgroundColor: `${getGuardColor(assignment.guard)}30`,
+                                              backgroundColor: isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`,
                                               borderColor: getGuardColor(assignment.guard),
-                                              color: getGuardColor(assignment.guard)
+                                              color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
                                             }}
                                              className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
@@ -422,8 +430,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                              {assignment.actualTime && (
                                                <span className="text-xs opacity-70">{formatTime(assignment.actualTime)}</span>
                                              )}
-                                          </div>
-                                        ))}
+                                           </div>
+                                          );
+                                        })}
                                       </div>
                                     </td>
                                   </tr>
@@ -455,7 +464,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                       onDrop={() => handleDropPatrol(patrol)}
                                     >
                                       <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-accent/50 transition-colors">
-                                        {getAssignmentsForPatrol(patrol).map((assignment) => (
+                                        {getAssignmentsForPatrol(patrol).map((assignment) => {
+                                          const isTamach = isGuardTamach(assignment.guard);
+                                          return (
                                           <div
                                             key={assignment.id}
                                             onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
@@ -464,9 +475,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                             onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
                                             onTouchEnd={handleLongPressEnd}
                                             style={{ 
-                                              backgroundColor: `${getGuardColor(assignment.guard)}30`,
+                                              backgroundColor: isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`,
                                               borderColor: getGuardColor(assignment.guard),
-                                              color: getGuardColor(assignment.guard)
+                                              color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
                                             }}
                                              className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
@@ -491,8 +502,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                              {assignment.actualTime && (
                                                <span className="text-xs opacity-70">{formatTime(assignment.actualTime)}</span>
                                              )}
-                                          </div>
-                                        ))}
+                                           </div>
+                                          );
+                                        })}
                                       </div>
                                     </td>
                                   </tr>
@@ -558,6 +570,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 style={{ backgroundColor: getGuardColor(guard) }}
                               />
                               <span className="text-foreground font-bold">{guard}</span>
+                              {isGuardTamach(guard) && (
+                                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ 
+                                  backgroundColor: getGuardColor(guard),
+                                  color: 'hsl(var(--background))'
+                                }}>תמך</span>
+                              )}
                             </div>
                             
                             {/* Completed tasks */}
@@ -650,7 +668,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-primary/50 transition-colors"
                       >
                         <div className="space-y-2">
-                          {meals.map((meal) => (
+                          {meals.map((meal) => {
+                            const isTamach = isGuardTamach(meal.guard);
+                            return (
                             <div
                               key={meal.id}
                               onMouseDown={() => handleLongPressStart(meal.id, meal.guard, "meal")}
@@ -659,9 +679,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               onTouchStart={() => handleLongPressStart(meal.id, meal.guard, "meal")}
                               onTouchEnd={handleLongPressEnd}
                               style={{ 
-                                backgroundColor: `${getGuardColor(meal.guard)}30`,
+                                backgroundColor: isTamach ? getGuardColor(meal.guard) : `${getGuardColor(meal.guard)}30`,
                                 borderColor: getGuardColor(meal.guard),
-                                color: getGuardColor(meal.guard)
+                                color: isTamach ? 'hsl(var(--background))' : getGuardColor(meal.guard)
                               }}
                                className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
@@ -689,7 +709,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                  )}
                                </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     </Card>
@@ -704,7 +725,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-accent/50 transition-colors"
                       >
                         <div className="space-y-2">
-                          {breaks.map((breakItem) => (
+                          {breaks.map((breakItem) => {
+                            const isTamach = isGuardTamach(breakItem.guard);
+                            return (
                             <div
                               key={breakItem.id}
                               onMouseDown={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
@@ -713,9 +736,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               onTouchStart={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
                               onTouchEnd={handleLongPressEnd}
                               style={{ 
-                                backgroundColor: `${getGuardColor(breakItem.guard)}30`,
+                                backgroundColor: isTamach ? getGuardColor(breakItem.guard) : `${getGuardColor(breakItem.guard)}30`,
                                 borderColor: getGuardColor(breakItem.guard),
-                                color: getGuardColor(breakItem.guard)
+                                color: isTamach ? 'hsl(var(--background))' : getGuardColor(breakItem.guard)
                               }}
                                className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
@@ -743,7 +766,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                  )}
                                </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     </Card>
