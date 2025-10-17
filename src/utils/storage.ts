@@ -15,6 +15,7 @@ export interface ShiftSettings {
     "RL": number;
     "defaultPatrol": number;
     "לובי עמידה": number;
+    "פ. שרונה": number;
   };
 }
 
@@ -34,7 +35,8 @@ export const getShiftSettings = (): ShiftSettings => {
       "פ.ת-7": 1.5,
       "RL": 0.4,
       "defaultPatrol": 1,
-      "לובי עמידה": 0.8
+      "לובי עמידה": 0.8,
+      "פ. שרונה": 1
     }
   };
 };

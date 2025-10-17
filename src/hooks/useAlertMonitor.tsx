@@ -102,7 +102,12 @@ export const useAlertMonitor = () => {
             `התראה: ${alert.guard} ${alert.post} כבר ${alert.duration} דקות!`,
             {
               duration: 5000,
-              icon: "⚠️"
+              icon: "⚠️",
+              style: {
+                background: 'hsl(0 84.2% 60.2%)',
+                color: 'white',
+                border: '1px solid hsl(0 84.2% 50%)'
+              }
             }
           );
         }

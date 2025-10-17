@@ -88,7 +88,8 @@ const Index = () => {
           "פ.ת-7": 1.5,
           "RL": 0.4,
           "defaultPatrol": 1,
-          "לובי עמידה": 0.8
+          "לובי עמידה": 0.8,
+          "פ. שרונה": 1
         }
       };
       setSettings(defaultSettings);

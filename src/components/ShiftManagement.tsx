@@ -53,6 +53,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     if (taskName === "פ.ת-21") return scores["פ.ת-21"];
     if (taskName === "פ.ע-7") return scores["פ.ע-7"];
     if (taskName === "פ.ת-7") return scores["פ.ת-7"];
+    if (taskName === "פ. שרונה") return scores["פ. שרונה"];
     if (taskName.includes("RL")) return scores["RL"];
     // Check if it's a patrol (from PATROLS list)
     if (PATROLS.includes(taskName)) return scores["defaultPatrol"];
