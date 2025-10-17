@@ -42,6 +42,45 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     const guard = data.guards.find(g => g.name === guardName);
     return guard?.shiftType?.includes("תמך") || false;
   };
+
+  // Get score for a task
+  const getTaskScore = (taskName: string): number => {
+    // Patrols scoring
+    if (taskName === "פ.ע-21") return 2.5;
+    if (taskName === "פ.ת-21") return 2;
+    if (taskName === "פ.ע-7") return 1.7;
+    if (taskName === "פ.ת-7") return 1.5;
+    if (taskName.includes("RL")) return 0.4;
+    // Check if it's a patrol (from PATROLS list)
+    if (PATROLS.includes(taskName)) return 1;
+    
+    // Posts scoring
+    if (taskName === "לובי עמידה") return 0.8;
+    
+    // Default for other tasks
+    return 0;
+  };
+
+  // Calculate total score for a guard
+  const getGuardScore = (guardName: string): number => {
+    let score = 0;
+    
+    // Add scores from completed assignments
+    assignments
+      .filter(a => a.guard === guardName && a.actualTime)
+      .forEach(a => {
+        score += getTaskScore(a.post);
+      });
+    
+    // Add scores from completed patrols
+    patrols
+      .filter(p => p.guard === guardName && p.actualTime)
+      .forEach(p => {
+        score += getTaskScore(p.patrol);
+      });
+    
+    return score;
+  };
   const [availableGuards, setAvailableGuards] = useState<string[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [patrols, setPatrols] = useState<PatrolAssignment[]>([]);
@@ -576,6 +615,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                   color: 'hsl(var(--background))'
                                 }}>תמך</span>
                               )}
+                              <span className="text-sm font-semibold px-2 py-0.5 rounded-full bg-primary/20 text-primary">
+                                {getGuardScore(guard).toFixed(1)} נק׳
+                              </span>
                             </div>
                             
                             {/* Completed tasks */}
