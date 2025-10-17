@@ -1,6 +1,25 @@
 import { GuardsData } from "@/types/guards";
 
 const STORAGE_KEY = "guardsData";
+const SETTINGS_KEY = "shiftSettings";
+
+export interface ShiftSettings {
+  alertThresholdMinutes: number;
+}
+
+export const getShiftSettings = (): ShiftSettings => {
+  const data = localStorage.getItem(SETTINGS_KEY);
+  if (data) {
+    return JSON.parse(data);
+  }
+  return {
+    alertThresholdMinutes: 60
+  };
+};
+
+export const saveShiftSettings = (settings: ShiftSettings): void => {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+};
 
 export const getGuardsData = (): GuardsData => {
   const data = localStorage.getItem(STORAGE_KEY);

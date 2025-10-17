@@ -7,11 +7,21 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import GuardsSetup from "@/components/GuardsSetup";
 import ShiftManagement from "@/components/ShiftManagement";
-import { getGuardsData, resetGuardsData, resetEveningShift } from "@/utils/storage";
-import { Users, Calendar, Menu, RefreshCw } from "lucide-react";
+import { getGuardsData, resetGuardsData, resetEveningShift, getShiftSettings, saveShiftSettings } from "@/utils/storage";
+import { Users, Calendar, Menu, RefreshCw, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 type Screen = "setup" | "management";
@@ -21,6 +31,8 @@ const Index = () => {
     const data = getGuardsData();
     return data.guards.length > 0 ? "management" : "setup";
   });
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [alertThreshold, setAlertThreshold] = useState(() => getShiftSettings().alertThresholdMinutes);
 
   const handleSetupComplete = () => {
     setScreen("management");
@@ -44,6 +56,16 @@ const Index = () => {
       toast.success("המשמרת אופסה למשמרת ערב");
       window.location.reload();
     }
+  };
+
+  const handleSaveSettings = () => {
+    if (alertThreshold < 1) {
+      toast.error("זמן התראה חייב להיות לפחות דקה אחת");
+      return;
+    }
+    saveShiftSettings({ alertThresholdMinutes: alertThreshold });
+    toast.success("ההגדרות נשמרו");
+    setSettingsOpen(false);
   };
 
   return (
@@ -78,6 +100,14 @@ const Index = () => {
                 >
                   <Calendar className="w-4 h-4 ml-2" />
                   ניהול משמרת
+                </Button>
+                <Button
+                  onClick={() => setSettingsOpen(true)}
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
+                  <Settings className="w-4 h-4 ml-2" />
+                  הגדרות משמרת
                 </Button>
                 <Button
                   onClick={handleEveningShiftReset}
@@ -117,6 +147,36 @@ const Index = () => {
       ) : (
         <ShiftManagement />
       )}
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="sm:max-w-[425px]" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>הגדרות משמרת</DialogTitle>
+            <DialogDescription>
+              שנה את זמן ההתראה למאבטחים שנמצאים בעמדה זמן רב
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="alertThreshold" className="text-right col-span-4">
+                זמן התראה (דקות)
+              </Label>
+              <Input
+                id="alertThreshold"
+                type="number"
+                min="1"
+                value={alertThreshold}
+                onChange={(e) => setAlertThreshold(Number(e.target.value))}
+                className="col-span-4"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSaveSettings}>שמור הגדרות</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

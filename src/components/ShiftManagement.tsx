@@ -21,9 +21,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { getGuardsData, saveGuardsData } from "@/utils/storage";
+import { getGuardsData, saveGuardsData, getShiftSettings } from "@/utils/storage";
 import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
-import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2 } from "lucide-react";
+import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 interface ShiftManagementProps {}
@@ -81,6 +81,30 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     
     return score;
   };
+
+  // Get alerts for guards staying too long in posts
+  const getAlerts = () => {
+    const settings = getShiftSettings();
+    const now = new Date();
+    const alerts: Array<{ guard: string; post: string; duration: number }> = [];
+    
+    assignments.forEach(assignment => {
+      if (!assignment.actualTime) return; // Only check active assignments
+      
+      const assignmentTime = new Date(assignment.actualTime);
+      const durationMinutes = (now.getTime() - assignmentTime.getTime()) / (1000 * 60);
+      
+      if (durationMinutes >= settings.alertThresholdMinutes) {
+        alerts.push({
+          guard: assignment.guard,
+          post: assignment.post,
+          duration: Math.floor(durationMinutes)
+        });
+      }
+    });
+    
+    return alerts;
+  };
   const [availableGuards, setAvailableGuards] = useState<string[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [patrols, setPatrols] = useState<PatrolAssignment[]>([]);
@@ -102,14 +126,24 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     tasks: true,
     history: true,
     mealBreak: true,
+    alerts: true,
   });
   const [tasksView, setTasksView] = useState<"posts" | "patrols">("posts");
   const [mealBreakView, setMealBreakView] = useState<"meals" | "breaks">("meals");
+  const [alertsKey, setAlertsKey] = useState(0); // Force re-render for alerts
   
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  // Update alerts every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAlertsKey(prev => prev + 1);
+    }, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadData = () => {
@@ -815,6 +849,67 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     </Card>
                   )}
                 </div>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          </CarouselItem>
+
+          {/* Section 4: Alerts */}
+          <CarouselItem className="pl-2 md:pl-4">
+            <Collapsible
+              open={openSections.alerts}
+              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, alerts: open }))}
+            >
+              <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
+                <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-foreground">התראות</h2>
+                    {getAlerts().length > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground text-xs font-semibold">
+                        {getAlerts().length}
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${openSections.alerts ? "rotate-180" : ""}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-6">
+                    <Card className="p-6 border-border/30 bg-background/30">
+                      {getAlerts().length === 0 ? (
+                        <div className="text-center text-muted-foreground py-8">
+                          אין התראות כרגע
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {getAlerts().map((alert, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center justify-between p-4 bg-destructive/10 border border-destructive/30 rounded-lg"
+                            >
+                              <div className="flex items-center gap-3">
+                                <AlertTriangle className="w-5 h-5 text-destructive" />
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span 
+                                      className="font-semibold"
+                                      style={{ color: getGuardColor(alert.guard) }}
+                                    >
+                                      {alert.guard}
+                                    </span>
+                                    <span className="text-muted-foreground">-</span>
+                                    <span className="font-medium text-foreground">{alert.post}</span>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground mt-1">
+                                    נמצא בעמדה {alert.duration} דקות
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  </div>
                 </CollapsibleContent>
               </Card>
             </Collapsible>
