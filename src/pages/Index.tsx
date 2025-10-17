@@ -32,7 +32,7 @@ const Index = () => {
     return data.guards.length > 0 ? "management" : "setup";
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [alertThreshold, setAlertThreshold] = useState(() => getShiftSettings().alertThresholdMinutes);
+  const [settings, setSettings] = useState(() => getShiftSettings());
 
   const handleSetupComplete = () => {
     setScreen("management");
@@ -59,13 +59,20 @@ const Index = () => {
   };
 
   const handleSaveSettings = () => {
-    if (alertThreshold < 1) {
+    if (settings.alertThresholdMinutes < 1) {
       toast.error("זמן התראה חייב להיות לפחות דקה אחת");
       return;
     }
-    saveShiftSettings({ alertThresholdMinutes: alertThreshold });
+    // Validate scores
+    const scoreValues = Object.values(settings.scores);
+    if (scoreValues.some(v => v < 0)) {
+      toast.error("ניקוד חייב להיות מספר חיובי");
+      return;
+    }
+    saveShiftSettings(settings);
     toast.success("ההגדרות נשמרו");
     setSettingsOpen(false);
+    window.location.reload(); // Reload to apply new scores
   };
 
   return (
@@ -150,26 +157,136 @@ const Index = () => {
 
       {/* Settings Dialog */}
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent className="sm:max-w-[425px]" dir="rtl">
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle>הגדרות משמרת</DialogTitle>
             <DialogDescription>
-              שנה את זמן ההתראה למאבטחים שנמצאים בעמדה זמן רב
+              שנה את זמן ההתראה וניקוד המשימות
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="alertThreshold" className="text-right col-span-4">
+          <div className="grid gap-6 py-4">
+            {/* Alert Threshold */}
+            <div className="space-y-2">
+              <Label htmlFor="alertThreshold" className="text-base font-semibold">
                 זמן התראה (דקות)
               </Label>
               <Input
                 id="alertThreshold"
                 type="number"
                 min="1"
-                value={alertThreshold}
-                onChange={(e) => setAlertThreshold(Number(e.target.value))}
-                className="col-span-4"
+                value={settings.alertThresholdMinutes}
+                onChange={(e) => setSettings(prev => ({ ...prev, alertThresholdMinutes: Number(e.target.value) }))}
               />
+            </div>
+
+            {/* Scores */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">ניקוד משימות</Label>
+              
+              <div className="space-y-2">
+                <Label htmlFor="score-pe21" className="text-sm">פ.ע-21</Label>
+                <Input
+                  id="score-pe21"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={settings.scores["פ.ע-21"]}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    scores: { ...prev.scores, "פ.ע-21": Number(e.target.value) }
+                  }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="score-pt21" className="text-sm">פ.ת-21</Label>
+                <Input
+                  id="score-pt21"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={settings.scores["פ.ת-21"]}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    scores: { ...prev.scores, "פ.ת-21": Number(e.target.value) }
+                  }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="score-pe7" className="text-sm">פ.ע-7</Label>
+                <Input
+                  id="score-pe7"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={settings.scores["פ.ע-7"]}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    scores: { ...prev.scores, "פ.ע-7": Number(e.target.value) }
+                  }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="score-pt7" className="text-sm">פ.ת-7</Label>
+                <Input
+                  id="score-pt7"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={settings.scores["פ.ת-7"]}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    scores: { ...prev.scores, "פ.ת-7": Number(e.target.value) }
+                  }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="score-rl" className="text-sm">פטרולי RL</Label>
+                <Input
+                  id="score-rl"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={settings.scores["RL"]}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    scores: { ...prev.scores, "RL": Number(e.target.value) }
+                  }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="score-default" className="text-sm">פטרולים אחרים</Label>
+                <Input
+                  id="score-default"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={settings.scores["defaultPatrol"]}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    scores: { ...prev.scores, "defaultPatrol": Number(e.target.value) }
+                  }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="score-lobby" className="text-sm">לובי עמידה</Label>
+                <Input
+                  id="score-lobby"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={settings.scores["לובי עמידה"]}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    scores: { ...prev.scores, "לובי עמידה": Number(e.target.value) }
+                  }))}
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>

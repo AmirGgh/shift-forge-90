@@ -45,17 +45,20 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
 
   // Get score for a task
   const getTaskScore = (taskName: string): number => {
-    // Patrols scoring
-    if (taskName === "פ.ע-21") return 2.5;
-    if (taskName === "פ.ת-21") return 2;
-    if (taskName === "פ.ע-7") return 1.7;
-    if (taskName === "פ.ת-7") return 1.5;
-    if (taskName.includes("RL")) return 0.4;
+    const settings = getShiftSettings();
+    const scores = settings.scores;
+    
+    // Specific patrols scoring
+    if (taskName === "פ.ע-21") return scores["פ.ע-21"];
+    if (taskName === "פ.ת-21") return scores["פ.ת-21"];
+    if (taskName === "פ.ע-7") return scores["פ.ע-7"];
+    if (taskName === "פ.ת-7") return scores["פ.ת-7"];
+    if (taskName.includes("RL")) return scores["RL"];
     // Check if it's a patrol (from PATROLS list)
-    if (PATROLS.includes(taskName)) return 1;
+    if (PATROLS.includes(taskName)) return scores["defaultPatrol"];
     
     // Posts scoring
-    if (taskName === "לובי עמידה") return 0.8;
+    if (taskName === "לובי עמידה") return scores["לובי עמידה"];
     
     // Default for other tasks
     return 0;

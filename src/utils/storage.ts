@@ -5,6 +5,15 @@ const SETTINGS_KEY = "shiftSettings";
 
 export interface ShiftSettings {
   alertThresholdMinutes: number;
+  scores: {
+    "פ.ע-21": number;
+    "פ.ת-21": number;
+    "פ.ע-7": number;
+    "פ.ת-7": number;
+    "RL": number;
+    "defaultPatrol": number;
+    "לובי עמידה": number;
+  };
 }
 
 export const getShiftSettings = (): ShiftSettings => {
@@ -13,7 +22,16 @@ export const getShiftSettings = (): ShiftSettings => {
     return JSON.parse(data);
   }
   return {
-    alertThresholdMinutes: 60
+    alertThresholdMinutes: 60,
+    scores: {
+      "פ.ע-21": 2.5,
+      "פ.ת-21": 2,
+      "פ.ע-7": 1.7,
+      "פ.ת-7": 1.5,
+      "RL": 0.4,
+      "defaultPatrol": 1,
+      "לובי עמידה": 0.8
+    }
   };
 };
 
