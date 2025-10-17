@@ -75,6 +75,29 @@ const Index = () => {
     window.location.reload(); // Reload to apply new scores
   };
 
+  const handleResetSettings = () => {
+    if (confirm("האם אתה בטוח שברצונך לאפס את ההגדרות לערכי ברירת מחדל?")) {
+      const defaultSettings = {
+        alertThresholdMinutes: 60,
+        breakThresholdMinutes: 15,
+        mealThresholdMinutes: 32,
+        scores: {
+          "פ.ע-21": 2.5,
+          "פ.ת-21": 2,
+          "פ.ע-7": 1.7,
+          "פ.ת-7": 1.5,
+          "RL": 0.4,
+          "defaultPatrol": 1,
+          "לובי עמידה": 0.8
+        }
+      };
+      setSettings(defaultSettings);
+      saveShiftSettings(defaultSettings);
+      toast.success("ההגדרות אופסו לערכי ברירת מחדל");
+      window.location.reload();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -313,7 +336,10 @@ const Index = () => {
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-row gap-2 justify-between">
+            <Button onClick={handleResetSettings} variant="outline">
+              איפוס לברירת מחדל
+            </Button>
             <Button onClick={handleSaveSettings}>שמור הגדרות</Button>
           </DialogFooter>
         </DialogContent>
