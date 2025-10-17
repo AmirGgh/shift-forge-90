@@ -18,49 +18,75 @@ export const useAlertMonitor = () => {
       const now = new Date();
       const currentAlerts: Alert[] = [];
 
-      // Check assignments (posts)
+      // Get the latest active task for each guard
+      const guardLatestTasks = new Map<string, { type: string; post: string; actualTime: string; thresholdMinutes: number }>();
+
+      // Collect all tasks with actualTime
       data.assignments.forEach(assignment => {
         if (!assignment.actualTime) return;
-        
-        const assignmentTime = new Date(assignment.actualTime);
-        const durationMinutes = (now.getTime() - assignmentTime.getTime()) / (1000 * 60);
-        
-        if (durationMinutes >= settings.alertThresholdMinutes) {
-          currentAlerts.push({
-            guard: assignment.guard,
+        const time = new Date(assignment.actualTime).getTime();
+        const current = guardLatestTasks.get(assignment.guard);
+        if (!current || new Date(current.actualTime).getTime() < time) {
+          guardLatestTasks.set(assignment.guard, {
+            type: 'post',
             post: `עמדה: ${assignment.post}`,
-            duration: Math.floor(durationMinutes)
+            actualTime: assignment.actualTime,
+            thresholdMinutes: settings.alertThresholdMinutes
+          });
+        }
+      });
+
+      data.patrols?.forEach(patrol => {
+        if (!patrol.actualTime) return;
+        const time = new Date(patrol.actualTime).getTime();
+        const current = guardLatestTasks.get(patrol.guard);
+        if (!current || new Date(current.actualTime).getTime() < time) {
+          guardLatestTasks.set(patrol.guard, {
+            type: 'patrol',
+            post: `פטרול: ${patrol.patrol}`,
+            actualTime: patrol.actualTime,
+            thresholdMinutes: settings.alertThresholdMinutes
           });
         }
       });
       
-      // Check breaks
       data.breaks.forEach(breakAssignment => {
         if (!breakAssignment.actualTime) return;
-        
-        const breakTime = new Date(breakAssignment.actualTime);
-        const durationMinutes = (now.getTime() - breakTime.getTime()) / (1000 * 60);
-        
-        if (durationMinutes >= settings.breakThresholdMinutes) {
-          currentAlerts.push({
-            guard: breakAssignment.guard,
+        const time = new Date(breakAssignment.actualTime).getTime();
+        const current = guardLatestTasks.get(breakAssignment.guard);
+        if (!current || new Date(current.actualTime).getTime() < time) {
+          guardLatestTasks.set(breakAssignment.guard, {
+            type: 'break',
             post: "הפסקה",
-            duration: Math.floor(durationMinutes)
+            actualTime: breakAssignment.actualTime,
+            thresholdMinutes: settings.breakThresholdMinutes
           });
         }
       });
       
-      // Check meals
       data.meals.forEach(meal => {
         if (!meal.actualTime) return;
-        
-        const mealTime = new Date(meal.actualTime);
-        const durationMinutes = (now.getTime() - mealTime.getTime()) / (1000 * 60);
-        
-        if (durationMinutes >= settings.mealThresholdMinutes) {
-          currentAlerts.push({
-            guard: meal.guard,
+        const time = new Date(meal.actualTime).getTime();
+        const current = guardLatestTasks.get(meal.guard);
+        if (!current || new Date(current.actualTime).getTime() < time) {
+          guardLatestTasks.set(meal.guard, {
+            type: 'meal',
             post: "אוכל",
+            actualTime: meal.actualTime,
+            thresholdMinutes: settings.mealThresholdMinutes
+          });
+        }
+      });
+
+      // Check only the latest task for each guard
+      guardLatestTasks.forEach((task, guard) => {
+        const taskTime = new Date(task.actualTime);
+        const durationMinutes = (now.getTime() - taskTime.getTime()) / (1000 * 60);
+        
+        if (durationMinutes >= task.thresholdMinutes) {
+          currentAlerts.push({
+            guard: guard,
+            post: task.post,
             duration: Math.floor(durationMinutes)
           });
         }

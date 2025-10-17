@@ -91,49 +91,71 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     const now = new Date();
     const alerts: Array<{ guard: string; post: string; duration: number }> = [];
     
-    // Check assignments (posts)
+    // Get the latest active task for each guard
+    const guardLatestTasks = new Map<string, { post: string; actualTime: string; thresholdMinutes: number }>();
+
+    // Collect all tasks with actualTime
     assignments.forEach(assignment => {
-      if (!assignment.actualTime) return; // Only check active assignments
-      
-      const assignmentTime = new Date(assignment.actualTime);
-      const durationMinutes = (now.getTime() - assignmentTime.getTime()) / (1000 * 60);
-      
-      if (durationMinutes >= settings.alertThresholdMinutes) {
-        alerts.push({
-          guard: assignment.guard,
+      if (!assignment.actualTime) return;
+      const time = new Date(assignment.actualTime).getTime();
+      const current = guardLatestTasks.get(assignment.guard);
+      if (!current || new Date(current.actualTime).getTime() < time) {
+        guardLatestTasks.set(assignment.guard, {
           post: `עמדה: ${assignment.post}`,
-          duration: Math.floor(durationMinutes)
+          actualTime: assignment.actualTime,
+          thresholdMinutes: settings.alertThresholdMinutes
+        });
+      }
+    });
+
+    patrols.forEach(patrol => {
+      if (!patrol.actualTime) return;
+      const time = new Date(patrol.actualTime).getTime();
+      const current = guardLatestTasks.get(patrol.guard);
+      if (!current || new Date(current.actualTime).getTime() < time) {
+        guardLatestTasks.set(patrol.guard, {
+          post: `פטרול: ${patrol.patrol}`,
+          actualTime: patrol.actualTime,
+          thresholdMinutes: settings.alertThresholdMinutes
         });
       }
     });
     
-    // Check breaks
     breaks.forEach(breakAssignment => {
-      if (!breakAssignment.actualTime) return; // Only check active breaks
-      
-      const breakTime = new Date(breakAssignment.actualTime);
-      const durationMinutes = (now.getTime() - breakTime.getTime()) / (1000 * 60);
-      
-      if (durationMinutes >= settings.breakThresholdMinutes) {
-        alerts.push({
-          guard: breakAssignment.guard,
+      if (!breakAssignment.actualTime) return;
+      const time = new Date(breakAssignment.actualTime).getTime();
+      const current = guardLatestTasks.get(breakAssignment.guard);
+      if (!current || new Date(current.actualTime).getTime() < time) {
+        guardLatestTasks.set(breakAssignment.guard, {
           post: "הפסקה",
-          duration: Math.floor(durationMinutes)
+          actualTime: breakAssignment.actualTime,
+          thresholdMinutes: settings.breakThresholdMinutes
         });
       }
     });
     
-    // Check meals
     meals.forEach(meal => {
-      if (!meal.actualTime) return; // Only check active meals
-      
-      const mealTime = new Date(meal.actualTime);
-      const durationMinutes = (now.getTime() - mealTime.getTime()) / (1000 * 60);
-      
-      if (durationMinutes >= settings.mealThresholdMinutes) {
-        alerts.push({
-          guard: meal.guard,
+      if (!meal.actualTime) return;
+      const time = new Date(meal.actualTime).getTime();
+      const current = guardLatestTasks.get(meal.guard);
+      if (!current || new Date(current.actualTime).getTime() < time) {
+        guardLatestTasks.set(meal.guard, {
           post: "אוכל",
+          actualTime: meal.actualTime,
+          thresholdMinutes: settings.mealThresholdMinutes
+        });
+      }
+    });
+
+    // Check only the latest task for each guard
+    guardLatestTasks.forEach((task, guard) => {
+      const taskTime = new Date(task.actualTime);
+      const durationMinutes = (now.getTime() - taskTime.getTime()) / (1000 * 60);
+      
+      if (durationMinutes >= task.thresholdMinutes) {
+        alerts.push({
+          guard: guard,
+          post: task.post,
           duration: Math.floor(durationMinutes)
         });
       }
@@ -424,6 +446,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             <div className="flex flex-wrap gap-2">
               {data.guards.map((guard) => {
                 const isTamach = guard.shiftType?.includes("תמך");
+                const isRegularShift = guard.shiftType === "בוקר" || guard.shiftType === "ערב";
+                const isCustomShift = !isTamach && !isRegularShift;
+                
                 return (
                   <div
                     key={guard.name}
@@ -432,6 +457,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     style={{ 
                       backgroundColor: isTamach ? guard.color : `${guard.color}20`,
                       borderColor: guard.color,
+                      borderStyle: isCustomShift ? 'dashed' : 'solid',
                       color: isTamach ? 'hsl(var(--background))' : guard.color
                     }}
                     className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium"
