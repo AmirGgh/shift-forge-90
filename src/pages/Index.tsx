@@ -42,6 +42,7 @@ const Index = () => {
     if (confirm("האם אתה בטוח שברצונך לאפס למשמרת ערב? זה ימחק היסטוריה של מאבטחים שאינם במשמרת תמך.")) {
       resetEveningShift();
       toast.success("המשמרת אופסה למשמרת ערב");
+      window.location.reload();
     }
   };
 
