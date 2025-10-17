@@ -368,16 +368,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             <table className="w-full">
                               <thead>
                                 <tr className="border-b border-border/50">
-                                  <th className="text-right p-3 font-semibold text-foreground">עמדה</th>
-                                  <th className="text-right p-3 font-semibold text-foreground">מאבטחים</th>
+                                  <th className="text-right p-3 font-semibold text-foreground whitespace-nowrap w-auto">עמדה</th>
+                                  <th className="text-right p-3 font-semibold text-foreground w-full">מאבטחים</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {POSTS.map((post) => (
                                   <tr key={post} className="border-b border-border/30 hover:bg-background/50 transition-colors">
-                                    <td className="p-3 font-medium text-foreground">{post}</td>
+                                    <td className="p-3 font-medium text-foreground whitespace-nowrap w-auto">{post}</td>
                                     <td
-                                      className="p-3"
+                                      className="p-3 w-full"
                                       onDragOver={handleDragOver}
                                       onDrop={() => handleDropPost(post)}
                                     >
@@ -437,16 +437,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             <table className="w-full">
                               <thead>
                                 <tr className="border-b border-border/50">
-                                  <th className="text-right p-3 font-semibold text-foreground">שם פטרול</th>
-                                  <th className="text-right p-3 font-semibold text-foreground">מאבטחים</th>
+                                  <th className="text-right p-3 font-semibold text-foreground whitespace-nowrap w-auto">שם פטרול</th>
+                                  <th className="text-right p-3 font-semibold text-foreground w-full">מאבטחים</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {PATROLS.map((patrol) => (
                                   <tr key={patrol} className="border-b border-border/30 hover:bg-background/50 transition-colors">
-                                    <td className="p-3 font-medium text-foreground">{patrol}</td>
+                                    <td className="p-3 font-medium text-foreground whitespace-nowrap w-auto">{patrol}</td>
                                     <td
-                                      className="p-3"
+                                      className="p-3 w-full"
                                       onDragOver={handleDragOver}
                                       onDrop={() => handleDropPatrol(patrol)}
                                     >
@@ -750,8 +750,6 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             </Collapsible>
           </CarouselItem>
         </CarouselContent>
-        <CarouselPrevious className="right-12" />
-        <CarouselNext className="left-12" />
       </Carousel>
       </div>
 
