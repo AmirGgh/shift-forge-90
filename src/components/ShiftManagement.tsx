@@ -447,8 +447,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             <div className="flex flex-wrap gap-2">
               {data.guards.map((guard) => {
                 const isTamach = guard.shiftType?.includes("תמך");
-                const isRegularShift = guard.shiftType === "בוקר" || guard.shiftType === "ערב";
-                const isCustomShift = !isTamach && !isRegularShift;
+                const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                const isInShiftList = SHIFT_TYPES.includes(guard.shiftType || "");
+                const isCustomShift = !isInShiftList;
                 
                 return (
                   <div
@@ -530,6 +531,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                       <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-primary/50 transition-colors">
                                         {getAssignmentsForPost(post).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
+                                          const guardData = data.guards.find(g => g.name === assignment.guard);
+                                          const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                                          const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
                                           return (
                                           <div
                                             key={assignment.id}
@@ -541,9 +545,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                             style={{ 
                                               backgroundColor: isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`,
                                               borderColor: getGuardColor(assignment.guard),
+                                              borderStyle: isCustomShift ? 'dashed' : 'solid',
                                               color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
                                             }}
-                                             className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                             className="inline-flex items-center gap-2 px-3 py-1 border-2 rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
                                              <span className="font-medium">{assignment.guard}</span>
                                              {assignment.actualTime ? (
@@ -602,6 +607,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                       <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-accent/50 transition-colors">
                                         {getAssignmentsForPatrol(patrol).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
+                                          const guardData = data.guards.find(g => g.name === assignment.guard);
+                                          const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                                          const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
                                           return (
                                           <div
                                             key={assignment.id}
@@ -613,9 +621,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                             style={{ 
                                               backgroundColor: isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`,
                                               borderColor: getGuardColor(assignment.guard),
+                                              borderStyle: isCustomShift ? 'dashed' : 'solid',
                                               color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
                                             }}
-                                             className="inline-flex items-center gap-2 px-3 py-1 border rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                             className="inline-flex items-center gap-2 px-3 py-1 border-2 rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
                                              <span className="font-medium">{assignment.guard}</span>
                                              {assignment.actualTime ? (
@@ -706,12 +715,20 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 style={{ backgroundColor: getGuardColor(guard) }}
                               />
                               <span className="text-foreground font-bold">{guard}</span>
-                              {isGuardTamach(guard) && (
-                                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ 
-                                  backgroundColor: getGuardColor(guard),
-                                  color: 'hsl(var(--background))'
-                                }}>תמך</span>
-                              )}
+                              {(() => {
+                                const guardData = data.guards.find(g => g.name === guard);
+                                const shiftType = guardData?.shiftType;
+                                if (shiftType) {
+                                  const isTamach = shiftType.includes("תמך");
+                                  return (
+                                    <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ 
+                                      backgroundColor: isTamach ? getGuardColor(guard) : `${getGuardColor(guard)}40`,
+                                      color: isTamach ? 'hsl(var(--background))' : getGuardColor(guard)
+                                    }}>{shiftType}</span>
+                                  );
+                                }
+                                return null;
+                              })()}
                               <span className="text-sm font-semibold px-2 py-0.5 rounded-full bg-primary/20 text-primary">
                                 {getGuardScore(guard).toFixed(1)} נק׳
                               </span>
@@ -809,6 +826,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         <div className="space-y-2">
                           {meals.map((meal) => {
                             const isTamach = isGuardTamach(meal.guard);
+                            const guardData = data.guards.find(g => g.name === meal.guard);
+                            const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                            const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
                             return (
                             <div
                               key={meal.id}
@@ -820,9 +840,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               style={{ 
                                 backgroundColor: isTamach ? getGuardColor(meal.guard) : `${getGuardColor(meal.guard)}30`,
                                 borderColor: getGuardColor(meal.guard),
+                                borderStyle: isCustomShift ? 'dashed' : 'solid',
                                 color: isTamach ? 'hsl(var(--background))' : getGuardColor(meal.guard)
                               }}
-                               className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                               className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
                                <div className="flex items-center gap-2">
                                  <span className="font-medium">{meal.guard}</span>
@@ -866,6 +887,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         <div className="space-y-2">
                           {breaks.map((breakItem) => {
                             const isTamach = isGuardTamach(breakItem.guard);
+                            const guardData = data.guards.find(g => g.name === breakItem.guard);
+                            const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                            const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
                             return (
                             <div
                               key={breakItem.id}
@@ -877,9 +901,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               style={{ 
                                 backgroundColor: isTamach ? getGuardColor(breakItem.guard) : `${getGuardColor(breakItem.guard)}30`,
                                 borderColor: getGuardColor(breakItem.guard),
+                                borderStyle: isCustomShift ? 'dashed' : 'solid',
                                 color: isTamach ? 'hsl(var(--background))' : getGuardColor(breakItem.guard)
                               }}
-                               className="flex items-center justify-between px-4 py-2 border rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                               className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
                                <div className="flex items-center gap-2">
                                  <span className="font-medium">{breakItem.guard}</span>

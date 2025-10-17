@@ -241,6 +241,9 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
             <div className="space-y-2">
               {guards.map((guard, index) => {
                 const isTamach = guard.shiftType?.includes("תמך");
+                const isInShiftList = SHIFT_TYPES.includes(guard.shiftType || "");
+                const isCustomShift = !isInShiftList;
+                
                 return (
                   <div
                     key={index}
@@ -248,7 +251,8 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
                     style={{ 
                       borderColor: editingIndex === index ? 'hsl(var(--primary))' : guard.color,
                       backgroundColor: isTamach ? guard.color : (editingIndex === index ? 'hsl(var(--accent) / 0.1)' : undefined),
-                      borderWidth: editingIndex === index ? '2px' : '1px'
+                      borderWidth: editingIndex === index ? '2px' : '2px',
+                      borderStyle: isCustomShift ? 'dashed' : 'solid'
                     }}
                   >
                     <div className="flex items-center gap-3 flex-wrap">
