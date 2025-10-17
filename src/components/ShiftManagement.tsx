@@ -85,12 +85,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     return score;
   };
 
-  // Get alerts for guards staying too long in posts
+  // Get alerts for guards staying too long in posts, breaks, or meals
   const getAlerts = () => {
     const settings = getShiftSettings();
     const now = new Date();
     const alerts: Array<{ guard: string; post: string; duration: number }> = [];
     
+    // Check assignments (posts)
     assignments.forEach(assignment => {
       if (!assignment.actualTime) return; // Only check active assignments
       
@@ -100,7 +101,39 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       if (durationMinutes >= settings.alertThresholdMinutes) {
         alerts.push({
           guard: assignment.guard,
-          post: assignment.post,
+          post: `עמדה: ${assignment.post}`,
+          duration: Math.floor(durationMinutes)
+        });
+      }
+    });
+    
+    // Check breaks
+    breaks.forEach(breakAssignment => {
+      if (!breakAssignment.actualTime) return; // Only check active breaks
+      
+      const breakTime = new Date(breakAssignment.actualTime);
+      const durationMinutes = (now.getTime() - breakTime.getTime()) / (1000 * 60);
+      
+      if (durationMinutes >= settings.breakThresholdMinutes) {
+        alerts.push({
+          guard: breakAssignment.guard,
+          post: "הפסקה",
+          duration: Math.floor(durationMinutes)
+        });
+      }
+    });
+    
+    // Check meals
+    meals.forEach(meal => {
+      if (!meal.actualTime) return; // Only check active meals
+      
+      const mealTime = new Date(meal.actualTime);
+      const durationMinutes = (now.getTime() - mealTime.getTime()) / (1000 * 60);
+      
+      if (durationMinutes >= settings.mealThresholdMinutes) {
+        alerts.push({
+          guard: meal.guard,
+          post: "אוכל",
           duration: Math.floor(durationMinutes)
         });
       }

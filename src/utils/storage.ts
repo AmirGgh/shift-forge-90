@@ -5,6 +5,8 @@ const SETTINGS_KEY = "shiftSettings";
 
 export interface ShiftSettings {
   alertThresholdMinutes: number;
+  breakThresholdMinutes: number;
+  mealThresholdMinutes: number;
   scores: {
     "פ.ע-21": number;
     "פ.ת-21": number;
@@ -23,6 +25,8 @@ export const getShiftSettings = (): ShiftSettings => {
   }
   return {
     alertThresholdMinutes: 60,
+    breakThresholdMinutes: 15,
+    mealThresholdMinutes: 32,
     scores: {
       "פ.ע-21": 2.5,
       "פ.ת-21": 2,

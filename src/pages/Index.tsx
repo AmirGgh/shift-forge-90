@@ -165,18 +165,42 @@ const Index = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-6 py-4">
-            {/* Alert Threshold */}
-            <div className="space-y-2">
-              <Label htmlFor="alertThreshold" className="text-base font-semibold">
-                זמן התראה (דקות)
-              </Label>
-              <Input
-                id="alertThreshold"
-                type="number"
-                min="1"
-                value={settings.alertThresholdMinutes}
-                onChange={(e) => setSettings(prev => ({ ...prev, alertThresholdMinutes: Number(e.target.value) }))}
-              />
+            {/* Alert Thresholds */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">זמני התראה</Label>
+              
+              <div className="space-y-2">
+                <Label htmlFor="alertThreshold" className="text-sm">זמן התראה עמדה (דקות)</Label>
+                <Input
+                  id="alertThreshold"
+                  type="number"
+                  min="1"
+                  value={settings.alertThresholdMinutes}
+                  onChange={(e) => setSettings(prev => ({ ...prev, alertThresholdMinutes: Number(e.target.value) }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="breakThreshold" className="text-sm">זמן התראה הפסקה (דקות)</Label>
+                <Input
+                  id="breakThreshold"
+                  type="number"
+                  min="1"
+                  value={settings.breakThresholdMinutes}
+                  onChange={(e) => setSettings(prev => ({ ...prev, breakThresholdMinutes: Number(e.target.value) }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mealThreshold" className="text-sm">זמן התראה אוכל (דקות)</Label>
+                <Input
+                  id="mealThreshold"
+                  type="number"
+                  min="1"
+                  value={settings.mealThresholdMinutes}
+                  onChange={(e) => setSettings(prev => ({ ...prev, mealThresholdMinutes: Number(e.target.value) }))}
+                />
+              </div>
             </div>
 
             {/* Scores */}
