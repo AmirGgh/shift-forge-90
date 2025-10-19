@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -214,7 +214,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     setBreaks(data.breaks || []);
   };
 
-  const handleDragStart = (guard: string) => {
+  const handleDragStart = (e: React.DragEvent, guard: string) => {
+    try {
+      e.dataTransfer.setData("text/plain", guard);
+      e.dataTransfer.effectAllowed = "move";
+    } catch {}
     setDraggedGuard(guard);
   };
 
@@ -456,7 +460,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                   <div
                     key={guard.name}
                     draggable
-                    onDragStart={() => handleDragStart(guard.name)}
+                    onDragStart={(e) => handleDragStart(e, guard.name)}
+                    onDragEnd={() => setDraggedGuard(null)}
                     data-effect-allowed="move"
                     style={{ 
                       backgroundColor: isTamach ? guard.color : `${guard.color}20`,
@@ -528,12 +533,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                      <td
                                        className="p-3 w-full"
                                        onDragOver={handleDragOver}
-                                       onDrop={() => handleDropPost(post)}
+                                       onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPost(post); }}
                                      >
                                        <div 
                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-primary/50 transition-colors"
                                          onDragOver={handleDragOver}
-                                         onDrop={() => handleDropPost(post)}
+                                         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPost(post); }}
                                        >
                                         {getAssignmentsForPost(post).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
@@ -608,12 +613,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                      <td
                                        className="p-3 w-full"
                                        onDragOver={handleDragOver}
-                                       onDrop={() => handleDropPatrol(patrol)}
+                                       onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPatrol(patrol); }}
                                      >
                                        <div 
                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-accent/50 transition-colors"
                                          onDragOver={handleDragOver}
-                                         onDrop={() => handleDropPatrol(patrol)}
+                                         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPatrol(patrol); }}
                                        >
                                         {getAssignmentsForPatrol(patrol).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
@@ -748,17 +753,17 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             {completedJourney.length > 0 && (
                               <div className="flex items-center gap-2 flex-wrap text-sm mb-2">
                                 {completedJourney.map((task, idx) => (
-                                  <>
-                                    <div key={`${idx}-task`} className="flex items-center gap-2 bg-background/50 px-3 py-1 rounded border border-border/30">
+                                  <Fragment key={`completed-${idx}`}>
+                                    <div className="flex items-center gap-2 bg-background/50 px-3 py-1 rounded border border-border/30">
                                       {task.post === "אוכל" && <UtensilsCrossed className="w-3 h-3" />}
                                       {task.post === "הפסקה" && <Coffee className="w-3 h-3" />}
                                       <span className="text-foreground font-medium">{task.post}</span>
                                       <span className="text-xs text-muted-foreground">{formatTime(task.actualTime!)}</span>
                                     </div>
                                     {idx < completedJourney.length - 1 && (
-                                      <span key={`${idx}-arrow`} className="text-muted-foreground">←</span>
+                                      <span className="text-muted-foreground">←</span>
                                     )}
-                                  </>
+                                  </Fragment>
                                 ))}
                               </div>
                             )}
@@ -768,16 +773,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                <div className="flex items-center gap-2 flex-wrap text-sm">
                                  <span className="text-xs text-muted-foreground font-semibold">מתוכנן:</span>
                                  {plannedJourney.map((task, idx) => (
-                                   <>
-                                     <div key={`${idx}-planned`} className="flex items-center gap-2 bg-background/30 px-3 py-1 rounded border border-dashed border-border/40 opacity-60">
+                                   <Fragment key={`planned-${idx}`}>
+                                     <div className="flex items-center gap-2 bg-background/30 px-3 py-1 rounded border border-dashed border-border/40 opacity-60">
                                        {task.post === "אוכל" && <UtensilsCrossed className="w-3 h-3" />}
                                        {task.post === "הפסקה" && <Coffee className="w-3 h-3" />}
                                        <span className="text-foreground font-medium">{task.post}</span>
                                      </div>
                                      {idx < plannedJourney.length - 1 && (
-                                       <span key={`${idx}-arrow-planned`} className="text-muted-foreground opacity-60">←</span>
+                                       <span className="text-muted-foreground opacity-60">←</span>
                                      )}
-                                   </>
+                                   </Fragment>
                                  ))}
                                </div>
                              )}
@@ -830,13 +835,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     <Card className="p-4 border-border/30 bg-background/30">
                       <div
                         onDragOver={handleDragOver}
-                        onDrop={handleDropMeal}
+                        onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropMeal(); }}
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-primary/50 transition-colors"
                       >
                         <div 
                           className="space-y-2"
                           onDragOver={handleDragOver}
-                          onDrop={handleDropMeal}
+                          onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropMeal(); }}
                         >
                           {meals.map((meal) => {
                             const isTamach = isGuardTamach(meal.guard);
@@ -895,13 +900,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     <Card className="p-4 border-border/30 bg-background/30">
                       <div
                         onDragOver={handleDragOver}
-                        onDrop={handleDropBreak}
+                        onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropBreak(); }}
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-accent/50 transition-colors"
                       >
                         <div 
                           className="space-y-2"
                           onDragOver={handleDragOver}
-                          onDrop={handleDropBreak}
+                          onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropBreak(); }}
                         >
                           {breaks.map((breakItem) => {
                             const isTamach = isGuardTamach(breakItem.guard);
