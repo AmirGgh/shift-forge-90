@@ -460,7 +460,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                       backgroundColor: isTamach ? guard.color : `${guard.color}20`,
                       borderColor: guard.color,
                       borderStyle: isCustomShift ? 'dashed' : 'solid',
-                      color: isTamach ? 'hsl(var(--background))' : guard.color
+                      color: isTamach ? '#FFFFFF' : guard.color
                     }}
                     className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium"
                   >

@@ -257,7 +257,10 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
                   >
                     <div className="flex items-center gap-3 flex-wrap">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: guard.color }} />
-                      <span className={`font-medium ${isTamach ? 'text-background' : 'text-foreground'}`}>
+                      <span 
+                        className="font-medium" 
+                        style={{ color: isTamach ? '#FFFFFF' : undefined }}
+                      >
                         {guard.name}
                       </span>
                       {guard.certified && (
