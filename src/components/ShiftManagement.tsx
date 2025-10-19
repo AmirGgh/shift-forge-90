@@ -220,6 +220,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
   };
 
   const handleDropPost = (post: string) => {
@@ -456,13 +457,14 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     key={guard.name}
                     draggable
                     onDragStart={() => handleDragStart(guard.name)}
+                    data-effect-allowed="move"
                     style={{ 
                       backgroundColor: isTamach ? guard.color : `${guard.color}20`,
                       borderColor: guard.color,
                       borderStyle: isCustomShift ? 'dashed' : 'solid',
                       color: isTamach ? '#FFFFFF' : guard.color
                     }}
-                    className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium"
+                    className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium touch-none"
                   >
                     {guard.name}
                   </div>
@@ -523,12 +525,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 {POSTS.map((post) => (
                                   <tr key={post} className="border-b border-border/30 hover:bg-background/50 transition-colors">
                                     <td className="p-3 font-medium text-foreground whitespace-nowrap w-auto">{post}</td>
-                                    <td
-                                      className="p-3 w-full"
-                                      onDragOver={handleDragOver}
-                                      onDrop={() => handleDropPost(post)}
-                                    >
-                                      <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-primary/50 transition-colors">
+                                     <td
+                                       className="p-3 w-full"
+                                       onDragOver={handleDragOver}
+                                       onDrop={() => handleDropPost(post)}
+                                     >
+                                       <div 
+                                         className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-primary/50 transition-colors"
+                                         onDragOver={handleDragOver}
+                                         onDrop={() => handleDropPost(post)}
+                                       >
                                         {getAssignmentsForPost(post).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
                                           const guardData = data.guards.find(g => g.name === assignment.guard);
@@ -599,12 +605,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 {PATROLS.map((patrol) => (
                                   <tr key={patrol} className="border-b border-border/30 hover:bg-background/50 transition-colors">
                                     <td className="p-3 font-medium text-foreground whitespace-nowrap w-auto">{patrol}</td>
-                                    <td
-                                      className="p-3 w-full"
-                                      onDragOver={handleDragOver}
-                                      onDrop={() => handleDropPatrol(patrol)}
-                                    >
-                                      <div className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-accent/50 transition-colors">
+                                     <td
+                                       className="p-3 w-full"
+                                       onDragOver={handleDragOver}
+                                       onDrop={() => handleDropPatrol(patrol)}
+                                     >
+                                       <div 
+                                         className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-accent/50 transition-colors"
+                                         onDragOver={handleDragOver}
+                                         onDrop={() => handleDropPatrol(patrol)}
+                                       >
                                         {getAssignmentsForPatrol(patrol).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
                                           const guardData = data.guards.find(g => g.name === assignment.guard);
@@ -823,7 +833,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         onDrop={handleDropMeal}
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-primary/50 transition-colors"
                       >
-                        <div className="space-y-2">
+                        <div 
+                          className="space-y-2"
+                          onDragOver={handleDragOver}
+                          onDrop={handleDropMeal}
+                        >
                           {meals.map((meal) => {
                             const isTamach = isGuardTamach(meal.guard);
                             const guardData = data.guards.find(g => g.name === meal.guard);
@@ -884,7 +898,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         onDrop={handleDropBreak}
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-accent/50 transition-colors"
                       >
-                        <div className="space-y-2">
+                        <div 
+                          className="space-y-2"
+                          onDragOver={handleDragOver}
+                          onDrop={handleDropBreak}
+                        >
                           {breaks.map((breakItem) => {
                             const isTamach = isGuardTamach(breakItem.guard);
                             const guardData = data.guards.find(g => g.name === breakItem.guard);
