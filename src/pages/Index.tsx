@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -33,6 +33,14 @@ const Index = () => {
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(() => getShiftSettings());
+  const [showBrowserWarning, setShowBrowserWarning] = useState(false);
+
+  useEffect(() => {
+    const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    if (!isChrome) {
+      setShowBrowserWarning(true);
+    }
+  }, []);
 
   const handleSetupComplete = () => {
     setScreen("management");
@@ -342,6 +350,38 @@ const Index = () => {
               איפוס לברירת מחדל
             </Button>
             <Button onClick={handleSaveSettings}>שמור הגדרות</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Browser Warning Dialog */}
+      <Dialog open={showBrowserWarning} onOpenChange={setShowBrowserWarning}>
+        <DialogContent className="sm:max-w-[500px]" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>דפדפן לא נתמך במלואו</DialogTitle>
+            <DialogDescription>
+              לחוויה מיטבית, מומלץ להשתמש בדפדפן Google Chrome
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              המערכת עובדת בצורה הטובה ביותר בדפדפן Chrome. תכונות מסוימות כמו גרירה ושחרור עשויות לא לעבוד כראוי בדפדפנים אחרים.
+            </p>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowBrowserWarning(false)}
+              className="w-full sm:w-auto"
+            >
+              המשך בכל זאת
+            </Button>
+            <Button
+              onClick={() => window.open('https://www.google.com/chrome/', '_blank')}
+              className="w-full sm:w-auto"
+            >
+              הורד Chrome
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
