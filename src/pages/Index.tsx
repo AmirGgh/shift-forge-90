@@ -34,6 +34,7 @@ const Index = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(() => getShiftSettings());
   const [showBrowserWarning, setShowBrowserWarning] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
@@ -113,7 +114,7 @@ const Index = () => {
       <nav className="sticky top-0 z-10 bg-card/80 backdrop-blur-lg border-b border-border/50 shadow-[var(--shadow-card)]">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between" dir="rtl">
           {/* Hamburger Menu */}
-          <Sheet>
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Menu className="w-5 h-5" />
@@ -125,7 +126,10 @@ const Index = () => {
               </SheetHeader>
               <div className="flex flex-col gap-2 mt-6">
                 <Button
-                  onClick={() => setScreen("setup")}
+                  onClick={() => {
+                    setScreen("setup");
+                    setMenuOpen(false);
+                  }}
                   variant={screen === "setup" ? "default" : "ghost"}
                   className="w-full justify-start"
                 >
@@ -133,7 +137,10 @@ const Index = () => {
                   מאבטחים
                 </Button>
                 <Button
-                  onClick={() => setScreen("management")}
+                  onClick={() => {
+                    setScreen("management");
+                    setMenuOpen(false);
+                  }}
                   variant={screen === "management" ? "default" : "ghost"}
                   className="w-full justify-start"
                 >
@@ -141,7 +148,10 @@ const Index = () => {
                   ניהול משמרת
                 </Button>
                 <Button
-                  onClick={() => setSettingsOpen(true)}
+                  onClick={() => {
+                    setSettingsOpen(true);
+                    setMenuOpen(false);
+                  }}
                   variant="ghost"
                   className="w-full justify-start"
                 >
@@ -149,7 +159,10 @@ const Index = () => {
                   הגדרות משמרת
                 </Button>
                 <Button
-                  onClick={handleEveningShiftReset}
+                  onClick={() => {
+                    handleEveningShiftReset();
+                    setMenuOpen(false);
+                  }}
                   variant="ghost"
                   className="w-full justify-start hover:bg-accent/20 hover:text-accent"
                 >
@@ -157,7 +170,10 @@ const Index = () => {
                   איפוס למשמרת ערב
                 </Button>
                 <Button
-                  onClick={handleShiftReset}
+                  onClick={() => {
+                    handleShiftReset();
+                    setMenuOpen(false);
+                  }}
                   variant="ghost"
                   className="w-full justify-start border-destructive/50 hover:bg-destructive/20 hover:text-destructive"
                 >
