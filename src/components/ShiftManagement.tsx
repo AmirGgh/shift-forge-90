@@ -533,13 +533,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                      <td
                                        className="p-3 w-full"
                                        onDragOver={handleDragOver}
-                                       onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPost(post); }}
+                                       onDrop={(e) => { e.preventDefault(); handleDropPost(post); }}
                                      >
-                                        <div 
-                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors"
-                                          onDragOver={handleDragOver}
-                                          onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPost(post); }}
-                                        >
+                                       <div 
+                                         className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors"
+                                       >
                                         {getAssignmentsForPost(post).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
                                           const guardData = data.guards.find(g => g.name === assignment.guard);
@@ -613,13 +611,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                      <td
                                        className="p-3 w-full"
                                        onDragOver={handleDragOver}
-                                       onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPatrol(patrol); }}
+                                       onDrop={(e) => { e.preventDefault(); handleDropPatrol(patrol); }}
                                      >
-                                        <div 
-                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-accent transition-colors"
-                                          onDragOver={handleDragOver}
-                                          onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPatrol(patrol); }}
-                                        >
+                                       <div 
+                                         className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors"
+                                       >
                                         {getAssignmentsForPatrol(patrol).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
                                           const guardData = data.guards.find(g => g.name === assignment.guard);
@@ -832,16 +828,15 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
 
                   {/* Meals View */}
                   {mealBreakView === "meals" && (
-                    <Card className="p-4 border-border/30 bg-background/30">
+                    <Card className="p-4 border-border/30 bg-background/30"
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => { e.preventDefault(); handleDropMeal(); }}
+                    >
                       <div
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropMeal(); }}
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-4 hover:border-primary transition-colors"
                       >
                         <div 
                           className="space-y-2"
-                          onDragOver={handleDragOver}
-                          onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropMeal(); }}
                         >
                           {meals.map((meal) => {
                             const isTamach = isGuardTamach(meal.guard);
@@ -897,16 +892,15 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
 
                   {/* Breaks View */}
                   {mealBreakView === "breaks" && (
-                    <Card className="p-4 border-border/30 bg-background/30">
+                    <Card className="p-4 border-border/30 bg-background/30"
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => { e.preventDefault(); handleDropBreak(); }}
+                    >
                       <div
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropBreak(); }}
                         className="min-h-[150px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-4 hover:border-accent transition-colors"
                       >
                         <div 
                           className="space-y-2"
-                          onDragOver={handleDragOver}
-                          onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropBreak(); }}
                         >
                           {breaks.map((breakItem) => {
                             const isTamach = isGuardTamach(breakItem.guard);
