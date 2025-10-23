@@ -535,11 +535,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                        onDragOver={handleDragOver}
                                        onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPost(post); }}
                                      >
-                                       <div 
-                                         className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-primary/50 transition-colors"
-                                         onDragOver={handleDragOver}
-                                         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPost(post); }}
-                                       >
+                                        <div 
+                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors"
+                                          onDragOver={handleDragOver}
+                                          onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPost(post); }}
+                                        >
                                         {getAssignmentsForPost(post).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
                                           const guardData = data.guards.find(g => g.name === assignment.guard);
@@ -615,11 +615,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                        onDragOver={handleDragOver}
                                        onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPatrol(patrol); }}
                                      >
-                                       <div 
-                                         className="min-h-[40px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-2 hover:border-accent/50 transition-colors"
-                                         onDragOver={handleDragOver}
-                                         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPatrol(patrol); }}
-                                       >
+                                        <div 
+                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-accent transition-colors"
+                                          onDragOver={handleDragOver}
+                                          onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropPatrol(patrol); }}
+                                        >
                                         {getAssignmentsForPatrol(patrol).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
                                           const guardData = data.guards.find(g => g.name === assignment.guard);
@@ -836,7 +836,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                       <div
                         onDragOver={handleDragOver}
                         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropMeal(); }}
-                        className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-primary/50 transition-colors"
+                        className="min-h-[150px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-4 hover:border-primary transition-colors"
                       >
                         <div 
                           className="space-y-2"
@@ -901,7 +901,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                       <div
                         onDragOver={handleDragOver}
                         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleDropBreak(); }}
-                        className="min-h-[150px] bg-background/30 border-2 border-dashed border-border/50 rounded-lg p-4 hover:border-accent/50 transition-colors"
+                        className="min-h-[150px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-4 hover:border-accent transition-colors"
                       >
                         <div 
                           className="space-y-2"
