@@ -629,14 +629,14 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 {[...POSTS].reverse().map((post) => (
                                   <td
                                     key={`${post}-${hour}`}
-                                    className="p-1 min-w-[74px] border-l border-border/30"
+                                    className="p-1 min-w-[44px] border-l border-border/30"
                                     onDragOver={handleDragOver}
                                     onDrop={(e) => { 
                                       e.preventDefault(); 
                                       handleDropSchedule(post, hour); 
                                     }}
                                   >
-                                    <div className="min-h-[30px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-1 hover:border-primary transition-colors">
+                                    <div className="min-h-[36px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-1 hover:border-primary transition-colors">
                                       <div className="flex flex-col gap-1">
                                         {getScheduleAssignments(post, hour).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
