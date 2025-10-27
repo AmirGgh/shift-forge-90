@@ -619,7 +619,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             <h2 className="text-xl font-semibold text-foreground mb-4">טבלת עמדות</h2>
             <div className="overflow-x-auto">
               <Table className="border-2 border-border">
-                <TableHeader>
+                <TableHeader className="sticky top-0 bg-card z-20">
                   <TableRow className="border-b-2 border-border">
                     <TableHead className="text-right font-semibold sticky right-0 bg-card z-10 min-w-[80px] border-l-2 border-border">שעה</TableHead>
                     {POSTS.map((post) => (
@@ -629,68 +629,72 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     ))}
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {HOURS.map((hour, index) => {
-                    const isCurrentHour = index === getCurrentHourIndex();
-                    return (
-                      <TableRow 
-                        key={hour}
-                        className={`border-b-2 border-border ${isCurrentHour ? "bg-primary/20 hover:bg-primary/30" : ""}`}
-                      >
-                        <TableCell className="font-medium sticky right-0 bg-card z-10 border-l-2 border-border">
-                          {hour}
-                        </TableCell>
-                        {POSTS.map((post) => {
-                          const cellAssignments = getScheduleAssignments(post, hour);
-                          return (
-                            <TableCell 
-                              key={post} 
-                              className="p-2 border-l-2 border-border"
-                              onDragOver={handleDragOver}
-                              onDrop={(e) => {
-                                e.preventDefault();
-                                handleDropSchedule(post, hour);
-                              }}
-                            >
-                              <div className="min-h-[60px] h-[60px] flex flex-wrap gap-1 content-start overflow-hidden">
-                                {cellAssignments.map((assignment) => (
-                                  <div
-                                    key={assignment.id}
-                                    onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
-                                    onMouseUp={handleLongPressEnd}
-                                    onMouseLeave={handleLongPressEnd}
-                                    onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
-                                    onTouchEnd={handleLongPressEnd}
-                                    onClick={() => handleSetActualTime(assignment.id, "schedule")}
-                                    style={{
-                                      backgroundColor: getGuardColor(assignment.guard),
-                                      borderColor: getGuardColor(assignment.guard)
-                                    }}
-                                    className={`px-2 py-0.5 text-xs rounded border cursor-pointer hover:opacity-80 transition-opacity text-white font-medium ${
-                                      assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule")
-                                        ? "line-through opacity-50"
-                                        : ""
-                                    }`}
-                                  >
-                                    <span className="flex items-center gap-1">
-                                      {assignment.guard}
-                                      {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
-                                        <span className="text-[9px] opacity-70">
-                                          {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                      )}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
               </Table>
+              <ScrollArea className="h-[500px]">
+                <Table className="border-2 border-border border-t-0">
+                  <TableBody>
+                    {HOURS.map((hour, index) => {
+                      const isCurrentHour = index === getCurrentHourIndex();
+                      return (
+                        <TableRow 
+                          key={hour}
+                          className={`border-b-2 border-border ${isCurrentHour ? "bg-primary/20 hover:bg-primary/30" : ""}`}
+                        >
+                          <TableCell className="font-medium sticky right-0 bg-card z-10 border-l-2 border-border">
+                            {hour}
+                          </TableCell>
+                          {POSTS.map((post) => {
+                            const cellAssignments = getScheduleAssignments(post, hour);
+                            return (
+                              <TableCell 
+                                key={post} 
+                                className="p-2 border-l-2 border-border"
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => {
+                                  e.preventDefault();
+                                  handleDropSchedule(post, hour);
+                                }}
+                              >
+                                <div className="min-h-[60px] h-[60px] flex flex-wrap gap-1 content-start overflow-hidden">
+                                  {cellAssignments.map((assignment) => (
+                                    <div
+                                      key={assignment.id}
+                                      onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                      onMouseUp={handleLongPressEnd}
+                                      onMouseLeave={handleLongPressEnd}
+                                      onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                      onTouchEnd={handleLongPressEnd}
+                                      onClick={() => handleSetActualTime(assignment.id, "schedule")}
+                                      style={{
+                                        backgroundColor: getGuardColor(assignment.guard),
+                                        borderColor: getGuardColor(assignment.guard)
+                                      }}
+                                      className={`px-2 py-0.5 text-xs rounded border cursor-pointer hover:opacity-80 transition-opacity text-white font-medium ${
+                                        assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule")
+                                          ? "line-through opacity-50"
+                                          : ""
+                                      }`}
+                                    >
+                                      <span className="flex items-center gap-1">
+                                        {assignment.guard}
+                                        {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
+                                          <span className="text-[9px] opacity-70">
+                                            {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                                          </span>
+                                        )}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
             </div>
           </div>
         </Card>
