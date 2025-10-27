@@ -543,11 +543,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     return scheduleAssignments.filter(s => s.post === post && s.hour === hour);
   };
 
-  // Generate hours array (7:45 to 18:45)
+  // Generate hours array (7:45 to 18:45) - reversed
   const HOURS = Array.from({ length: 12 }, (_, i) => {
     const hour = 7 + i;
     return `${hour}:45`;
-  });
+  }).reverse();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-4 md:p-8" dir="rtl">
@@ -607,10 +607,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                           <table className="w-full border-collapse">
                             <thead>
                               <tr className="border-b-2 border-border/50">
-                                <th className="text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30">
+                                <th className="sticky right-0 z-20 text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background/95 backdrop-blur-sm">
                                   שעה
                                 </th>
-                                {POSTS.map((post) => (
+                                {[...POSTS].reverse().map((post) => (
                                   <th 
                                     key={post} 
                                     className="text-center p-3 font-semibold text-foreground whitespace-nowrap min-w-[196px] border-l border-border/30"
@@ -626,10 +626,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                           <tbody>
                             {HOURS.map((hour) => (
                               <tr key={hour} className="border-b border-border/30 hover:bg-background/30 transition-colors">
-                                <td className="p-3 font-medium text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background/20">
+                                <td className="sticky right-0 z-10 p-3 font-medium text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background/95 backdrop-blur-sm">
                                   {hour}
                                 </td>
-                                {POSTS.map((post) => (
+                                {[...POSTS].reverse().map((post) => (
                                   <td
                                     key={`${post}-${hour}`}
                                     className="p-2 min-w-[196px] border-l border-border/30"
