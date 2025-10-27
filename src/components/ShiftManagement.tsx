@@ -22,6 +22,14 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { getGuardsData, saveGuardsData, getShiftSettings } from "@/utils/storage";
 import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
 import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle } from "lucide-react";
@@ -549,6 +557,24 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     return `${hour}:45`;
   });
 
+  // Get current hour to highlight
+  const getCurrentHourIndex = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+    
+    // Find the last passed hour
+    for (let i = HOURS.length - 1; i >= 0; i--) {
+      const [hourStr] = HOURS[i].split(':');
+      const hour = parseInt(hourStr);
+      
+      if (currentHour > hour || (currentHour === hour && currentMinutes >= 45)) {
+        return i;
+      }
+    }
+    return -1; // No hour has passed yet
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-4 md:p-8" dir="rtl">
       <div className="max-w-full mx-auto space-y-6">
@@ -583,6 +609,49 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </Card>
+
+        {/* Posts Schedule Table */}
+        <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-4">טבלת עמדות</h2>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right font-semibold sticky right-0 bg-card z-10 min-w-[80px]">שעה</TableHead>
+                    {POSTS.map((post) => (
+                      <TableHead key={post} className="text-right font-semibold min-w-[120px]">
+                        {post}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {HOURS.map((hour, index) => {
+                    const isCurrentHour = index === getCurrentHourIndex();
+                    return (
+                      <TableRow 
+                        key={hour}
+                        className={isCurrentHour ? "bg-primary/20 hover:bg-primary/30" : ""}
+                      >
+                        <TableCell className="font-medium sticky right-0 bg-card z-10">
+                          {hour}
+                        </TableCell>
+                        {POSTS.map((post) => (
+                          <TableCell key={post} className="p-2">
+                            <div className="min-h-[60px] flex items-center justify-center">
+                              {/* Empty cell for now - can be populated with assignments */}
+                            </div>
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
           </div>
         </Card>
