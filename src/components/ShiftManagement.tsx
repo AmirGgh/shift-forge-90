@@ -384,6 +384,34 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     });
   };
 
+  // Check if this is the latest task for a guard (to mark previous tasks with strikethrough)
+  const isLatestTask = (guardName: string, taskId: string, type: "post" | "patrol" | "meal" | "break"): boolean => {
+    // Collect all tasks with actualTime for this guard
+    const guardTasks: Array<{ id: string; actualTime: string; type: string }> = [];
+
+    assignments
+      .filter(a => a.guard === guardName && a.actualTime)
+      .forEach(a => guardTasks.push({ id: a.id, actualTime: a.actualTime, type: "post" }));
+
+    patrols
+      .filter(p => p.guard === guardName && p.actualTime)
+      .forEach(p => guardTasks.push({ id: p.id, actualTime: p.actualTime, type: "patrol" }));
+
+    meals
+      .filter(m => m.guard === guardName && m.actualTime)
+      .forEach(m => guardTasks.push({ id: m.id, actualTime: m.actualTime, type: "meal" }));
+
+    breaks
+      .filter(b => b.guard === guardName && b.actualTime)
+      .forEach(b => guardTasks.push({ id: b.id, actualTime: b.actualTime, type: "break" }));
+
+    // Sort by actualTime to find the latest
+    guardTasks.sort((a, b) => new Date(b.actualTime).getTime() - new Date(a.actualTime).getTime());
+
+    // Check if this task is the latest one
+    return guardTasks.length > 0 && guardTasks[0].id === taskId;
+  };
+
   const handleSetActualTime = (id: string, type: "post" | "patrol" | "meal" | "break") => {
     const data = getGuardsData();
     const now = new Date().toISOString();
@@ -538,11 +566,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                        <div 
                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors"
                                        >
-                                        {getAssignmentsForPost(post).map((assignment) => {
+                                         {getAssignmentsForPost(post).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
                                           const guardData = data.guards.find(g => g.name === assignment.guard);
                                           const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
                                           const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                                          const isOldTask = assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "post");
                                           return (
                                           <div
                                             key={assignment.id}
@@ -559,7 +588,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                             }}
                                              className="inline-flex items-center gap-2 px-3 py-1 border-2 rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
-                                             <span className="font-medium">{assignment.guard}</span>
+                                             <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{assignment.guard}</span>
                                              {assignment.actualTime ? (
                                                <CheckCircle2 
                                                  className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
@@ -616,11 +645,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                        <div 
                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors"
                                        >
-                                        {getAssignmentsForPatrol(patrol).map((assignment) => {
+                                         {getAssignmentsForPatrol(patrol).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
                                           const guardData = data.guards.find(g => g.name === assignment.guard);
                                           const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
                                           const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                                          const isOldTask = assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "patrol");
                                           return (
                                           <div
                                             key={assignment.id}
@@ -637,7 +667,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                             }}
                                              className="inline-flex items-center gap-2 px-3 py-1 border-2 rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
-                                             <span className="font-medium">{assignment.guard}</span>
+                                             <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{assignment.guard}</span>
                                              {assignment.actualTime ? (
                                                <CheckCircle2 
                                                  className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
@@ -843,6 +873,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             const guardData = data.guards.find(g => g.name === meal.guard);
                             const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
                             const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                            const isOldTask = meal.actualTime && !isLatestTask(meal.guard, meal.id, "meal");
                             return (
                             <div
                               key={meal.id}
@@ -860,7 +891,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
                                <div className="flex items-center gap-2">
-                                 <span className="font-medium">{meal.guard}</span>
+                                 <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{meal.guard}</span>
                                  {meal.actualTime ? (
                                    <CheckCircle2 
                                      className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
@@ -907,6 +938,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             const guardData = data.guards.find(g => g.name === breakItem.guard);
                             const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
                             const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                            const isOldTask = breakItem.actualTime && !isLatestTask(breakItem.guard, breakItem.id, "break");
                             return (
                             <div
                               key={breakItem.id}
@@ -924,7 +956,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                             >
                                <div className="flex items-center gap-2">
-                                 <span className="font-medium">{breakItem.guard}</span>
+                                 <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{breakItem.guard}</span>
                                  {breakItem.actualTime ? (
                                    <CheckCircle2 
                                      className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
