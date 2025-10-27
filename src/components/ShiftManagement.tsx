@@ -205,6 +205,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     guards: true,
     tasks: true,
     schedule: true,
+    postsTable: true,
     history: true,
     mealBreak: true,
     alerts: true,
@@ -623,101 +624,111 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         </Card>
 
         {/* Posts Schedule Table */}
-        <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
+        <Collapsible
+          open={openSections.postsTable}
+          onOpenChange={(open) => setOpenSections(prev => ({ ...prev, postsTable: open }))}
+        >
+          <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
+            <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
               <h2 className="text-xl font-semibold text-foreground">טבלת עמדות</h2>
-              <ToggleGroup 
-                type="single" 
-                value={scheduleView} 
-                onValueChange={(value) => value && setScheduleView(value as "morning" | "evening")}
-                className="border border-border rounded-lg"
-              >
-                <ToggleGroupItem value="morning" className="px-6">
-                  בוקר
-                </ToggleGroupItem>
-                <ToggleGroupItem value="evening" className="px-6">
-                  ערב
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
-            <div className="overflow-x-auto">
-              <Table className="border-2 border-border">
-                <TableHeader>
-                  <TableRow className="border-b-2 border-border">
-                    <TableHead className="text-right font-semibold min-w-[80px] border-l-2 border-border">שעה</TableHead>
-                    {POSTS.map((post) => (
-                      <TableHead key={post} className="text-right font-semibold min-w-[120px] border-l-2 border-border">
-                        {post}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {HOURS.map((hour, index) => {
-                    const isCurrentHour = index === getCurrentHourIndex();
-                    return (
-                      <TableRow 
-                        key={hour}
-                        className={`border-b-2 border-border ${isCurrentHour ? "bg-primary/20 hover:bg-primary/30" : ""}`}
-                      >
-                        <TableCell className="font-medium border-l-2 border-border">
-                          {hour}
-                        </TableCell>
-                        {POSTS.map((post) => {
-                          const cellAssignments = getScheduleAssignments(post, hour);
-                          return (
-                            <TableCell 
-                              key={post} 
-                              className="p-2 border-l-2 border-border"
-                              onDragOver={handleDragOver}
-                              onDrop={(e) => {
-                                e.preventDefault();
-                                handleDropSchedule(post, hour);
-                              }}
-                            >
-                              <div className="min-h-[60px] h-[60px] flex flex-wrap gap-1 content-start overflow-hidden">
-                                {cellAssignments.map((assignment) => (
-                                  <div
-                                    key={assignment.id}
-                                    onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
-                                    onMouseUp={handleLongPressEnd}
-                                    onMouseLeave={handleLongPressEnd}
-                                    onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
-                                    onTouchEnd={handleLongPressEnd}
-                                    onClick={() => handleSetActualTime(assignment.id, "schedule")}
-                                    style={{
-                                      backgroundColor: getGuardColor(assignment.guard),
-                                      borderColor: getGuardColor(assignment.guard)
-                                    }}
-                                    className={`px-2 py-0.5 text-xs rounded border cursor-pointer hover:opacity-80 transition-opacity text-white font-medium ${
-                                      assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule")
-                                        ? "line-through opacity-50"
-                                        : ""
-                                    }`}
-                                  >
-                                    <span className="flex items-center gap-1">
-                                      {assignment.guard}
-                                      {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
-                                        <span className="text-[9px] opacity-70">
-                                          {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                      )}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </TableCell>
-                          );
-                        })}
+              <div className="flex items-center gap-4">
+                <ToggleGroup 
+                  type="single" 
+                  value={scheduleView} 
+                  onValueChange={(value) => value && setScheduleView(value as "morning" | "evening")}
+                  className="border border-border rounded-lg"
+                >
+                  <ToggleGroupItem value="morning" className="px-6">
+                    בוקר
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="evening" className="px-6">
+                    ערב
+                  </ToggleGroupItem>
+                </ToggleGroup>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openSections.postsTable ? "rotate-180" : ""}`} />
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="p-6 pt-0">
+                <div className="overflow-x-auto">
+                  <Table className="border-2 border-border">
+                    <TableHeader>
+                      <TableRow className="border-b-2 border-border">
+                        <TableHead className="text-right font-semibold min-w-[80px] border-l-2 border-border">שעה</TableHead>
+                        {POSTS.map((post) => (
+                          <TableHead key={post} className="text-right font-semibold min-w-[120px] border-l-2 border-border">
+                            {post}
+                          </TableHead>
+                        ))}
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {HOURS.map((hour, index) => {
+                        const isCurrentHour = index === getCurrentHourIndex();
+                        return (
+                          <TableRow 
+                            key={hour}
+                            className={`border-b-2 border-border ${isCurrentHour ? "bg-primary/20 hover:bg-primary/30" : ""}`}
+                          >
+                            <TableCell className="font-medium border-l-2 border-border">
+                              {hour}
+                            </TableCell>
+                            {POSTS.map((post) => {
+                              const cellAssignments = getScheduleAssignments(post, hour);
+                              return (
+                                <TableCell 
+                                  key={post} 
+                                  className="p-2 border-l-2 border-border"
+                                  onDragOver={handleDragOver}
+                                  onDrop={(e) => {
+                                    e.preventDefault();
+                                    handleDropSchedule(post, hour);
+                                  }}
+                                >
+                                  <div className="min-h-[60px] h-[60px] flex flex-wrap gap-1 content-start overflow-hidden">
+                                    {cellAssignments.map((assignment) => (
+                                      <div
+                                        key={assignment.id}
+                                        onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                        onMouseUp={handleLongPressEnd}
+                                        onMouseLeave={handleLongPressEnd}
+                                        onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                        onTouchEnd={handleLongPressEnd}
+                                        onClick={() => handleSetActualTime(assignment.id, "schedule")}
+                                        style={{
+                                          backgroundColor: getGuardColor(assignment.guard),
+                                          borderColor: getGuardColor(assignment.guard)
+                                        }}
+                                        className={`px-2 py-0.5 text-xs rounded border cursor-pointer hover:opacity-80 transition-opacity text-white font-medium ${
+                                          assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule")
+                                            ? "line-through opacity-50"
+                                            : ""
+                                        }`}
+                                      >
+                                        <span className="flex items-center gap-1">
+                                          {assignment.guard}
+                                          {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
+                                            <span className="text-[9px] opacity-70">
+                                              {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                          )}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </TableCell>
+                              );
+                            })}
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
 
         {/* Carousel for 2 sections */}
@@ -933,7 +944,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
               <CollapsibleContent>
                 <div className="px-6 pb-6">
                   <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {assignments.length === 0 && patrols.length === 0 && meals.length === 0 && breaks.length === 0 && (
+                    {assignments.length === 0 && patrols.length === 0 && meals.length === 0 && breaks.length === 0 && scheduleAssignments.length === 0 && (
                       <p className="text-muted-foreground text-center py-4">אין היסטוריה עדיין</p>
                     )}
                     {(() => {
@@ -941,7 +952,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         ...assignments.map(a => ({ ...a, post: a.post, actualTime: a.actualTime })),
                         ...patrols.map(p => ({ ...p, post: p.patrol, actualTime: p.actualTime })),
                         ...meals.map(m => ({ ...m, guard: m.guard, post: "אוכל", time: m.time, actualTime: m.actualTime })),
-                        ...breaks.map(b => ({ ...b, guard: b.guard, post: "הפסקה", time: b.time, actualTime: b.actualTime }))
+                        ...breaks.map(b => ({ ...b, guard: b.guard, post: "הפסקה", time: b.time, actualTime: b.actualTime })),
+                        ...scheduleAssignments.map(s => ({ ...s, guard: s.guard, post: `${s.post} (${s.hour})`, time: s.time, actualTime: s.actualTime }))
                       ].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
                       
                       // Group by guard to show their journey
