@@ -551,19 +551,6 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     return scheduleAssignments.filter(s => s.post === post && s.hour === hour);
   };
 
-  // Calculate time delta (difference between scheduled and actual time)
-  const calculateTimeDelta = (scheduledHour: string, actualTime: string): string => {
-    const [hourStr, minuteStr] = scheduledHour.split(':');
-    const scheduled = new Date();
-    scheduled.setHours(parseInt(hourStr), parseInt(minuteStr), 0, 0);
-    
-    const actual = new Date(actualTime);
-    const diffMinutes = Math.round((actual.getTime() - scheduled.getTime()) / (1000 * 60));
-    
-    if (diffMinutes === 0) return "בזמן";
-    return diffMinutes > 0 ? `+${diffMinutes}` : `${diffMinutes}`;
-  };
-
   // Generate hours array (7:45 to 18:45)
   const HOURS = Array.from({ length: 12 }, (_, i) => {
     const hour = 7 + i;
@@ -666,9 +653,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               }}
                             >
                               <div className="min-h-[60px] h-[60px] flex flex-wrap gap-1 content-start overflow-hidden">
-                                {cellAssignments.map((assignment) => {
-                                  const delta = assignment.actualTime ? calculateTimeDelta(hour, assignment.actualTime) : null;
-                                  return (
+                                {cellAssignments.map((assignment) => (
                                   <div
                                     key={assignment.id}
                                     onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
@@ -692,13 +677,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                       {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
                                         <CheckCircle2 className="w-3 h-3" />
                                       )}
-                                      {delta && (
-                                        <span className="text-[10px] opacity-80">({delta})</span>
-                                      )}
                                     </span>
                                   </div>
-                                  );
-                                })}
+                                ))}
                               </div>
                             </TableCell>
                           );
