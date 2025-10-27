@@ -14,13 +14,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 
 import {
   Table,
@@ -208,6 +201,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     history: true,
     alerts: true,
   });
+  const [mainView, setMainView] = useState<"posts" | "patrols" | "meals-breaks" | "history" | "alerts">("posts");
   const [tasksView, setTasksView] = useState<"posts" | "patrols" | "meals" | "breaks">("posts");
   const [alertsKey, setAlertsKey] = useState(0); // Force re-render for alerts
   const [scheduleView, setScheduleView] = useState<"morning" | "evening">("morning");
@@ -621,60 +615,59 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         </Card>
 
 
-        {/* Carousel for 2 sections */}
-        <Carousel className="w-full max-w-full overflow-hidden" opts={{ align: "start", direction: "rtl" }}>
-          <CarouselContent className="-ml-2 md:-ml-4">
-            {/* Section 1: Tasks - Posts and Patrols */}
-            <CarouselItem className="pl-2 md:pl-4">
-              <Collapsible
-                open={openSections.tasks}
-                onOpenChange={(open) => setOpenSections(prev => ({ ...prev, tasks: open }))}
+        {/* Main Navigation */}
+        <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
+          <div className="p-6">
+            <div className="flex flex-wrap gap-2 justify-center mb-6">
+              <Button
+                variant={mainView === "posts" ? "default" : "outline"}
+                onClick={() => setMainView("posts")}
+                className="flex-1 min-w-[120px]"
               >
-                <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
-                  <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-                    <h2 className="text-xl font-semibold text-foreground">משימות</h2>
-                    <ChevronDown className={`w-5 h-5 transition-transform ${openSections.tasks ? "rotate-180" : ""}`} />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="p-6">
-                      {/* Toggle Buttons */}
-                      <div className="grid grid-cols-2 gap-2 mb-4">
-                        <Button
-                          variant={tasksView === "posts" ? "default" : "outline"}
-                          onClick={() => setTasksView("posts")}
-                          className="flex-1"
-                        >
-                          <MapPin className="w-4 h-4 ml-2" />
-                          עמדות
-                        </Button>
-                        <Button
-                          variant={tasksView === "patrols" ? "default" : "outline"}
-                          onClick={() => setTasksView("patrols")}
-                          className="flex-1"
-                        >
-                          <Clock className="w-4 h-4 ml-2" />
-                          פטרולים
-                        </Button>
-                        <Button
-                          variant={tasksView === "meals" ? "default" : "outline"}
-                          onClick={() => setTasksView("meals")}
-                          className="flex-1"
-                        >
-                          <UtensilsCrossed className="w-4 h-4 ml-2" />
-                          אוכל
-                        </Button>
-                        <Button
-                          variant={tasksView === "breaks" ? "default" : "outline"}
-                          onClick={() => setTasksView("breaks")}
-                          className="flex-1"
-                        >
-                          <Coffee className="w-4 h-4 ml-2" />
-                          הפסקות
-                        </Button>
-                      </div>
+                <MapPin className="w-4 h-4 ml-2" />
+                עמדות
+              </Button>
+              <Button
+                variant={mainView === "patrols" ? "default" : "outline"}
+                onClick={() => setMainView("patrols")}
+                className="flex-1 min-w-[120px]"
+              >
+                <Clock className="w-4 h-4 ml-2" />
+                פטרולים
+              </Button>
+              <Button
+                variant={mainView === "meals-breaks" ? "default" : "outline"}
+                onClick={() => setMainView("meals-breaks")}
+                className="flex-1 min-w-[120px]"
+              >
+                <UtensilsCrossed className="w-4 h-4 ml-2" />
+                אוכל והפסקות
+              </Button>
+              <Button
+                variant={mainView === "history" ? "default" : "outline"}
+                onClick={() => setMainView("history")}
+                className="flex-1 min-w-[120px]"
+              >
+                <History className="w-4 h-4 ml-2" />
+                היסטוריה
+              </Button>
+              <Button
+                variant={mainView === "alerts" ? "default" : "outline"}
+                onClick={() => setMainView("alerts")}
+                className="flex-1 min-w-[120px]"
+              >
+                <AlertTriangle className="w-4 h-4 ml-2" />
+                התראות
+                {getAlerts().length > 0 && (
+                  <span className="mr-1 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-xs font-semibold">
+                    {getAlerts().length}
+                  </span>
+                )}
+              </Button>
+            </div>
 
-                      {/* Posts Table */}
-                      {tasksView === "posts" && (
+            {/* Posts Table */}
+            {mainView === "posts" && (
                         <div className="space-y-4">
                           {/* Toggle for Morning/Evening */}
                           <div className="flex justify-center">
@@ -771,11 +764,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               </Table>
                             </div>
                           </Card>
-                        </div>
-                      )}
+              </div>
+            )}
 
-                      {/* Patrols Table */}
-                      {tasksView === "patrols" && (
+            {/* Patrols Table */}
+            {mainView === "patrols" && (
                         <Card className="p-6 border-border/30 bg-background/30">
                           <div className="overflow-x-auto">
                             <table className="w-full">
@@ -849,12 +842,19 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 ))}
                               </tbody>
                             </table>
-                          </div>
-                        </Card>
-                      )}
+                </div>
+              </Card>
+            )}
 
-                      {/* Meals View */}
-                      {tasksView === "meals" && (
+            {/* Meals and Breaks View */}
+            {mainView === "meals-breaks" && (
+              <div className="space-y-4">
+                {/* Meals View */}
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <UtensilsCrossed className="w-5 h-5" />
+                    אוכל
+                  </h3>
                         <Card className="p-4 border-border/30 bg-background/30"
                           onDragOver={handleDragOver}
                           onDrop={(e) => { e.preventDefault(); handleDropMeal(); }}
@@ -913,13 +913,17 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 </div>
                                 );
                               })}
-                            </div>
-                          </div>
-                        </Card>
-                      )}
+                      </div>
+                    </div>
+                  </Card>
+                </div>
 
-                      {/* Breaks View */}
-                      {tasksView === "breaks" && (
+                {/* Breaks View */}
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Coffee className="w-5 h-5" />
+                    הפסקות
+                  </h3>
                         <Card className="p-4 border-border/30 bg-background/30"
                           onDragOver={handleDragOver}
                           onDrop={(e) => { e.preventDefault(); handleDropBreak(); }}
@@ -978,34 +982,21 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 </div>
                                 );
                               })}
-                            </div>
-                          </div>
-                        </Card>
-                      )}
+                      </div>
                     </div>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            </CarouselItem>
+                  </Card>
+                </div>
+              </div>
+            )}
 
-            {/* Section 2: History */}
-            <CarouselItem className="pl-2 md:pl-4" data-history-section>
-              <Collapsible
-                open={openSections.history}
-                onOpenChange={(open) => setOpenSections(prev => ({ ...prev, history: open }))}
-              >
-            <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
-              <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-                <h2 className="text-xl font-semibold text-foreground">היסטוריה</h2>
-                <ChevronDown className={`w-5 h-5 transition-transform ${openSections.history ? "rotate-180" : ""}`} />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-6 pb-6">
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {assignments.length === 0 && patrols.length === 0 && meals.length === 0 && breaks.length === 0 && scheduleAssignments.length === 0 && (
-                      <p className="text-muted-foreground text-center py-4">אין היסטוריה עדיין</p>
-                    )}
-                    {(() => {
+            {/* History View */}
+            {mainView === "history" && (
+              <div className="space-y-4" data-history-section>
+                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                  {assignments.length === 0 && patrols.length === 0 && meals.length === 0 && breaks.length === 0 && scheduleAssignments.length === 0 && (
+                    <p className="text-muted-foreground text-center py-4">אין היסטוריה עדיין</p>
+                  )}
+                  {(() => {
                       const allItems = [
                         ...assignments.map(a => ({ ...a, post: a.post, actualTime: a.actualTime })),
                         ...patrols.map(p => ({ ...p, post: p.patrol, actualTime: p.actualTime })),
@@ -1098,76 +1089,53 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                           </div>
                         );
                       });
-                    })()}
-                  </div>
+                  })()}
                 </div>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
-          </CarouselItem>
+              </div>
+            )}
 
-          {/* Section 3: Alerts */}
-          <CarouselItem className="pl-2 md:pl-4">
-            <Collapsible
-              open={openSections.alerts}
-              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, alerts: open }))}
-            >
-              <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
-                <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-semibold text-foreground">התראות</h2>
-                    {getAlerts().length > 0 && (
-                      <span className="px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground text-xs font-semibold">
-                        {getAlerts().length}
-                      </span>
-                    )}
-                  </div>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${openSections.alerts ? "rotate-180" : ""}`} />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="p-6">
-                    <Card className="p-6 border-border/30 bg-background/30">
-                      {getAlerts().length === 0 ? (
-                        <div className="text-center text-muted-foreground py-8">
-                          אין התראות כרגע
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {getAlerts().map((alert, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center justify-between p-4 bg-destructive/10 border border-destructive/30 rounded-lg"
-                            >
-                              <div className="flex items-center gap-3">
-                                <AlertTriangle className="w-5 h-5 text-destructive" />
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span 
-                                      className="font-semibold"
-                                      style={{ color: getGuardColor(alert.guard) }}
-                                    >
-                                      {alert.guard}
-                                    </span>
-                                    <span className="text-muted-foreground">-</span>
-                                    <span className="font-medium text-foreground">{alert.post}</span>
-                                  </div>
-                                  <div className="text-sm text-muted-foreground mt-1">
-                                    נמצא בעמדה {alert.duration} דקות
-                                  </div>
-                                </div>
+            {/* Alerts View */}
+            {mainView === "alerts" && (
+              <div className="space-y-4">
+                <Card className="p-6 border-border/30 bg-background/30">
+                  {getAlerts().length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">
+                      אין התראות כרגע
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {getAlerts().map((alert, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-4 bg-destructive/10 border border-destructive/30 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <AlertTriangle className="w-5 h-5 text-destructive" />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span 
+                                  className="font-semibold"
+                                  style={{ color: getGuardColor(alert.guard) }}
+                                >
+                                  {alert.guard}
+                                </span>
+                                <span className="text-muted-foreground">-</span>
+                                <span className="font-medium text-foreground">{alert.post}</span>
+                              </div>
+                              <div className="text-sm text-muted-foreground mt-1">
+                                נמצא בעמדה {alert.duration} דקות
                               </div>
                             </div>
-                          ))}
+                          </div>
                         </div>
-                      )}
-                    </Card>
-                  </div>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
-          </CarouselItem>
-        </CarouselContent>
-      </Carousel>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
 
       {/* Confirmation Dialog */}

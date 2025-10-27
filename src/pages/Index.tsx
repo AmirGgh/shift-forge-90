@@ -21,7 +21,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import GuardsSetup from "@/components/GuardsSetup";
 import ShiftManagement from "@/components/ShiftManagement";
 import { getGuardsData, resetGuardsData, resetEveningShift, getShiftSettings, saveShiftSettings } from "@/utils/storage";
-import { Users, Calendar, Menu, RefreshCw, Settings, History } from "lucide-react";
+import { Users, Calendar, Menu, RefreshCw, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 type Screen = "setup" | "management";
@@ -178,26 +178,11 @@ const Index = () => {
             </SheetContent>
           </Sheet>
 
-          {/* Title and History Button */}
+          {/* Title */}
           <div className="flex items-center gap-2">
             <h1 className="text-xl md:text-2xl font-bold text-foreground">
               {screen === "setup" ? "הגדרת מאבטחים" : "ניהול משמרת"}
             </h1>
-            {screen === "management" && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  const historySection = document.querySelector('[data-history-section]');
-                  if (historySection) {
-                    historySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-                }}
-                title="עבור להיסטוריה"
-              >
-                <History className="w-5 h-5" />
-              </Button>
-            )}
           </div>
 
           {/* Empty space for balance */}
