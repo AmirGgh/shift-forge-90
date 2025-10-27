@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getGuardsData, saveGuardsData, getShiftSettings } from "@/utils/storage";
 import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
 import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle } from "lucide-react";
@@ -211,6 +212,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   const [tasksView, setTasksView] = useState<"posts" | "patrols">("posts");
   const [mealBreakView, setMealBreakView] = useState<"meals" | "breaks">("meals");
   const [alertsKey, setAlertsKey] = useState(0); // Force re-render for alerts
+  const [scheduleView, setScheduleView] = useState<"morning" | "evening">("morning");
   
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -551,11 +553,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     return scheduleAssignments.filter(s => s.post === post && s.hour === hour);
   };
 
-  // Generate hours array (7:45 to 18:45)
-  const HOURS = Array.from({ length: 12 }, (_, i) => {
+  // Generate hours array (7:45 to 19:45)
+  const ALL_HOURS = Array.from({ length: 13 }, (_, i) => {
     const hour = 7 + i;
     return `${hour}:45`;
   });
+
+  // Filter hours based on view
+  const HOURS = scheduleView === "morning" 
+    ? ALL_HOURS.slice(0, 8)  // 7:45 to 14:45
+    : ALL_HOURS.slice(7, 13); // 14:45 to 19:45
 
   // Get current hour to highlight
   const getCurrentHourIndex = () => {
@@ -563,13 +570,15 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     const currentHour = now.getHours();
     const currentMinutes = now.getMinutes();
     
-    // Find the last passed hour
-    for (let i = HOURS.length - 1; i >= 0; i--) {
-      const [hourStr] = HOURS[i].split(':');
+    // Find the last passed hour in ALL_HOURS
+    for (let i = ALL_HOURS.length - 1; i >= 0; i--) {
+      const [hourStr] = ALL_HOURS[i].split(':');
       const hour = parseInt(hourStr);
       
       if (currentHour > hour || (currentHour === hour && currentMinutes >= 45)) {
-        return i;
+        // Return the index relative to the filtered HOURS array
+        const indexInFiltered = HOURS.indexOf(ALL_HOURS[i]);
+        return indexInFiltered;
       }
     }
     return -1; // No hour has passed yet
@@ -616,7 +625,22 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         {/* Posts Schedule Table */}
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
           <div className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">טבלת עמדות</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-foreground">טבלת עמדות</h2>
+              <ToggleGroup 
+                type="single" 
+                value={scheduleView} 
+                onValueChange={(value) => value && setScheduleView(value as "morning" | "evening")}
+                className="border border-border rounded-lg"
+              >
+                <ToggleGroupItem value="morning" className="px-6">
+                  בוקר
+                </ToggleGroupItem>
+                <ToggleGroupItem value="evening" className="px-6">
+                  ערב
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
             <div className="overflow-x-auto">
               <Table className="border-2 border-border">
                 <TableHeader>
