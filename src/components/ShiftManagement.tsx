@@ -587,7 +587,131 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
           </div>
         </Card>
 
-        {/* Carousel for 3 sections */}
+        {/* Schedule Table - Outside Carousel */}
+        <Collapsible
+          open={openSections.schedule}
+          onOpenChange={(open) => setOpenSections(prev => ({ ...prev, schedule: open }))}
+        >
+          <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
+            <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
+              <h2 className="text-xl font-semibold text-foreground">לוח זמנים - עמדות לפי שעות</h2>
+              <ChevronDown className={`w-5 h-5 transition-transform ${openSections.schedule ? "rotate-180" : ""}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="p-6">
+                <Card className="p-6 border-border/30 bg-background/30">
+                  <ScrollArea className="w-full">
+                    <div className="min-w-max">
+                      <div className="sticky top-0 z-10 bg-background/50">
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="border-b-2 border-border/50">
+                              <th className="text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30">
+                                שעה
+                              </th>
+                              {POSTS.map((post) => (
+                                <th 
+                                  key={post} 
+                                  className="text-center p-3 font-semibold text-foreground whitespace-nowrap min-w-[280px] border-l border-border/30"
+                                >
+                                  {post}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                        </table>
+                      </div>
+                      <ScrollArea className="h-[500px]">
+                        <table className="w-full border-collapse">
+                          <tbody>
+                            {HOURS.map((hour) => (
+                              <tr key={hour} className="border-b border-border/30 hover:bg-background/30 transition-colors">
+                                <td className="p-3 font-medium text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background/20">
+                                  {hour}
+                                </td>
+                                {POSTS.map((post) => (
+                                  <td
+                                    key={`${post}-${hour}`}
+                                    className="p-2 min-w-[280px] border-l border-border/30"
+                                    onDragOver={handleDragOver}
+                                    onDrop={(e) => { 
+                                      e.preventDefault(); 
+                                      handleDropSchedule(post, hour); 
+                                    }}
+                                  >
+                                    <div className="min-h-[100px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors">
+                                      <div className="flex flex-col gap-1">
+                                        {getScheduleAssignments(post, hour).map((assignment) => {
+                                          const isTamach = isGuardTamach(assignment.guard);
+                                          const guardData = data.guards.find(g => g.name === assignment.guard);
+                                          const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                                          const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                                          const isOldTask = assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule");
+                                          
+                                          return (
+                                            <div
+                                              key={assignment.id}
+                                              onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                              onMouseUp={handleLongPressEnd}
+                                              onMouseLeave={handleLongPressEnd}
+                                              onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                              onTouchEnd={handleLongPressEnd}
+                                              style={{ 
+                                                backgroundColor: isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`,
+                                                borderColor: getGuardColor(assignment.guard),
+                                                borderStyle: isCustomShift ? 'dashed' : 'solid',
+                                                color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
+                                              }}
+                                              className="flex flex-col items-center gap-1 px-3 py-2 border-2 rounded text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                            >
+                                              <span className={`font-medium text-center ${isOldTask ? 'line-through opacity-60' : ''}`}>
+                                                {assignment.guard}
+                                              </span>
+                                              <div className="flex items-center gap-1">
+                                                {assignment.actualTime ? (
+                                                  <CheckCircle2 
+                                                    className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      handleSetActualTime(assignment.id, "schedule");
+                                                    }}
+                                                  />
+                                                ) : (
+                                                  <Clock 
+                                                    className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      handleSetActualTime(assignment.id, "schedule");
+                                                    }}
+                                                  />
+                                                )}
+                                                {assignment.actualTime && (
+                                                  <span className="text-xs opacity-70">
+                                                    {formatTime(assignment.actualTime)}
+                                                  </span>
+                                                )}
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </ScrollArea>
+                    </div>
+                  </ScrollArea>
+                </Card>
+              </div>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+
+        {/* Carousel for 2 sections */}
         <Carousel className="w-full max-w-full overflow-hidden" opts={{ align: "start", direction: "rtl" }}>
           <CarouselContent className="-ml-2 md:-ml-4">
             {/* Section 1: Tasks - Posts and Patrols */}
@@ -786,131 +910,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
               </Collapsible>
             </CarouselItem>
 
-            {/* Section 2: Schedule Table */}
-            <CarouselItem className="pl-2 md:pl-4">
-              <Collapsible
-                open={openSections.schedule}
-                onOpenChange={(open) => setOpenSections(prev => ({ ...prev, schedule: open }))}
-              >
-                <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
-                  <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-                    <h2 className="text-xl font-semibold text-foreground">לוח זמנים - עמדות לפי שעות</h2>
-                    <ChevronDown className={`w-5 h-5 transition-transform ${openSections.schedule ? "rotate-180" : ""}`} />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="p-6">
-                      <Card className="p-6 border-border/30 bg-background/30">
-                        <div className="overflow-hidden">
-                          <div className="overflow-x-auto">
-                            <table className="w-full border-collapse">
-                              <thead>
-                                <tr className="border-b-2 border-border/50 bg-background/50 sticky top-0 z-10">
-                                  <th className="text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[80px] border-l border-border/30">
-                                    שעה
-                                  </th>
-                                  {POSTS.map((post) => (
-                                    <th 
-                                      key={post} 
-                                      className="text-center p-3 font-semibold text-foreground whitespace-nowrap min-w-[200px] border-l border-border/30"
-                                    >
-                                      {post}
-                                    </th>
-                                  ))}
-                                </tr>
-                              </thead>
-                            </table>
-                          </div>
-                          <ScrollArea className="h-[500px]">
-                            <table className="w-full border-collapse">
-                              <tbody>
-                                {HOURS.map((hour) => (
-                                  <tr key={hour} className="border-b border-border/30 hover:bg-background/30 transition-colors">
-                                    <td className="p-3 font-medium text-foreground whitespace-nowrap min-w-[80px] border-l border-border/30 bg-background/20">
-                                      {hour}
-                                    </td>
-                                    {POSTS.map((post) => (
-                                      <td
-                                        key={`${post}-${hour}`}
-                                        className="p-2 min-w-[200px] border-l border-border/30"
-                                        onDragOver={handleDragOver}
-                                        onDrop={(e) => { 
-                                          e.preventDefault(); 
-                                          handleDropSchedule(post, hour); 
-                                        }}
-                                      >
-                                        <div className="min-h-[80px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors">
-                                          <div className="flex flex-col gap-1">
-                                            {getScheduleAssignments(post, hour).map((assignment) => {
-                                              const isTamach = isGuardTamach(assignment.guard);
-                                              const guardData = data.guards.find(g => g.name === assignment.guard);
-                                              const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                                              const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
-                                              const isOldTask = assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule");
-                                              
-                                              return (
-                                                <div
-                                                  key={assignment.id}
-                                                  onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
-                                                  onMouseUp={handleLongPressEnd}
-                                                  onMouseLeave={handleLongPressEnd}
-                                                  onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
-                                                  onTouchEnd={handleLongPressEnd}
-                                                  style={{ 
-                                                    backgroundColor: isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`,
-                                                    borderColor: getGuardColor(assignment.guard),
-                                                    borderStyle: isCustomShift ? 'dashed' : 'solid',
-                                                    color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
-                                                  }}
-                                                  className="flex flex-col items-center gap-1 px-2 py-1.5 border-2 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity"
-                                                >
-                                                  <span className={`font-medium text-center ${isOldTask ? 'line-through opacity-60' : ''}`}>
-                                                    {assignment.guard}
-                                                  </span>
-                                                  <div className="flex items-center gap-1">
-                                                    {assignment.actualTime ? (
-                                                      <CheckCircle2 
-                                                        className="w-3 h-3 cursor-pointer hover:scale-110 transition-transform fill-current"
-                                                        onClick={(e) => {
-                                                          e.stopPropagation();
-                                                          handleSetActualTime(assignment.id, "schedule");
-                                                        }}
-                                                      />
-                                                    ) : (
-                                                      <Clock 
-                                                        className="w-3 h-3 cursor-pointer hover:scale-110 transition-transform"
-                                                        onClick={(e) => {
-                                                          e.stopPropagation();
-                                                          handleSetActualTime(assignment.id, "schedule");
-                                                        }}
-                                                      />
-                                                    )}
-                                                    {assignment.actualTime && (
-                                                      <span className="text-[10px] opacity-70">
-                                                        {formatTime(assignment.actualTime)}
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
-                                        </div>
-                                      </td>
-                                    ))}
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </ScrollArea>
-                        </div>
-                      </Card>
-                    </div>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            </CarouselItem>
-
-            {/* Section 3: History */}
+            {/* Section 2: History */}
             <CarouselItem className="pl-2 md:pl-4">
               <Collapsible
                 open={openSections.history}
