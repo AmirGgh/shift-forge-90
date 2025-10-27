@@ -607,6 +607,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                           <table className="w-full border-collapse">
                             <thead>
                               <tr className="border-b-2 border-border/50">
+                                <th className="sticky right-0 z-30 text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[60px] border-l border-border/30 bg-background shadow-lg">
+                                  שעה
+                                </th>
                                 {[...POSTS].reverse().map((post) => (
                                   <th 
                                     key={post} 
@@ -615,9 +618,6 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                     {post}
                                   </th>
                                 ))}
-                                <th className="sticky right-0 z-30 text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[60px] border-l border-border/30 bg-background shadow-lg">
-                                  שעה
-                                </th>
                               </tr>
                             </thead>
                           </table>
@@ -626,6 +626,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                           <tbody>
                             {HOURS.map((hour) => (
                               <tr key={hour} className="border-b border-border/30 hover:bg-background/30 transition-colors">
+                                <td className="sticky right-0 z-20 p-3 font-medium text-foreground whitespace-nowrap min-w-[60px] border-l border-border/30 bg-background shadow-lg">
+                                  {hour}
+                                </td>
                                 {[...POSTS].reverse().map((post) => (
                                   <td
                                     key={`${post}-${hour}`}
@@ -695,9 +698,6 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                     </div>
                                   </td>
                                 ))}
-                                <td className="sticky right-0 z-20 p-3 font-medium text-foreground whitespace-nowrap min-w-[60px] border-l border-border/30 bg-background shadow-lg">
-                                  {hour}
-                                </td>
                               </tr>
                             ))}
                           </tbody>
