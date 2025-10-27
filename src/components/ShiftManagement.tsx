@@ -600,28 +600,28 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             <CollapsibleContent>
               <div className="p-6">
                 <Card className="p-6 border-border/30 bg-background/30">
-                  <ScrollArea className="w-full">
+                  <div className="w-full overflow-x-auto">
                     <div className="min-w-max">
-                      <div className="sticky top-0 z-10 bg-background/50">
-                        <table className="w-full border-collapse">
-                          <thead>
-                            <tr className="border-b-2 border-border/50">
-                              <th className="text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30">
-                                שעה
-                              </th>
-                              {POSTS.map((post) => (
-                                <th 
-                                  key={post} 
-                                  className="text-center p-3 font-semibold text-foreground whitespace-nowrap min-w-[280px] border-l border-border/30"
-                                >
-                                  {post}
+                      <ScrollArea className="h-[600px]">
+                        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="border-b-2 border-border/50">
+                                <th className="text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30">
+                                  שעה
                                 </th>
-                              ))}
-                            </tr>
-                          </thead>
-                        </table>
-                      </div>
-                      <ScrollArea className="h-[500px]">
+                                {POSTS.map((post) => (
+                                  <th 
+                                    key={post} 
+                                    className="text-center p-3 font-semibold text-foreground whitespace-nowrap min-w-[280px] border-l border-border/30"
+                                  >
+                                    {post}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                          </table>
+                        </div>
                         <table className="w-full border-collapse">
                           <tbody>
                             {HOURS.map((hour) => (
@@ -704,7 +704,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         </table>
                       </ScrollArea>
                     </div>
-                  </ScrollArea>
+                  </div>
                 </Card>
               </div>
             </CollapsibleContent>
