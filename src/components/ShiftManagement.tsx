@@ -104,12 +104,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     const now = new Date();
     const alerts: Array<{ guard: string; post: string; duration: number }> = [];
     
-    // Get the latest active task for each guard
+    // Get the latest active task for each guard (filtered by time range)
     const guardLatestTasks = new Map<string, { post: string; actualTime: string; thresholdMinutes: number }>();
 
-    // Collect all tasks with actualTime
+    // Collect all tasks with actualTime that match the current time filter
     assignments.forEach(assignment => {
-      if (!assignment.actualTime) return;
+      if (!assignment.actualTime || !isInTimeRange(assignment.actualTime)) return;
       const time = new Date(assignment.actualTime).getTime();
       const current = guardLatestTasks.get(assignment.guard);
       if (!current || new Date(current.actualTime).getTime() < time) {
@@ -122,7 +122,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     });
 
     patrols.forEach(patrol => {
-      if (!patrol.actualTime) return;
+      if (!patrol.actualTime || !isInTimeRange(patrol.actualTime)) return;
       const time = new Date(patrol.actualTime).getTime();
       const current = guardLatestTasks.get(patrol.guard);
       if (!current || new Date(current.actualTime).getTime() < time) {
@@ -135,7 +135,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     });
     
     breaks.forEach(breakAssignment => {
-      if (!breakAssignment.actualTime) return;
+      if (!breakAssignment.actualTime || !isInTimeRange(breakAssignment.actualTime)) return;
       const time = new Date(breakAssignment.actualTime).getTime();
       const current = guardLatestTasks.get(breakAssignment.guard);
       if (!current || new Date(current.actualTime).getTime() < time) {
@@ -148,7 +148,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     });
     
     meals.forEach(meal => {
-      if (!meal.actualTime) return;
+      if (!meal.actualTime || !isInTimeRange(meal.actualTime)) return;
       const time = new Date(meal.actualTime).getTime();
       const current = guardLatestTasks.get(meal.guard);
       if (!current || new Date(current.actualTime).getTime() < time) {
@@ -545,6 +545,21 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     return scheduleAssignments.filter(s => s.post === post && s.hour === hour);
   };
 
+  // Filter items by time of day
+  const isInTimeRange = (actualTime: string | undefined) => {
+    if (!actualTime) return false;
+    const time = new Date(actualTime);
+    const hour = time.getHours();
+    
+    if (scheduleView === "morning") {
+      // Morning: 7:00 - 14:44
+      return hour >= 7 && hour < 15;
+    } else {
+      // Evening: 14:45 - 19:59
+      return hour >= 14 && hour < 20;
+    }
+  };
+
   // Generate hours array (7:45 to 19:45)
   const ALL_HOURS = Array.from({ length: 13 }, (_, i) => {
     const hour = 7 + i;
@@ -619,8 +634,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
           <div className="p-6">
             <div className="flex flex-col gap-2 items-center mb-6">
-              {/* First row - 3 buttons */}
-              <div className="flex gap-2 justify-center w-full">
+              {/* First row - 3 buttons + time filter */}
+              <div className="flex gap-2 justify-center w-full items-center">
                 <Button
                   variant={mainView === "posts" ? "default" : "outline"}
                   onClick={() => setMainView("posts")}
@@ -647,8 +662,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                 </Button>
               </div>
               
-              {/* Second row - 2 buttons */}
-              <div className="flex gap-2 justify-center w-full">
+              {/* Second row - 2 buttons + time filter */}
+              <div className="flex gap-2 justify-center w-full items-center">
                 <Button
                   variant={mainView === "history" ? "default" : "outline"}
                   onClick={() => setMainView("history")}
@@ -670,29 +685,31 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     </span>
                   )}
                 </Button>
+                
+                {/* Time filter - only show when not in patrols view */}
+                {mainView !== "patrols" && (
+                  <div className="mr-2">
+                    <ToggleGroup 
+                      type="single" 
+                      value={scheduleView} 
+                      onValueChange={(value) => value && setScheduleView(value as "morning" | "evening")}
+                      className="border border-border rounded"
+                    >
+                      <ToggleGroupItem value="morning" className="px-3 py-1 text-[10px] h-auto">
+                        בוקר
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="evening" className="px-3 py-1 text-[10px] h-auto">
+                        ערב
+                      </ToggleGroupItem>
+                    </ToggleGroup>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Posts Table */}
             {mainView === "posts" && (
                         <div className="space-y-4">
-                          {/* Toggle for Morning/Evening */}
-                          <div className="flex justify-center">
-                            <ToggleGroup 
-                              type="single" 
-                              value={scheduleView} 
-                              onValueChange={(value) => value && setScheduleView(value as "morning" | "evening")}
-                              className="border border-border rounded-lg"
-                            >
-                              <ToggleGroupItem value="morning" className="px-6">
-                                בוקר
-                              </ToggleGroupItem>
-                              <ToggleGroupItem value="evening" className="px-6">
-                                ערב
-                              </ToggleGroupItem>
-                            </ToggleGroup>
-                          </div>
-                          
                           {/* Schedule Table */}
                           <Card className="p-6 border-border/30 bg-background/30">
                             <div className="overflow-x-auto">
@@ -872,7 +889,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             <div 
                               className="space-y-2"
                             >
-                              {meals.map((meal) => {
+                              {meals.filter(meal => isInTimeRange(meal.actualTime)).map((meal) => {
                                 const isTamach = isGuardTamach(meal.guard);
                                 const guardData = data.guards.find(g => g.name === meal.guard);
                                 const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
@@ -941,7 +958,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             <div 
                               className="space-y-2"
                             >
-                              {breaks.map((breakItem) => {
+                              {breaks.filter(breakItem => isInTimeRange(breakItem.actualTime)).map((breakItem) => {
                                 const isTamach = isGuardTamach(breakItem.guard);
                                 const guardData = data.guards.find(g => g.name === breakItem.guard);
                                 const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
@@ -1005,11 +1022,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                   )}
                   {(() => {
                       const allItems = [
-                        ...assignments.map(a => ({ ...a, post: a.post, actualTime: a.actualTime })),
-                        ...patrols.map(p => ({ ...p, post: p.patrol, actualTime: p.actualTime })),
-                        ...meals.map(m => ({ ...m, guard: m.guard, post: "אוכל", time: m.time, actualTime: m.actualTime })),
-                        ...breaks.map(b => ({ ...b, guard: b.guard, post: "הפסקה", time: b.time, actualTime: b.actualTime })),
-                        ...scheduleAssignments.map(s => ({ ...s, guard: s.guard, post: `${s.post} (${s.hour})`, time: s.time, actualTime: s.actualTime }))
+                        ...assignments.filter(a => isInTimeRange(a.actualTime)).map(a => ({ ...a, post: a.post, actualTime: a.actualTime })),
+                        ...patrols.filter(p => isInTimeRange(p.actualTime)).map(p => ({ ...p, post: p.patrol, actualTime: p.actualTime })),
+                        ...meals.filter(m => isInTimeRange(m.actualTime)).map(m => ({ ...m, guard: m.guard, post: "אוכל", time: m.time, actualTime: m.actualTime })),
+                        ...breaks.filter(b => isInTimeRange(b.actualTime)).map(b => ({ ...b, guard: b.guard, post: "הפסקה", time: b.time, actualTime: b.actualTime })),
+                        ...scheduleAssignments.filter(s => isInTimeRange(s.actualTime)).map(s => ({ ...s, guard: s.guard, post: `${s.post} (${s.hour})`, time: s.time, actualTime: s.actualTime }))
                       ].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
                       
                       // Group by guard to show their journey
