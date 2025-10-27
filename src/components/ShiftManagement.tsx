@@ -595,41 +595,6 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-4 md:p-8" dir="rtl">
       <div className="max-w-full mx-auto space-y-6">
 
-        {/* Guards Bank - Always visible */}
-        <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
-          <div className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">מאבטחים במשמרת</h2>
-            <div className="flex flex-wrap gap-2">
-              {data.guards.map((guard) => {
-                const isTamach = guard.shiftType?.includes("תמך");
-                const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                const isInShiftList = SHIFT_TYPES.includes(guard.shiftType || "");
-                const isCustomShift = !isInShiftList;
-                
-                return (
-                  <div
-                    key={guard.name}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, guard.name)}
-                    onDragEnd={() => setDraggedGuard(null)}
-                    data-effect-allowed="move"
-                    style={{ 
-                      backgroundColor: isTamach ? guard.color : `${guard.color}20`,
-                      borderColor: guard.color,
-                      borderStyle: isCustomShift ? 'dashed' : 'solid',
-                      color: isTamach ? '#FFFFFF' : guard.color
-                    }}
-                    className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium touch-none"
-                  >
-                    {guard.name}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </Card>
-
-
         {/* Main Navigation */}
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
           <div className="p-6">
@@ -704,6 +669,38 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     </ToggleGroup>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Guards Bank - Always visible */}
+            <div className="mb-6 pb-6 border-b border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-3">מאבטחים במשמרת</h3>
+              <div className="flex flex-wrap gap-2">
+                {data.guards.map((guard) => {
+                  const isTamach = guard.shiftType?.includes("תמך");
+                  const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                  const isInShiftList = SHIFT_TYPES.includes(guard.shiftType || "");
+                  const isCustomShift = !isInShiftList;
+                  
+                  return (
+                    <div
+                      key={guard.name}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, guard.name)}
+                      onDragEnd={() => setDraggedGuard(null)}
+                      data-effect-allowed="move"
+                      style={{ 
+                        backgroundColor: isTamach ? guard.color : `${guard.color}20`,
+                        borderColor: guard.color,
+                        borderStyle: isCustomShift ? 'dashed' : 'solid',
+                        color: isTamach ? '#FFFFFF' : guard.color
+                      }}
+                      className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium touch-none"
+                    >
+                      {guard.name}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
