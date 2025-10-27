@@ -607,17 +607,17 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                           <table className="w-full border-collapse">
                             <thead>
                               <tr className="border-b-2 border-border/50">
-                                <th className="sticky right-0 z-30 text-right p-2 font-semibold text-foreground whitespace-nowrap min-w-[45px] border-l border-border/30 bg-background shadow-lg">
-                                  שעה
-                                </th>
                                 {[...POSTS].reverse().map((post) => (
                                   <th 
                                     key={post} 
-                                    className="text-center p-3 font-semibold text-foreground whitespace-nowrap min-w-[44px] border-l border-border/30"
+                                    className="text-center p-2 font-semibold text-foreground whitespace-nowrap w-[50px] border-l border-border/30"
                                   >
                                     {post}
                                   </th>
                                 ))}
+                                <th className="sticky right-0 z-30 text-right px-0.5 py-0.5 font-semibold text-foreground whitespace-nowrap w-[50px] border-l border-border/30 bg-background shadow-lg">
+                                  שעה
+                                </th>
                               </tr>
                             </thead>
                           </table>
@@ -626,13 +626,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                           <tbody>
                             {HOURS.map((hour) => (
                               <tr key={hour} className="border-b border-border/30 hover:bg-background/30 transition-colors">
-                                <td className="sticky right-0 z-20 p-2 font-medium text-foreground whitespace-nowrap min-w-[45px] border-l border-border/30 bg-background shadow-lg">
-                                  {hour}
-                                </td>
                                 {[...POSTS].reverse().map((post) => (
                                   <td
                                     key={`${post}-${hour}`}
-                                    className="p-1 min-w-[44px] border-l border-border/30"
+                                    className="p-1 w-[50px] border-l border-border/30"
                                     onDragOver={handleDragOver}
                                     onDrop={(e) => { 
                                       e.preventDefault(); 
@@ -698,6 +695,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                     </div>
                                   </td>
                                 ))}
+                                <td className="sticky right-0 z-20 px-0.5 py-0.5 font-medium text-foreground whitespace-nowrap w-[50px] border-l border-border/30 bg-background shadow-lg text-right">
+                                  {hour}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
