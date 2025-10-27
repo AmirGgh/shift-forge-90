@@ -604,39 +604,39 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     <div className="min-w-max">
                       <ScrollArea className="h-[600px]">
                         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
-                          <table className="w-full border-collapse">
+                          <table className="w-full table-fixed border-collapse">
                             <thead>
                               <tr className="border-b-2 border-border/50">
                                 {[...POSTS].reverse().map((post) => (
                                   <th 
                                     key={post} 
-                                    className="text-center p-2 font-semibold text-foreground whitespace-nowrap w-[50px] border-l border-border/30"
+                                    className="text-center p-2 font-semibold text-foreground whitespace-nowrap w-[50px] min-w-[50px] max-w-[50px] overflow-hidden text-ellipsis border-l border-border/30"
                                   >
                                     {post}
                                   </th>
                                 ))}
-                                <th className="sticky right-0 z-30 text-right px-0.5 py-0.5 font-semibold text-foreground whitespace-nowrap w-[50px] border-l border-border/30 bg-background shadow-lg">
+                                <th className="sticky right-0 z-30 text-right px-0.5 py-0.5 font-semibold text-foreground whitespace-nowrap w-[50px] min-w-[50px] max-w-[50px] overflow-hidden border-l border-border/30 bg-background shadow-lg">
                                   שעה
                                 </th>
                               </tr>
                             </thead>
                           </table>
                         </div>
-                        <table className="w-full border-collapse">
+                        <table className="w-full table-fixed border-collapse">
                           <tbody>
                             {HOURS.map((hour) => (
                               <tr key={hour} className="border-b border-border/30 hover:bg-background/30 transition-colors">
                                 {[...POSTS].reverse().map((post) => (
                                   <td
                                     key={`${post}-${hour}`}
-                                    className="p-1 w-[50px] border-l border-border/30"
+                                    className="p-1 w-[50px] min-w-[50px] max-w-[50px] overflow-hidden border-l border-border/30"
                                     onDragOver={handleDragOver}
                                     onDrop={(e) => { 
                                       e.preventDefault(); 
                                       handleDropSchedule(post, hour); 
                                     }}
                                   >
-                                    <div className="min-h-[36px] max-h-[120px] overflow-y-auto bg-background/30 border-2 border-dashed border-foreground rounded-lg p-1 hover:border-primary transition-colors">
+                                    <div className="w-full min-h-[36px] max-h-[120px] overflow-y-auto bg-background/30 border-2 border-dashed border-foreground rounded-lg p-1 hover:border-primary transition-colors">
                                       <div className="flex flex-col gap-1">
                                         {getScheduleAssignments(post, hour).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
@@ -659,7 +659,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                 borderStyle: isCustomShift ? 'dashed' : 'solid',
                                                 color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
                                               }}
-                                              className="flex items-center justify-center gap-1 px-1 py-1 border-2 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                                              className="flex items-center justify-center gap-1 px-1 py-1 border-2 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity max-w-full overflow-hidden"
                                             >
                                               <span className={`font-medium truncate ${isOldTask ? 'line-through opacity-60' : ''}`}>
                                                 {assignment.guard}
@@ -692,7 +692,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                     </div>
                                   </td>
                                 ))}
-                                <td className="sticky right-0 z-20 px-0.5 py-0.5 font-medium text-foreground whitespace-nowrap w-[50px] border-l border-border/30 bg-background shadow-lg text-right">
+                                <td className="sticky right-0 z-20 px-0.5 py-0.5 font-medium text-foreground whitespace-nowrap w-[50px] min-w-[50px] max-w-[50px] border-l border-border/30 bg-background shadow-lg text-right">
                                   {hour}
                                 </td>
                               </tr>
