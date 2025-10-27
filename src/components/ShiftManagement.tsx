@@ -610,12 +610,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 {[...POSTS].reverse().map((post) => (
                                   <th 
                                     key={post} 
-                                    className="text-center p-3 font-semibold text-foreground whitespace-nowrap min-w-[196px] border-l border-border/30"
+                                    className="text-center p-3 font-semibold text-foreground whitespace-nowrap min-w-[44px] border-l border-border/30"
                                   >
                                     {post}
                                   </th>
                                 ))}
-                                <th className="sticky right-0 z-30 text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background shadow-lg">
+                                <th className="sticky right-0 z-30 text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[60px] border-l border-border/30 bg-background shadow-lg">
                                   שעה
                                 </th>
                               </tr>
@@ -695,7 +695,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                     </div>
                                   </td>
                                 ))}
-                                <td className="sticky right-0 z-20 p-3 font-medium text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background shadow-lg">
+                                <td className="sticky right-0 z-20 p-3 font-medium text-foreground whitespace-nowrap min-w-[60px] border-l border-border/30 bg-background shadow-lg">
                                   {hour}
                                 </td>
                               </tr>
