@@ -636,7 +636,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                       handleDropSchedule(post, hour); 
                                     }}
                                   >
-                                    <div className="min-h-[36px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-1 hover:border-primary transition-colors">
+                                    <div className="min-h-[36px] max-h-[120px] overflow-y-auto bg-background/30 border-2 border-dashed border-foreground rounded-lg p-1 hover:border-primary transition-colors">
                                       <div className="flex flex-col gap-1">
                                         {getScheduleAssignments(post, hour).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
@@ -659,20 +659,22 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                 borderStyle: isCustomShift ? 'dashed' : 'solid',
                                                 color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
                                               }}
-                                              className="flex items-center justify-center gap-1 px-1 py-1 border-2 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                                              className="flex items-center justify-center gap-1 px-1 py-1 border-2 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                                             >
-                                              <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>
+                                              <span className={`font-medium truncate ${isOldTask ? 'line-through opacity-60' : ''}`}>
                                                 {assignment.guard}
                                               </span>
                                               <div className="flex items-center gap-1 shrink-0">
                                                 {assignment.actualTime ? (
-                                                  <CheckCircle2 
-                                                    className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
+                                                  <span 
+                                                    className="text-xs opacity-70 cursor-pointer hover:opacity-100 transition-opacity"
                                                     onClick={(e) => {
                                                       e.stopPropagation();
                                                       handleSetActualTime(assignment.id, "schedule");
                                                     }}
-                                                  />
+                                                  >
+                                                    {formatTime(assignment.actualTime)}
+                                                  </span>
                                                 ) : (
                                                   <Clock 
                                                     className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
@@ -681,11 +683,6 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                       handleSetActualTime(assignment.id, "schedule");
                                                     }}
                                                   />
-                                                )}
-                                                {assignment.actualTime && (
-                                                  <span className="text-xs opacity-70">
-                                                    {formatTime(assignment.actualTime)}
-                                                  </span>
                                                 )}
                                               </div>
                                             </div>
