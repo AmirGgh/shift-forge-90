@@ -640,13 +640,48 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         <TableCell className="font-medium sticky right-0 bg-card z-10 border-l-2 border-border">
                           {hour}
                         </TableCell>
-                        {POSTS.map((post) => (
-                          <TableCell key={post} className="p-2 border-l-2 border-border">
-                            <div className="min-h-[60px] flex items-center justify-center">
-                              {/* Empty cell for now - can be populated with assignments */}
-                            </div>
-                          </TableCell>
-                        ))}
+                        {POSTS.map((post) => {
+                          const cellAssignments = getScheduleAssignments(post, hour);
+                          return (
+                            <TableCell 
+                              key={post} 
+                              className="p-2 border-l-2 border-border"
+                              onDragOver={handleDragOver}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                handleDropSchedule(post, hour);
+                              }}
+                            >
+                              <div className="min-h-[60px] h-[60px] flex flex-wrap gap-1 content-start overflow-hidden">
+                                {cellAssignments.map((assignment) => (
+                                  <div
+                                    key={assignment.id}
+                                    onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                    onMouseUp={handleLongPressEnd}
+                                    onMouseLeave={handleLongPressEnd}
+                                    onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                    onTouchEnd={handleLongPressEnd}
+                                    onClick={() => handleSetActualTime(assignment.id, "schedule")}
+                                    style={{
+                                      backgroundColor: getGuardColor(assignment.guard),
+                                      borderColor: getGuardColor(assignment.guard)
+                                    }}
+                                    className={`px-2 py-0.5 text-xs rounded border cursor-pointer hover:opacity-80 transition-opacity text-white font-medium ${
+                                      assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule")
+                                        ? "line-through opacity-50"
+                                        : ""
+                                    }`}
+                                  >
+                                    {assignment.guard}
+                                    {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
+                                      <CheckCircle2 className="w-3 h-3 inline-block mr-1" />
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
                     );
                   })}
