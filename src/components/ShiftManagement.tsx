@@ -675,7 +675,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                     <span className="flex items-center gap-1">
                                       {assignment.guard}
                                       {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
-                                        <CheckCircle2 className="w-3 h-3" />
+                                        <span className="text-[9px] opacity-70">
+                                          {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
                                       )}
                                     </span>
                                   </div>
