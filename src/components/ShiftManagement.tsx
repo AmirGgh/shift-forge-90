@@ -21,10 +21,20 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { getGuardsData, saveGuardsData, getShiftSettings } from "@/utils/storage";
 import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
 import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+
+interface ScheduleAssignment {
+  id: string;
+  guard: string;
+  post: string;
+  hour: string;
+  time: string;
+  actualTime?: string;
+}
 
 interface ShiftManagementProps {}
 
@@ -169,20 +179,23 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   const [patrols, setPatrols] = useState<PatrolAssignment[]>([]);
   const [meals, setMeals] = useState<MealAssignment[]>([]);
   const [breaks, setBreaks] = useState<BreakAssignment[]>([]);
+  const [scheduleAssignments, setScheduleAssignments] = useState<ScheduleAssignment[]>([]);
   const [draggedGuard, setDraggedGuard] = useState<string | null>(null);
   const [pendingAssignment, setPendingAssignment] = useState<{
     guard: string;
     target: string;
-    type: "post" | "patrol" | "meal" | "break";
+    type: "post" | "patrol" | "meal" | "break" | "schedule";
+    hour?: string;
   } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
     guard: string;
     target: string;
-    type: "post" | "patrol" | "meal" | "break";
+    type: "post" | "patrol" | "meal" | "break" | "schedule";
   } | null>(null);
   const [openSections, setOpenSections] = useState({
     guards: true,
     tasks: true,
+    schedule: true,
     history: true,
     mealBreak: true,
     alerts: true,
@@ -212,6 +225,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     setPatrols(data.patrols);
     setMeals(data.meals || []);
     setBreaks(data.breaks || []);
+    setScheduleAssignments((data as any).scheduleAssignments || []);
   };
 
   const handleDragStart = (e: React.DragEvent, guard: string) => {
@@ -267,7 +281,30 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     setDraggedGuard(null);
   };
 
-  const handleLongPressStart = (id: string, guard: string, type: "post" | "patrol" | "meal" | "break") => {
+  const handleDropSchedule = (post: string, hour: string) => {
+    if (!draggedGuard) return;
+    
+    // Check if already 4 guards in this cell
+    const currentGuards = scheduleAssignments.filter(
+      a => a.post === post && a.hour === hour
+    );
+    
+    if (currentGuards.length >= 4) {
+      toast.error("לא ניתן להוסיף יותר מ-4 מאבטחים למשבצת");
+      setDraggedGuard(null);
+      return;
+    }
+    
+    setPendingAssignment({
+      guard: draggedGuard,
+      target: post,
+      type: "schedule",
+      hour: hour
+    });
+    setDraggedGuard(null);
+  };
+
+  const handleLongPressStart = (id: string, guard: string, type: "post" | "patrol" | "meal" | "break" | "schedule") => {
     longPressTimer.current = setTimeout(() => {
       setDeleteTarget({ guard, target: id, type });
     }, 500);
@@ -309,6 +346,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       setBreaks(newBreaks);
       data.breaks = newBreaks;
       toast.success(`${deleteTarget.guard} הוסר מהפסקה`);
+    } else if (deleteTarget.type === "schedule") {
+      const newSchedule = scheduleAssignments.filter(s => s.id !== deleteTarget.target);
+      setScheduleAssignments(newSchedule);
+      (data as any).scheduleAssignments = newSchedule;
+      toast.success(`${deleteTarget.guard} הוסר מהלוח זמנים`);
     }
 
     saveGuardsData(data);
@@ -362,6 +404,18 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       setBreaks(newBreaks);
       data.breaks = newBreaks;
       toast.success(`${pendingAssignment.guard} הוצב בהפסקה`);
+    } else if (pendingAssignment.type === "schedule" && pendingAssignment.hour) {
+      const newSchedule: ScheduleAssignment = {
+        id: `${Date.now()}-${Math.random()}`,
+        guard: pendingAssignment.guard,
+        post: pendingAssignment.target,
+        hour: pendingAssignment.hour,
+        time: new Date().toISOString()
+      };
+      const newScheduleAssignments = [...scheduleAssignments, newSchedule];
+      setScheduleAssignments(newScheduleAssignments);
+      (data as any).scheduleAssignments = newScheduleAssignments;
+      toast.success(`${pendingAssignment.guard} הוצב ב${pendingAssignment.target} בשעה ${pendingAssignment.hour}`);
     }
 
     saveGuardsData(data);
@@ -385,7 +439,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   };
 
   // Check if this is the latest task for a guard (to mark previous tasks with strikethrough)
-  const isLatestTask = (guardName: string, taskId: string, type: "post" | "patrol" | "meal" | "break"): boolean => {
+  const isLatestTask = (guardName: string, taskId: string, type: "post" | "patrol" | "meal" | "break" | "schedule"): boolean => {
     // Collect all tasks with actualTime for this guard
     const guardTasks: Array<{ id: string; actualTime: string; type: string }> = [];
 
@@ -405,6 +459,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       .filter(b => b.guard === guardName && b.actualTime)
       .forEach(b => guardTasks.push({ id: b.id, actualTime: b.actualTime, type: "break" }));
 
+    scheduleAssignments
+      .filter(s => s.guard === guardName && s.actualTime)
+      .forEach(s => guardTasks.push({ id: s.id, actualTime: s.actualTime, type: "schedule" }));
+
     // Sort by actualTime to find the latest
     guardTasks.sort((a, b) => new Date(b.actualTime).getTime() - new Date(a.actualTime).getTime());
 
@@ -412,7 +470,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     return guardTasks.length > 0 && guardTasks[0].id === taskId;
   };
 
-  const handleSetActualTime = (id: string, type: "post" | "patrol" | "meal" | "break") => {
+  const handleSetActualTime = (id: string, type: "post" | "patrol" | "meal" | "break" | "schedule") => {
     const data = getGuardsData();
     const now = new Date().toISOString();
 
@@ -464,10 +522,32 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       setBreaks(updatedBreaks);
       data.breaks = updatedBreaks;
       toast.success(isRemoving ? `זמן ביצוע בוטל` : `זמן ביצוע נרשם`);
+    } else if (type === "schedule") {
+      const currentSchedule = scheduleAssignments.find(s => s.id === id);
+      const isRemoving = !!currentSchedule?.actualTime;
+      
+      const updatedSchedule = scheduleAssignments.map(s =>
+        s.id === id
+          ? { ...s, actualTime: isRemoving ? undefined : now }
+          : s
+      );
+      setScheduleAssignments(updatedSchedule);
+      (data as any).scheduleAssignments = updatedSchedule;
+      toast.success(isRemoving ? `זמן ביצוע בוטל` : `זמן ביצוע נרשם`);
     }
 
     saveGuardsData(data);
   };
+
+  const getScheduleAssignments = (post: string, hour: string) => {
+    return scheduleAssignments.filter(s => s.post === post && s.hour === hour);
+  };
+
+  // Generate hours array (7:45 to 18:45)
+  const HOURS = Array.from({ length: 12 }, (_, i) => {
+    const hour = 7 + i;
+    return `${hour}:45`;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-4 md:p-8" dir="rtl">
@@ -706,7 +786,131 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
               </Collapsible>
             </CarouselItem>
 
-            {/* Section 2: History */}
+            {/* Section 2: Schedule Table */}
+            <CarouselItem className="pl-2 md:pl-4">
+              <Collapsible
+                open={openSections.schedule}
+                onOpenChange={(open) => setOpenSections(prev => ({ ...prev, schedule: open }))}
+              >
+                <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
+                  <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
+                    <h2 className="text-xl font-semibold text-foreground">לוח זמנים - עמדות לפי שעות</h2>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${openSections.schedule ? "rotate-180" : ""}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="p-6">
+                      <Card className="p-6 border-border/30 bg-background/30">
+                        <div className="overflow-hidden">
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse">
+                              <thead>
+                                <tr className="border-b-2 border-border/50 bg-background/50 sticky top-0 z-10">
+                                  <th className="text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[80px] border-l border-border/30">
+                                    שעה
+                                  </th>
+                                  {POSTS.map((post) => (
+                                    <th 
+                                      key={post} 
+                                      className="text-center p-3 font-semibold text-foreground whitespace-nowrap min-w-[200px] border-l border-border/30"
+                                    >
+                                      {post}
+                                    </th>
+                                  ))}
+                                </tr>
+                              </thead>
+                            </table>
+                          </div>
+                          <ScrollArea className="h-[500px]">
+                            <table className="w-full border-collapse">
+                              <tbody>
+                                {HOURS.map((hour) => (
+                                  <tr key={hour} className="border-b border-border/30 hover:bg-background/30 transition-colors">
+                                    <td className="p-3 font-medium text-foreground whitespace-nowrap min-w-[80px] border-l border-border/30 bg-background/20">
+                                      {hour}
+                                    </td>
+                                    {POSTS.map((post) => (
+                                      <td
+                                        key={`${post}-${hour}`}
+                                        className="p-2 min-w-[200px] border-l border-border/30"
+                                        onDragOver={handleDragOver}
+                                        onDrop={(e) => { 
+                                          e.preventDefault(); 
+                                          handleDropSchedule(post, hour); 
+                                        }}
+                                      >
+                                        <div className="min-h-[80px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors">
+                                          <div className="flex flex-col gap-1">
+                                            {getScheduleAssignments(post, hour).map((assignment) => {
+                                              const isTamach = isGuardTamach(assignment.guard);
+                                              const guardData = data.guards.find(g => g.name === assignment.guard);
+                                              const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                                              const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                                              const isOldTask = assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule");
+                                              
+                                              return (
+                                                <div
+                                                  key={assignment.id}
+                                                  onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                                  onMouseUp={handleLongPressEnd}
+                                                  onMouseLeave={handleLongPressEnd}
+                                                  onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                                  onTouchEnd={handleLongPressEnd}
+                                                  style={{ 
+                                                    backgroundColor: isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`,
+                                                    borderColor: getGuardColor(assignment.guard),
+                                                    borderStyle: isCustomShift ? 'dashed' : 'solid',
+                                                    color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
+                                                  }}
+                                                  className="flex flex-col items-center gap-1 px-2 py-1.5 border-2 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                                                >
+                                                  <span className={`font-medium text-center ${isOldTask ? 'line-through opacity-60' : ''}`}>
+                                                    {assignment.guard}
+                                                  </span>
+                                                  <div className="flex items-center gap-1">
+                                                    {assignment.actualTime ? (
+                                                      <CheckCircle2 
+                                                        className="w-3 h-3 cursor-pointer hover:scale-110 transition-transform fill-current"
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          handleSetActualTime(assignment.id, "schedule");
+                                                        }}
+                                                      />
+                                                    ) : (
+                                                      <Clock 
+                                                        className="w-3 h-3 cursor-pointer hover:scale-110 transition-transform"
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          handleSetActualTime(assignment.id, "schedule");
+                                                        }}
+                                                      />
+                                                    )}
+                                                    {assignment.actualTime && (
+                                                      <span className="text-[10px] opacity-70">
+                                                        {formatTime(assignment.actualTime)}
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        </div>
+                                      </td>
+                                    ))}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </ScrollArea>
+                        </div>
+                      </Card>
+                    </div>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            </CarouselItem>
+
+            {/* Section 3: History */}
             <CarouselItem className="pl-2 md:pl-4">
               <Collapsible
                 open={openSections.history}
@@ -823,7 +1027,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             </Collapsible>
           </CarouselItem>
 
-          {/* Section 3: Meals and Breaks */}
+          {/* Section 4: Meals and Breaks */}
           <CarouselItem className="pl-2 md:pl-4">
             <Collapsible
               open={openSections.mealBreak}
@@ -991,7 +1195,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             </Collapsible>
           </CarouselItem>
 
-          {/* Section 4: Alerts */}
+          {/* Section 5: Alerts */}
           <CarouselItem className="pl-2 md:pl-4">
             <Collapsible
               open={openSections.alerts}
