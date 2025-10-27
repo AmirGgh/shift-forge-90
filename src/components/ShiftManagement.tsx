@@ -618,12 +618,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
           <div className="p-6">
             <h2 className="text-xl font-semibold text-foreground mb-4">טבלת עמדות</h2>
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="border-2 border-border">
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-right font-semibold sticky right-0 bg-card z-10 min-w-[80px]">שעה</TableHead>
+                  <TableRow className="border-b-2 border-border">
+                    <TableHead className="text-right font-semibold sticky right-0 bg-card z-10 min-w-[80px] border-l-2 border-border">שעה</TableHead>
                     {POSTS.map((post) => (
-                      <TableHead key={post} className="text-right font-semibold min-w-[120px]">
+                      <TableHead key={post} className="text-right font-semibold min-w-[120px] border-l-2 border-border">
                         {post}
                       </TableHead>
                     ))}
@@ -635,13 +635,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                     return (
                       <TableRow 
                         key={hour}
-                        className={isCurrentHour ? "bg-primary/20 hover:bg-primary/30" : ""}
+                        className={`border-b-2 border-border ${isCurrentHour ? "bg-primary/20 hover:bg-primary/30" : ""}`}
                       >
-                        <TableCell className="font-medium sticky right-0 bg-card z-10">
+                        <TableCell className="font-medium sticky right-0 bg-card z-10 border-l-2 border-border">
                           {hour}
                         </TableCell>
                         {POSTS.map((post) => (
-                          <TableCell key={post} className="p-2">
+                          <TableCell key={post} className="p-2 border-l-2 border-border">
                             <div className="min-h-[60px] flex items-center justify-center">
                               {/* Empty cell for now - can be populated with assignments */}
                             </div>
