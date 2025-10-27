@@ -618,54 +618,54 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         {/* Main Navigation */}
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
           <div className="p-6">
-            <div className="flex flex-col gap-3 items-center mb-6">
+            <div className="flex flex-col gap-2 items-center mb-6">
               {/* First row - 3 buttons */}
-              <div className="flex gap-3 justify-center w-full">
+              <div className="flex gap-2 justify-center w-full">
                 <Button
                   variant={mainView === "posts" ? "default" : "outline"}
                   onClick={() => setMainView("posts")}
-                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px]"
+                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px]"
                 >
-                  <MapPin className="w-5 h-5" />
-                  <span className="text-xs">עמדות</span>
+                  <MapPin className="w-4 h-4" />
+                  <span className="text-[10px]">עמדות</span>
                 </Button>
                 <Button
                   variant={mainView === "patrols" ? "default" : "outline"}
                   onClick={() => setMainView("patrols")}
-                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px]"
+                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px]"
                 >
-                  <Clock className="w-5 h-5" />
-                  <span className="text-xs">פטרולים</span>
+                  <Clock className="w-4 h-4" />
+                  <span className="text-[10px]">פטרולים</span>
                 </Button>
                 <Button
                   variant={mainView === "meals-breaks" ? "default" : "outline"}
                   onClick={() => setMainView("meals-breaks")}
-                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px]"
+                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px]"
                 >
-                  <UtensilsCrossed className="w-5 h-5" />
-                  <span className="text-xs">אוכל והפסקות</span>
+                  <UtensilsCrossed className="w-4 h-4" />
+                  <span className="text-[10px]">אוכל והפסקות</span>
                 </Button>
               </div>
               
               {/* Second row - 2 buttons */}
-              <div className="flex gap-3 justify-center w-full">
+              <div className="flex gap-2 justify-center w-full">
                 <Button
                   variant={mainView === "history" ? "default" : "outline"}
                   onClick={() => setMainView("history")}
-                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px]"
+                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px]"
                 >
-                  <History className="w-5 h-5" />
-                  <span className="text-xs">היסטוריה</span>
+                  <History className="w-4 h-4" />
+                  <span className="text-[10px]">היסטוריה</span>
                 </Button>
                 <Button
                   variant={mainView === "alerts" ? "default" : "outline"}
                   onClick={() => setMainView("alerts")}
-                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px] relative"
+                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px] relative"
                 >
-                  <AlertTriangle className="w-5 h-5" />
-                  <span className="text-xs">התראות</span>
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="text-[10px]">התראות</span>
                   {getAlerts().length > 0 && (
-                    <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-xs font-semibold">
+                    <span className="absolute top-0.5 left-0.5 px-1 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-semibold">
                       {getAlerts().length}
                     </span>
                   )}
