@@ -615,7 +615,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                     {post}
                                   </th>
                                 ))}
-                                <th className="sticky right-0 z-20 text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background/95 backdrop-blur-sm">
+                                <th className="sticky right-0 z-30 text-right p-3 font-semibold text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background shadow-lg">
                                   שעה
                                 </th>
                               </tr>
@@ -629,14 +629,14 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 {[...POSTS].reverse().map((post) => (
                                   <td
                                     key={`${post}-${hour}`}
-                                    className="p-2 min-w-[196px] border-l border-border/30"
+                                    className="p-1.5 min-w-[147px] border-l border-border/30"
                                     onDragOver={handleDragOver}
                                     onDrop={(e) => { 
                                       e.preventDefault(); 
                                       handleDropSchedule(post, hour); 
                                     }}
                                   >
-                                    <div className="min-h-[80px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors">
+                                    <div className="min-h-[60px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-1.5 hover:border-primary transition-colors">
                                       <div className="flex flex-col gap-1">
                                         {getScheduleAssignments(post, hour).map((assignment) => {
                                           const isTamach = isGuardTamach(assignment.guard);
@@ -659,7 +659,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                 borderStyle: isCustomShift ? 'dashed' : 'solid',
                                                 color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
                                               }}
-                                              className="flex items-center justify-center gap-2 px-3 py-2 border-2 rounded text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                              className="flex items-center justify-center gap-2 px-2 py-1.5 border-2 rounded text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                             >
                                               <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>
                                                 {assignment.guard}
@@ -695,7 +695,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                     </div>
                                   </td>
                                 ))}
-                                <td className="sticky right-0 z-10 p-3 font-medium text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background/95 backdrop-blur-sm">
+                                <td className="sticky right-0 z-20 p-3 font-medium text-foreground whitespace-nowrap min-w-[100px] border-l border-border/30 bg-background shadow-lg">
                                   {hour}
                                 </td>
                               </tr>
@@ -790,7 +790,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                               borderStyle: isCustomShift ? 'dashed' : 'solid',
                                               color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
                                             }}
-                                             className="inline-flex items-center gap-2 px-3 py-1 border-2 rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                             className="inline-flex items-center gap-2 px-2 py-1 border-2 rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
                                              <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{assignment.guard}</span>
                                              {assignment.actualTime ? (
@@ -869,7 +869,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                               borderStyle: isCustomShift ? 'dashed' : 'solid',
                                               color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
                                             }}
-                                             className="inline-flex items-center gap-2 px-3 py-1 border-2 rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                             className="inline-flex items-center gap-2 px-2 py-1 border-2 rounded m-1 text-sm cursor-pointer hover:opacity-80 transition-opacity"
                                           >
                                              <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{assignment.guard}</span>
                                              {assignment.actualTime ? (
