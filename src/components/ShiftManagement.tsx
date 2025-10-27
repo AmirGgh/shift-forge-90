@@ -618,52 +618,59 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         {/* Main Navigation */}
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
           <div className="p-6">
-            <div className="flex flex-wrap gap-2 justify-center mb-6">
-              <Button
-                variant={mainView === "posts" ? "default" : "outline"}
-                onClick={() => setMainView("posts")}
-                className="flex-1 min-w-[120px]"
-              >
-                <MapPin className="w-4 h-4 ml-2" />
-                עמדות
-              </Button>
-              <Button
-                variant={mainView === "patrols" ? "default" : "outline"}
-                onClick={() => setMainView("patrols")}
-                className="flex-1 min-w-[120px]"
-              >
-                <Clock className="w-4 h-4 ml-2" />
-                פטרולים
-              </Button>
-              <Button
-                variant={mainView === "meals-breaks" ? "default" : "outline"}
-                onClick={() => setMainView("meals-breaks")}
-                className="flex-1 min-w-[120px]"
-              >
-                <UtensilsCrossed className="w-4 h-4 ml-2" />
-                אוכל והפסקות
-              </Button>
-              <Button
-                variant={mainView === "history" ? "default" : "outline"}
-                onClick={() => setMainView("history")}
-                className="flex-1 min-w-[120px]"
-              >
-                <History className="w-4 h-4 ml-2" />
-                היסטוריה
-              </Button>
-              <Button
-                variant={mainView === "alerts" ? "default" : "outline"}
-                onClick={() => setMainView("alerts")}
-                className="flex-1 min-w-[120px]"
-              >
-                <AlertTriangle className="w-4 h-4 ml-2" />
-                התראות
-                {getAlerts().length > 0 && (
-                  <span className="mr-1 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-xs font-semibold">
-                    {getAlerts().length}
-                  </span>
-                )}
-              </Button>
+            <div className="flex flex-col gap-3 items-center mb-6">
+              {/* First row - 3 buttons */}
+              <div className="flex gap-3 justify-center w-full">
+                <Button
+                  variant={mainView === "posts" ? "default" : "outline"}
+                  onClick={() => setMainView("posts")}
+                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px]"
+                >
+                  <MapPin className="w-5 h-5" />
+                  <span className="text-xs">עמדות</span>
+                </Button>
+                <Button
+                  variant={mainView === "patrols" ? "default" : "outline"}
+                  onClick={() => setMainView("patrols")}
+                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px]"
+                >
+                  <Clock className="w-5 h-5" />
+                  <span className="text-xs">פטרולים</span>
+                </Button>
+                <Button
+                  variant={mainView === "meals-breaks" ? "default" : "outline"}
+                  onClick={() => setMainView("meals-breaks")}
+                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px]"
+                >
+                  <UtensilsCrossed className="w-5 h-5" />
+                  <span className="text-xs">אוכל והפסקות</span>
+                </Button>
+              </div>
+              
+              {/* Second row - 2 buttons */}
+              <div className="flex gap-3 justify-center w-full">
+                <Button
+                  variant={mainView === "history" ? "default" : "outline"}
+                  onClick={() => setMainView("history")}
+                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px]"
+                >
+                  <History className="w-5 h-5" />
+                  <span className="text-xs">היסטוריה</span>
+                </Button>
+                <Button
+                  variant={mainView === "alerts" ? "default" : "outline"}
+                  onClick={() => setMainView("alerts")}
+                  className="flex flex-col items-center gap-1 h-auto py-3 px-6 min-w-[90px] relative"
+                >
+                  <AlertTriangle className="w-5 h-5" />
+                  <span className="text-xs">התראות</span>
+                  {getAlerts().length > 0 && (
+                    <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-xs font-semibold">
+                      {getAlerts().length}
+                    </span>
+                  )}
+                </Button>
+              </div>
             </div>
 
             {/* Posts Table */}
