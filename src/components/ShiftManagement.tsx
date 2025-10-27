@@ -33,7 +33,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getGuardsData, saveGuardsData, getShiftSettings } from "@/utils/storage";
 import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
-import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle, History } from "lucide-react";
 import { toast } from "sonner";
 
 interface ScheduleAssignment {
@@ -206,11 +206,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     tasks: true,
     schedule: true,
     history: true,
-    mealBreak: true,
     alerts: true,
   });
-  const [tasksView, setTasksView] = useState<"posts" | "patrols">("posts");
-  const [mealBreakView, setMealBreakView] = useState<"meals" | "breaks">("meals");
+  const [tasksView, setTasksView] = useState<"posts" | "patrols" | "meals" | "breaks">("posts");
   const [alertsKey, setAlertsKey] = useState(0); // Force re-render for alerts
   const [scheduleView, setScheduleView] = useState<"morning" | "evening">("morning");
   
@@ -640,7 +638,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                   <CollapsibleContent>
                     <div className="p-6">
                       {/* Toggle Buttons */}
-                      <div className="flex gap-2 mb-4">
+                      <div className="grid grid-cols-2 gap-2 mb-4">
                         <Button
                           variant={tasksView === "posts" ? "default" : "outline"}
                           onClick={() => setTasksView("posts")}
@@ -656,6 +654,22 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                         >
                           <Clock className="w-4 h-4 ml-2" />
                           פטרולים
+                        </Button>
+                        <Button
+                          variant={tasksView === "meals" ? "default" : "outline"}
+                          onClick={() => setTasksView("meals")}
+                          className="flex-1"
+                        >
+                          <UtensilsCrossed className="w-4 h-4 ml-2" />
+                          אוכל
+                        </Button>
+                        <Button
+                          variant={tasksView === "breaks" ? "default" : "outline"}
+                          onClick={() => setTasksView("breaks")}
+                          className="flex-1"
+                        >
+                          <Coffee className="w-4 h-4 ml-2" />
+                          הפסקות
                         </Button>
                       </div>
 
@@ -838,6 +852,136 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                           </div>
                         </Card>
                       )}
+
+                      {/* Meals View */}
+                      {tasksView === "meals" && (
+                        <Card className="p-4 border-border/30 bg-background/30"
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => { e.preventDefault(); handleDropMeal(); }}
+                        >
+                          <div
+                            className="min-h-[150px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-4 hover:border-primary transition-colors"
+                          >
+                            <div 
+                              className="space-y-2"
+                            >
+                              {meals.map((meal) => {
+                                const isTamach = isGuardTamach(meal.guard);
+                                const guardData = data.guards.find(g => g.name === meal.guard);
+                                const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                                const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                                const isOldTask = meal.actualTime && !isLatestTask(meal.guard, meal.id, "meal");
+                                return (
+                                <div
+                                  key={meal.id}
+                                  onMouseDown={() => handleLongPressStart(meal.id, meal.guard, "meal")}
+                                  onMouseUp={handleLongPressEnd}
+                                  onMouseLeave={handleLongPressEnd}
+                                  onTouchStart={() => handleLongPressStart(meal.id, meal.guard, "meal")}
+                                  onTouchEnd={handleLongPressEnd}
+                                  style={{ 
+                                    backgroundColor: isTamach ? getGuardColor(meal.guard) : `${getGuardColor(meal.guard)}30`,
+                                    borderColor: getGuardColor(meal.guard),
+                                    borderStyle: isCustomShift ? 'dashed' : 'solid',
+                                    color: isTamach ? 'hsl(var(--background))' : getGuardColor(meal.guard)
+                                  }}
+                                   className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                >
+                                   <div className="flex items-center gap-2">
+                                     <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{meal.guard}</span>
+                                     {meal.actualTime ? (
+                                       <CheckCircle2 
+                                         className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
+                                         onClick={(e) => {
+                                           e.stopPropagation();
+                                           handleSetActualTime(meal.id, "meal");
+                                         }}
+                                       />
+                                     ) : (
+                                       <Clock 
+                                         className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
+                                         onClick={(e) => {
+                                           e.stopPropagation();
+                                           handleSetActualTime(meal.id, "meal");
+                                         }}
+                                       />
+                                     )}
+                                     {meal.actualTime && (
+                                       <span className="text-xs opacity-70">{formatTime(meal.actualTime)}</span>
+                                     )}
+                                   </div>
+                                </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </Card>
+                      )}
+
+                      {/* Breaks View */}
+                      {tasksView === "breaks" && (
+                        <Card className="p-4 border-border/30 bg-background/30"
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => { e.preventDefault(); handleDropBreak(); }}
+                        >
+                          <div
+                            className="min-h-[150px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-4 hover:border-accent transition-colors"
+                          >
+                            <div 
+                              className="space-y-2"
+                            >
+                              {breaks.map((breakItem) => {
+                                const isTamach = isGuardTamach(breakItem.guard);
+                                const guardData = data.guards.find(g => g.name === breakItem.guard);
+                                const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                                const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                                const isOldTask = breakItem.actualTime && !isLatestTask(breakItem.guard, breakItem.id, "break");
+                                return (
+                                <div
+                                  key={breakItem.id}
+                                  onMouseDown={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
+                                  onMouseUp={handleLongPressEnd}
+                                  onMouseLeave={handleLongPressEnd}
+                                  onTouchStart={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
+                                  onTouchEnd={handleLongPressEnd}
+                                  style={{ 
+                                    backgroundColor: isTamach ? getGuardColor(breakItem.guard) : `${getGuardColor(breakItem.guard)}30`,
+                                    borderColor: getGuardColor(breakItem.guard),
+                                    borderStyle: isCustomShift ? 'dashed' : 'solid',
+                                    color: isTamach ? 'hsl(var(--background))' : getGuardColor(breakItem.guard)
+                                  }}
+                                   className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                >
+                                   <div className="flex items-center gap-2">
+                                     <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{breakItem.guard}</span>
+                                     {breakItem.actualTime ? (
+                                       <CheckCircle2 
+                                         className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
+                                         onClick={(e) => {
+                                           e.stopPropagation();
+                                           handleSetActualTime(breakItem.id, "break");
+                                         }}
+                                       />
+                                     ) : (
+                                       <Clock 
+                                         className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
+                                         onClick={(e) => {
+                                           e.stopPropagation();
+                                           handleSetActualTime(breakItem.id, "break");
+                                         }}
+                                       />
+                                     )}
+                                     {breakItem.actualTime && (
+                                       <span className="text-xs opacity-70">{formatTime(breakItem.actualTime)}</span>
+                                     )}
+                                   </div>
+                                </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </Card>
+                      )}
                     </div>
                   </CollapsibleContent>
                 </Card>
@@ -845,7 +989,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             </CarouselItem>
 
             {/* Section 2: History */}
-            <CarouselItem className="pl-2 md:pl-4">
+            <CarouselItem className="pl-2 md:pl-4" data-history-section>
               <Collapsible
                 open={openSections.history}
                 onOpenChange={(open) => setOpenSections(prev => ({ ...prev, history: open }))}
@@ -962,175 +1106,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             </Collapsible>
           </CarouselItem>
 
-          {/* Section 4: Meals and Breaks */}
-          <CarouselItem className="pl-2 md:pl-4">
-            <Collapsible
-              open={openSections.mealBreak}
-              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, mealBreak: open }))}
-            >
-            <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80 h-full">
-              <CollapsibleTrigger className="w-full p-6 flex items-center justify-between hover:bg-background/20 transition-colors rounded-t-lg">
-                <h2 className="text-xl font-semibold text-foreground">אוכל והפסקות</h2>
-                <ChevronDown className={`w-5 h-5 transition-transform ${openSections.mealBreak ? "rotate-180" : ""}`} />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="p-6">
-                  {/* Toggle Buttons */}
-                  <div className="flex gap-2 mb-4">
-                    <Button
-                      variant={mealBreakView === "meals" ? "default" : "outline"}
-                      onClick={() => setMealBreakView("meals")}
-                      className="flex-1"
-                    >
-                      <UtensilsCrossed className="w-4 h-4 ml-2" />
-                      אוכל
-                    </Button>
-                    <Button
-                      variant={mealBreakView === "breaks" ? "default" : "outline"}
-                      onClick={() => setMealBreakView("breaks")}
-                      className="flex-1"
-                    >
-                      <Coffee className="w-4 h-4 ml-2" />
-                      הפסקות
-                    </Button>
-                  </div>
-
-                  {/* Meals View */}
-                  {mealBreakView === "meals" && (
-                    <Card className="p-4 border-border/30 bg-background/30"
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => { e.preventDefault(); handleDropMeal(); }}
-                    >
-                      <div
-                        className="min-h-[150px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-4 hover:border-primary transition-colors"
-                      >
-                        <div 
-                          className="space-y-2"
-                        >
-                          {meals.map((meal) => {
-                            const isTamach = isGuardTamach(meal.guard);
-                            const guardData = data.guards.find(g => g.name === meal.guard);
-                            const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                            const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
-                            const isOldTask = meal.actualTime && !isLatestTask(meal.guard, meal.id, "meal");
-                            return (
-                            <div
-                              key={meal.id}
-                              onMouseDown={() => handleLongPressStart(meal.id, meal.guard, "meal")}
-                              onMouseUp={handleLongPressEnd}
-                              onMouseLeave={handleLongPressEnd}
-                              onTouchStart={() => handleLongPressStart(meal.id, meal.guard, "meal")}
-                              onTouchEnd={handleLongPressEnd}
-                              style={{ 
-                                backgroundColor: isTamach ? getGuardColor(meal.guard) : `${getGuardColor(meal.guard)}30`,
-                                borderColor: getGuardColor(meal.guard),
-                                borderStyle: isCustomShift ? 'dashed' : 'solid',
-                                color: isTamach ? 'hsl(var(--background))' : getGuardColor(meal.guard)
-                              }}
-                               className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                            >
-                               <div className="flex items-center gap-2">
-                                 <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{meal.guard}</span>
-                                 {meal.actualTime ? (
-                                   <CheckCircle2 
-                                     className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
-                                     onClick={(e) => {
-                                       e.stopPropagation();
-                                       handleSetActualTime(meal.id, "meal");
-                                     }}
-                                   />
-                                 ) : (
-                                   <Clock 
-                                     className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
-                                     onClick={(e) => {
-                                       e.stopPropagation();
-                                       handleSetActualTime(meal.id, "meal");
-                                     }}
-                                   />
-                                 )}
-                                 {meal.actualTime && (
-                                   <span className="text-xs opacity-70">{formatTime(meal.actualTime)}</span>
-                                 )}
-                               </div>
-                            </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </Card>
-                  )}
-
-                  {/* Breaks View */}
-                  {mealBreakView === "breaks" && (
-                    <Card className="p-4 border-border/30 bg-background/30"
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => { e.preventDefault(); handleDropBreak(); }}
-                    >
-                      <div
-                        className="min-h-[150px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-4 hover:border-accent transition-colors"
-                      >
-                        <div 
-                          className="space-y-2"
-                        >
-                          {breaks.map((breakItem) => {
-                            const isTamach = isGuardTamach(breakItem.guard);
-                            const guardData = data.guards.find(g => g.name === breakItem.guard);
-                            const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                            const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
-                            const isOldTask = breakItem.actualTime && !isLatestTask(breakItem.guard, breakItem.id, "break");
-                            return (
-                            <div
-                              key={breakItem.id}
-                              onMouseDown={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
-                              onMouseUp={handleLongPressEnd}
-                              onMouseLeave={handleLongPressEnd}
-                              onTouchStart={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
-                              onTouchEnd={handleLongPressEnd}
-                              style={{ 
-                                backgroundColor: isTamach ? getGuardColor(breakItem.guard) : `${getGuardColor(breakItem.guard)}30`,
-                                borderColor: getGuardColor(breakItem.guard),
-                                borderStyle: isCustomShift ? 'dashed' : 'solid',
-                                color: isTamach ? 'hsl(var(--background))' : getGuardColor(breakItem.guard)
-                              }}
-                               className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                            >
-                               <div className="flex items-center gap-2">
-                                 <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{breakItem.guard}</span>
-                                 {breakItem.actualTime ? (
-                                   <CheckCircle2 
-                                     className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform fill-current"
-                                     onClick={(e) => {
-                                       e.stopPropagation();
-                                       handleSetActualTime(breakItem.id, "break");
-                                     }}
-                                   />
-                                 ) : (
-                                   <Clock 
-                                     className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform"
-                                     onClick={(e) => {
-                                       e.stopPropagation();
-                                       handleSetActualTime(breakItem.id, "break");
-                                     }}
-                                   />
-                                 )}
-                                 {breakItem.actualTime && (
-                                   <span className="text-xs opacity-70">{formatTime(breakItem.actualTime)}</span>
-                                 )}
-                               </div>
-                            </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </Card>
-                  )}
-                </div>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
-          </CarouselItem>
-
-          {/* Section 5: Alerts */}
+          {/* Section 3: Alerts */}
           <CarouselItem className="pl-2 md:pl-4">
             <Collapsible
               open={openSections.alerts}
