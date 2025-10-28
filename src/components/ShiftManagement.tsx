@@ -886,7 +886,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             <div 
                               className="space-y-2"
                             >
-                              {meals.filter(meal => isInTimeRange(meal.actualTime)).map((meal) => {
+                              {meals.filter(meal => !meal.actualTime || isInTimeRange(meal.actualTime)).map((meal) => {
                                 const isTamach = isGuardTamach(meal.guard);
                                 const guardData = data.guards.find(g => g.name === meal.guard);
                                 const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
@@ -955,7 +955,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             <div 
                               className="space-y-2"
                             >
-                              {breaks.filter(breakItem => isInTimeRange(breakItem.actualTime)).map((breakItem) => {
+                              {breaks.filter(breakItem => !breakItem.actualTime || isInTimeRange(breakItem.actualTime)).map((breakItem) => {
                                 const isTamach = isGuardTamach(breakItem.guard);
                                 const guardData = data.guards.find(g => g.name === breakItem.guard);
                                 const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
@@ -1019,11 +1019,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                   )}
                   {(() => {
                       const allItems = [
-                        ...assignments.filter(a => isInTimeRange(a.actualTime)).map(a => ({ ...a, post: a.post, actualTime: a.actualTime })),
-                        ...patrols.filter(p => isInTimeRange(p.actualTime)).map(p => ({ ...p, post: p.patrol, actualTime: p.actualTime })),
-                        ...meals.filter(m => isInTimeRange(m.actualTime)).map(m => ({ ...m, guard: m.guard, post: "אוכל", time: m.time, actualTime: m.actualTime })),
-                        ...breaks.filter(b => isInTimeRange(b.actualTime)).map(b => ({ ...b, guard: b.guard, post: "הפסקה", time: b.time, actualTime: b.actualTime })),
-                        ...scheduleAssignments.filter(s => isInTimeRange(s.actualTime)).map(s => ({ ...s, guard: s.guard, post: `${s.post} (${s.hour})`, time: s.time, actualTime: s.actualTime }))
+                        ...assignments.filter(a => !a.actualTime || isInTimeRange(a.actualTime)).map(a => ({ ...a, post: a.post, actualTime: a.actualTime })),
+                        ...patrols.filter(p => !p.actualTime || isInTimeRange(p.actualTime)).map(p => ({ ...p, post: p.patrol, actualTime: p.actualTime })),
+                        ...meals.filter(m => !m.actualTime || isInTimeRange(m.actualTime)).map(m => ({ ...m, guard: m.guard, post: "אוכל", time: m.time, actualTime: m.actualTime })),
+                        ...breaks.filter(b => !b.actualTime || isInTimeRange(b.actualTime)).map(b => ({ ...b, guard: b.guard, post: "הפסקה", time: b.time, actualTime: b.actualTime })),
+                        ...scheduleAssignments.filter(s => !s.actualTime || isInTimeRange(s.actualTime)).map(s => ({ ...s, guard: s.guard, post: `${s.post} (${s.hour})`, time: s.time, actualTime: s.actualTime }))
                       ].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
                       
                       // Group by guard to show their journey
