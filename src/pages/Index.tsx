@@ -20,8 +20,8 @@ import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import GuardsSetup from "@/components/GuardsSetup";
 import ShiftManagement from "@/components/ShiftManagement";
-import { getGuardsData, resetGuardsData, resetEveningShift, getShiftSettings, saveShiftSettings } from "@/utils/storage";
-import { Users, Calendar, Menu, RefreshCw, Settings } from "lucide-react";
+import { getGuardsData, resetGuardsData, resetEveningShift, getShiftSettings, saveShiftSettings, saveGuardsData } from "@/utils/storage";
+import { Users, Calendar, Menu, RefreshCw, Settings, ArrowLeftRight, Copy, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 type Screen = "setup" | "management";
@@ -34,6 +34,8 @@ const Index = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(() => getShiftSettings());
   const [menuOpen, setMenuOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [importData, setImportData] = useState("");
 
   const handleSetupComplete = () => {
     setScreen("management");
@@ -100,6 +102,30 @@ const Index = () => {
     }
   };
 
+  const handleExportData = () => {
+    const data = getGuardsData();
+    const jsonString = JSON.stringify(data);
+    navigator.clipboard.writeText(jsonString);
+    toast.success("המידע הועתק ללוח");
+  };
+
+  const handleImportData = () => {
+    try {
+      const data = JSON.parse(importData);
+      if (!data.guards || !data.assignments || !data.patrols || !data.meals || !data.breaks) {
+        toast.error("פורמט המידע לא תקין");
+        return;
+      }
+      saveGuardsData(data);
+      toast.success("המידע יובא בהצלחה");
+      setTransferOpen(false);
+      setImportData("");
+      window.location.reload();
+    } catch (error) {
+      toast.error("שגיאה בפענוח המידע - וודא שהפורמט תקין");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -152,6 +178,17 @@ const Index = () => {
                 </Button>
                 <Button
                   onClick={() => {
+                    setTransferOpen(true);
+                    setMenuOpen(false);
+                  }}
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
+                  <ArrowLeftRight className="w-4 h-4 ml-2" />
+                  העברת משמרת
+                </Button>
+                <Button
+                  onClick={() => {
                     handleEveningShiftReset();
                     setMenuOpen(false);
                   }}
@@ -196,6 +233,53 @@ const Index = () => {
       ) : (
         <ShiftManagement />
       )}
+
+      {/* Transfer Dialog */}
+      <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
+        <DialogContent className="sm:max-w-[600px]" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>העברת משמרת</DialogTitle>
+            <DialogDescription>
+              העבר את כל המידע הנצבר למשמרת חדשה
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            {/* Export Section */}
+            <div className="space-y-3 p-4 border border-border/50 rounded-lg bg-card/50">
+              <Label className="text-base font-semibold">ייצוא מידע</Label>
+              <p className="text-sm text-muted-foreground">
+                לחץ על הכפתור להעתקת כל המידע ללוח
+              </p>
+              <Button onClick={handleExportData} className="w-full">
+                <Copy className="w-4 h-4 ml-2" />
+                העתק את כל המידע
+              </Button>
+            </div>
+
+            {/* Import Section */}
+            <div className="space-y-3 p-4 border border-border/50 rounded-lg bg-card/50">
+              <Label className="text-base font-semibold">ייבוא מידע</Label>
+              <p className="text-sm text-muted-foreground">
+                הדבק את המידע שהועתק מהמשמרת הקודמת
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="importData">מידע לייבוא</Label>
+                <textarea
+                  id="importData"
+                  value={importData}
+                  onChange={(e) => setImportData(e.target.value)}
+                  className="flex min-h-[120px] w-full rounded-md border-2 border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="הדבק כאן את המידע המיוצא..."
+                />
+              </div>
+              <Button onClick={handleImportData} className="w-full" disabled={!importData.trim()}>
+                <Upload className="w-4 h-4 ml-2" />
+                הוסף את כל המידע למשמרת החדשה
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Settings Dialog */}
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
