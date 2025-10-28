@@ -26,7 +26,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getGuardsData, saveGuardsData, getShiftSettings } from "@/utils/storage";
 import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
-import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle, History } from "lucide-react";
+import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle, History, PersonStanding, Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
 
 interface ScheduleAssignment {
@@ -598,78 +598,71 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         {/* Main Navigation */}
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
           <div className="p-6">
-            <div className="flex flex-col gap-2 items-center mb-6">
-              {/* First row - 3 buttons + time filter */}
-              <div className="flex gap-2 justify-center w-full items-center">
-                <Button
-                  variant={mainView === "posts" ? "default" : "outline"}
-                  onClick={() => setMainView("posts")}
-                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px]"
-                >
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-[10px]">עמדות</span>
-                </Button>
-                <Button
-                  variant={mainView === "patrols" ? "default" : "outline"}
-                  onClick={() => setMainView("patrols")}
-                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px]"
-                >
-                  <Clock className="w-4 h-4" />
-                  <span className="text-[10px]">פטרולים</span>
-                </Button>
-                <Button
-                  variant={mainView === "meals-breaks" ? "default" : "outline"}
-                  onClick={() => setMainView("meals-breaks")}
-                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px]"
-                >
-                  <UtensilsCrossed className="w-4 h-4" />
-                  <span className="text-[10px]">אוכל והפסקות</span>
-                </Button>
-              </div>
-              
-              {/* Second row - 2 buttons + time filter */}
-              <div className="flex gap-2 justify-center w-full items-center">
-                <Button
-                  variant={mainView === "history" ? "default" : "outline"}
-                  onClick={() => setMainView("history")}
-                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px]"
-                >
-                  <History className="w-4 h-4" />
-                  <span className="text-[10px]">היסטוריה</span>
-                </Button>
-                <Button
-                  variant={mainView === "alerts" ? "default" : "outline"}
-                  onClick={() => setMainView("alerts")}
-                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-3 min-w-[70px] relative"
-                >
-                  <AlertTriangle className="w-4 h-4" />
-                  <span className="text-[10px]">התראות</span>
-                  {getAlerts().length > 0 && (
-                    <span className="absolute top-0.5 left-0.5 px-1 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-semibold">
-                      {getAlerts().length}
-                    </span>
-                  )}
-                </Button>
-                
-                {/* Time filter - only show when not in patrols view */}
-                {mainView !== "patrols" && (
-                  <div className="mr-2">
-                    <ToggleGroup 
-                      type="single" 
-                      value={scheduleView} 
-                      onValueChange={(value) => value && setScheduleView(value as "morning" | "evening")}
-                      className="border border-border rounded"
-                    >
-                      <ToggleGroupItem value="morning" className="px-3 py-1 text-[10px] h-auto">
-                        בוקר
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="evening" className="px-3 py-1 text-[10px] h-auto">
-                        ערב
-                      </ToggleGroupItem>
-                    </ToggleGroup>
-                  </div>
+            <div className="flex gap-2 items-center justify-center mb-6">
+              <Button
+                variant={mainView === "posts" ? "default" : "outline"}
+                onClick={() => setMainView("posts")}
+                className="h-10 w-10 p-0"
+                size="icon"
+              >
+                <MapPin className="w-5 h-5" />
+              </Button>
+              <Button
+                variant={mainView === "patrols" ? "default" : "outline"}
+                onClick={() => setMainView("patrols")}
+                className="h-10 w-10 p-0"
+                size="icon"
+              >
+                <PersonStanding className="w-5 h-5" />
+              </Button>
+              <Button
+                variant={mainView === "meals-breaks" ? "default" : "outline"}
+                onClick={() => setMainView("meals-breaks")}
+                className="h-10 w-10 p-0"
+                size="icon"
+              >
+                <UtensilsCrossed className="w-5 h-5" />
+              </Button>
+              <Button
+                variant={mainView === "history" ? "default" : "outline"}
+                onClick={() => setMainView("history")}
+                className="h-10 w-10 p-0"
+                size="icon"
+              >
+                <History className="w-5 h-5" />
+              </Button>
+              <Button
+                variant={mainView === "alerts" ? "default" : "outline"}
+                onClick={() => setMainView("alerts")}
+                className="h-10 w-10 p-0 relative"
+                size="icon"
+              >
+                <AlertTriangle className="w-5 h-5" />
+                {getAlerts().length > 0 && (
+                  <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
+                    {getAlerts().length}
+                  </span>
                 )}
-              </div>
+              </Button>
+              
+              {/* Time filter - only show when not in patrols view */}
+              {mainView !== "patrols" && (
+                <div className="mr-2">
+                  <ToggleGroup 
+                    type="single" 
+                    value={scheduleView} 
+                    onValueChange={(value) => value && setScheduleView(value as "morning" | "evening")}
+                    className="border border-border rounded"
+                  >
+                    <ToggleGroupItem value="morning" className="px-3 py-1 h-auto">
+                      <Sun className="w-4 h-4" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="evening" className="px-3 py-1 h-auto">
+                      <Moon className="w-4 h-4" />
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+              )}
             </div>
 
             {/* Guards Bank - Always visible */}
