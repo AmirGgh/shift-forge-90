@@ -26,8 +26,9 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getGuardsData, saveGuardsData, getShiftSettings } from "@/utils/storage";
 import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
-import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle, History, PersonStanding, Moon, Sun } from "lucide-react";
+import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle, History, PersonStanding, Moon, Sun, Edit } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 interface ScheduleAssignment {
   id: string;
@@ -194,6 +195,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     target: string;
     type: "post" | "patrol" | "meal" | "break" | "schedule";
   } | null>(null);
+  const [editTimeTarget, setEditTimeTarget] = useState<{
+    id: string;
+    guard: string;
+    type: "post" | "patrol" | "meal" | "break" | "schedule";
+    currentTime: string;
+  } | null>(null);
+  const [editTimeValue, setEditTimeValue] = useState("");
   const [openSections, setOpenSections] = useState({
     guards: true,
     tasks: true,
@@ -356,6 +364,141 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     }
 
     saveGuardsData(data);
+    setDeleteTarget(null);
+  };
+
+  const handleEditTime = () => {
+    if (!editTimeTarget) return;
+    
+    // Get current item to extract date
+    let currentItem: any = null;
+    if (editTimeTarget.type === "post") {
+      currentItem = assignments.find(a => a.id === editTimeTarget.id);
+    } else if (editTimeTarget.type === "patrol") {
+      currentItem = patrols.find(p => p.id === editTimeTarget.id);
+    } else if (editTimeTarget.type === "meal") {
+      currentItem = meals.find(m => m.id === editTimeTarget.id);
+    } else if (editTimeTarget.type === "break") {
+      currentItem = breaks.find(b => b.id === editTimeTarget.id);
+    } else if (editTimeTarget.type === "schedule") {
+      currentItem = scheduleAssignments.find(s => s.id === editTimeTarget.id);
+    }
+
+    if (!currentItem || !currentItem.actualTime) {
+      toast.error("לא ניתן לערוך שעה - המשימה אינה פעילה");
+      setEditTimeTarget(null);
+      return;
+    }
+
+    // Parse the time input (HH:MM format)
+    const timeMatch = editTimeValue.match(/^(\d{1,2}):(\d{2})$/);
+    if (!timeMatch) {
+      toast.error("פורמט שעה לא תקין. השתמש בפורמט HH:MM");
+      return;
+    }
+
+    const hours = parseInt(timeMatch[1]);
+    const minutes = parseInt(timeMatch[2]);
+
+    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+      toast.error("שעה לא תקינה");
+      return;
+    }
+
+    // Create new date with the same date but updated time
+    const currentDate = new Date(currentItem.actualTime);
+    const newDate = new Date(currentDate);
+    newDate.setHours(hours, minutes, 0, 0);
+
+    const data = getGuardsData();
+
+    if (editTimeTarget.type === "post") {
+      const updatedAssignments = assignments.map(a =>
+        a.id === editTimeTarget.id
+          ? { ...a, actualTime: newDate.toISOString() }
+          : a
+      );
+      setAssignments(updatedAssignments);
+      data.assignments = updatedAssignments;
+    } else if (editTimeTarget.type === "patrol") {
+      const updatedPatrols = patrols.map(p =>
+        p.id === editTimeTarget.id
+          ? { ...p, actualTime: newDate.toISOString() }
+          : p
+      );
+      setPatrols(updatedPatrols);
+      data.patrols = updatedPatrols;
+    } else if (editTimeTarget.type === "meal") {
+      const updatedMeals = meals.map(m =>
+        m.id === editTimeTarget.id
+          ? { ...m, actualTime: newDate.toISOString() }
+          : m
+      );
+      setMeals(updatedMeals);
+      data.meals = updatedMeals;
+    } else if (editTimeTarget.type === "break") {
+      const updatedBreaks = breaks.map(b =>
+        b.id === editTimeTarget.id
+          ? { ...b, actualTime: newDate.toISOString() }
+          : b
+      );
+      setBreaks(updatedBreaks);
+      data.breaks = updatedBreaks;
+    } else if (editTimeTarget.type === "schedule") {
+      const updatedSchedule = scheduleAssignments.map(s =>
+        s.id === editTimeTarget.id
+          ? { ...s, actualTime: newDate.toISOString() }
+          : s
+      );
+      setScheduleAssignments(updatedSchedule);
+      (data as any).scheduleAssignments = updatedSchedule;
+    }
+
+    saveGuardsData(data);
+    toast.success(`השעה עודכנה ל-${editTimeValue}`);
+    setEditTimeTarget(null);
+    setEditTimeValue("");
+  };
+
+  const handleOpenEditTime = () => {
+    if (!deleteTarget) return;
+    
+    // Get current actualTime
+    let currentTime = "";
+    if (deleteTarget.type === "post") {
+      const item = assignments.find(a => a.id === deleteTarget.target);
+      currentTime = item?.actualTime || "";
+    } else if (deleteTarget.type === "patrol") {
+      const item = patrols.find(p => p.id === deleteTarget.target);
+      currentTime = item?.actualTime || "";
+    } else if (deleteTarget.type === "meal") {
+      const item = meals.find(m => m.id === deleteTarget.target);
+      currentTime = item?.actualTime || "";
+    } else if (deleteTarget.type === "break") {
+      const item = breaks.find(b => b.id === deleteTarget.target);
+      currentTime = item?.actualTime || "";
+    } else if (deleteTarget.type === "schedule") {
+      const item = scheduleAssignments.find(s => s.id === deleteTarget.target);
+      currentTime = item?.actualTime || "";
+    }
+
+    if (!currentTime) {
+      toast.error("לא ניתן לערוך שעה - המשימה אינה פעילה");
+      setDeleteTarget(null);
+      return;
+    }
+
+    // Format current time to HH:MM
+    const date = new Date(currentTime);
+    const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    
+    setEditTimeTarget({
+      id: deleteTarget.target,
+      guard: deleteTarget.guard,
+      type: deleteTarget.type,
+      currentTime: currentTime
+    });
+    setEditTimeValue(formattedTime);
     setDeleteTarget(null);
   };
 
@@ -1185,22 +1328,76 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent className="bg-card border-border/50">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground text-right">מחיקת הצבה</AlertDialogTitle>
+            <AlertDialogTitle className="text-foreground text-right">פעולות על הצבה</AlertDialogTitle>
             <AlertDialogDescription className="text-right text-lg">
               {deleteTarget && (
                 <span className="text-foreground font-medium">
-                  האם למחוק את <span className="text-primary font-bold">{deleteTarget.guard}</span>?
+                  בחר פעולה עבור <span className="text-primary font-bold">{deleteTarget.guard}</span>
                 </span>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row-reverse gap-2">
-            <Button onClick={handleDeleteAssignment} variant="destructive" className="flex-1">
-              אישור
+          <AlertDialogFooter className="flex-col gap-2">
+            <Button 
+              onClick={handleOpenEditTime} 
+              variant="outline" 
+              className="w-full flex items-center justify-center gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              עריכת שעה
+            </Button>
+            <Button 
+              onClick={handleDeleteAssignment} 
+              variant="destructive" 
+              className="w-full"
+            >
+              מחיקה
             </Button>
             <Button
               variant="outline"
               onClick={() => setDeleteTarget(null)}
+              className="w-full"
+            >
+              ביטול
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Time Dialog */}
+      <AlertDialog open={!!editTimeTarget} onOpenChange={(open) => !open && setEditTimeTarget(null)}>
+        <AlertDialogContent className="bg-card border-border/50">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground text-right">עריכת שעה</AlertDialogTitle>
+            <AlertDialogDescription className="text-right text-lg">
+              {editTimeTarget && (
+                <div className="space-y-4">
+                  <span className="text-foreground font-medium">
+                    ערוך את השעה עבור <span className="text-primary font-bold">{editTimeTarget.guard}</span>
+                  </span>
+                  <div className="pt-4">
+                    <Input
+                      type="time"
+                      value={editTimeValue}
+                      onChange={(e) => setEditTimeValue(e.target.value)}
+                      className="text-right text-lg"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <Button onClick={handleEditTime} className="flex-1">
+              אישור
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditTimeTarget(null);
+                setEditTimeValue("");
+              }}
               className="flex-1"
             >
               ביטול
