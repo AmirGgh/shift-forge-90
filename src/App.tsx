@@ -29,7 +29,9 @@ const App = () => (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <TooltipProvider>
         <Toaster />
-        <Sonner position="top-center" />
+        <Sonner 
+          position="bottom-left"
+        />
         <AppContent />
       </TooltipProvider>
     </ThemeProvider>
