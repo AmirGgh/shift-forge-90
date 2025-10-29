@@ -508,6 +508,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     const data = getGuardsData();
 
     if (pendingAssignment.type === "post") {
+      // Check if guard is certified for desk positions
+      const guard = data.guards.find(g => g.name === pendingAssignment.guard);
+      const restrictedPosts = ["דסק 15", "דסק לובי"];
+      
+      if (!guard?.certified && restrictedPosts.includes(pendingAssignment.target)) {
+        toast.error(`לא ניתן להציב מאבטח לא מוסמך ב${pendingAssignment.target}`);
+        setPendingAssignment(null);
+        return;
+      }
+
       const newAssignment: Assignment = {
         id: `${Date.now()}-${Math.random()}`,
         guard: pendingAssignment.guard,
@@ -550,6 +560,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       data.breaks = newBreaks;
       toast.success(`${pendingAssignment.guard} הוצב בהפסקה`);
     } else if (pendingAssignment.type === "schedule" && pendingAssignment.hour) {
+      // Check if guard is certified for desk positions in schedule
+      const guard = data.guards.find(g => g.name === pendingAssignment.guard);
+      const restrictedPosts = ["דסק 15", "דסק לובי"];
+      
+      if (!guard?.certified && restrictedPosts.includes(pendingAssignment.target)) {
+        toast.error(`לא ניתן להציב מאבטח לא מוסמך ב${pendingAssignment.target}`);
+        setPendingAssignment(null);
+        return;
+      }
+
       const newSchedule: ScheduleAssignment = {
         id: `${Date.now()}-${Math.random()}`,
         guard: pendingAssignment.guard,
