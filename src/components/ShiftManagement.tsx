@@ -978,26 +978,27 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                        <div 
                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors"
                                        >
-                                         {getAssignmentsForPatrol(patrol).map((assignment) => {
-                                          const isTamach = isGuardTamach(assignment.guard);
-                                          const guardData = data.guards.find(g => g.name === assignment.guard);
-                                          const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                                          const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
-                                          const isOldTask = assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "patrol");
-                                          return (
-                                          <div
-                                            key={assignment.id}
-                                            onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
-                                            onMouseUp={handleLongPressEnd}
-                                            onMouseLeave={handleLongPressEnd}
-                                            onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
-                                            onTouchEnd={handleLongPressEnd}
-                                            style={{ 
-                                              backgroundColor: isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`,
-                                              borderColor: getGuardColor(assignment.guard),
-                                              borderStyle: isCustomShift ? 'dashed' : 'solid',
-                                              color: isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard)
-                                            }}
+                                          {getAssignmentsForPatrol(patrol).map((assignment) => {
+                                           const iPhone = isIPhone();
+                                           const isTamach = isGuardTamach(assignment.guard);
+                                           const guardData = data.guards.find(g => g.name === assignment.guard);
+                                           const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                                           const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                                           const isOldTask = assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "patrol");
+                                           return (
+                                           <div
+                                             key={assignment.id}
+                                             onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
+                                             onMouseUp={handleLongPressEnd}
+                                             onMouseLeave={handleLongPressEnd}
+                                             onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
+                                             onTouchEnd={handleLongPressEnd}
+                                             style={{ 
+                                               backgroundColor: iPhone ? 'transparent' : (isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`),
+                                               borderColor: getGuardColor(assignment.guard),
+                                               borderStyle: isCustomShift ? 'dashed' : 'solid',
+                                               color: iPhone ? getGuardColor(assignment.guard) : (isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard))
+                                             }}
                                              className="inline-flex items-center gap-1 px-1 py-0.5 border-2 rounded m-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
                                           >
                                              <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{assignment.guard}</span>
@@ -1053,26 +1054,27 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             <div 
                               className="space-y-2"
                             >
-                              {meals.filter(meal => !meal.actualTime || isInTimeRange(meal.actualTime)).map((meal) => {
-                                const isTamach = isGuardTamach(meal.guard);
-                                const guardData = data.guards.find(g => g.name === meal.guard);
-                                const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                                const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
-                                const isOldTask = meal.actualTime && !isLatestTask(meal.guard, meal.id, "meal");
-                                return (
-                                <div
-                                  key={meal.id}
-                                  onMouseDown={() => handleLongPressStart(meal.id, meal.guard, "meal")}
-                                  onMouseUp={handleLongPressEnd}
-                                  onMouseLeave={handleLongPressEnd}
-                                  onTouchStart={() => handleLongPressStart(meal.id, meal.guard, "meal")}
-                                  onTouchEnd={handleLongPressEnd}
-                                  style={{ 
-                                    backgroundColor: isTamach ? getGuardColor(meal.guard) : `${getGuardColor(meal.guard)}30`,
-                                    borderColor: getGuardColor(meal.guard),
-                                    borderStyle: isCustomShift ? 'dashed' : 'solid',
-                                    color: isTamach ? 'hsl(var(--background))' : getGuardColor(meal.guard)
-                                  }}
+                               {meals.filter(meal => !meal.actualTime || isInTimeRange(meal.actualTime)).map((meal) => {
+                                 const iPhone = isIPhone();
+                                 const isTamach = isGuardTamach(meal.guard);
+                                 const guardData = data.guards.find(g => g.name === meal.guard);
+                                 const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                                 const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                                 const isOldTask = meal.actualTime && !isLatestTask(meal.guard, meal.id, "meal");
+                                 return (
+                                 <div
+                                   key={meal.id}
+                                   onMouseDown={() => handleLongPressStart(meal.id, meal.guard, "meal")}
+                                   onMouseUp={handleLongPressEnd}
+                                   onMouseLeave={handleLongPressEnd}
+                                   onTouchStart={() => handleLongPressStart(meal.id, meal.guard, "meal")}
+                                   onTouchEnd={handleLongPressEnd}
+                                   style={{ 
+                                     backgroundColor: iPhone ? 'transparent' : (isTamach ? getGuardColor(meal.guard) : `${getGuardColor(meal.guard)}30`),
+                                     borderColor: getGuardColor(meal.guard),
+                                     borderStyle: isCustomShift ? 'dashed' : 'solid',
+                                     color: iPhone ? getGuardColor(meal.guard) : (isTamach ? 'hsl(var(--background))' : getGuardColor(meal.guard))
+                                   }}
                                    className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                                 >
                                    <div className="flex items-center gap-2">
@@ -1122,26 +1124,27 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                             <div 
                               className="space-y-2"
                             >
-                              {breaks.filter(breakItem => !breakItem.actualTime || isInTimeRange(breakItem.actualTime)).map((breakItem) => {
-                                const isTamach = isGuardTamach(breakItem.guard);
-                                const guardData = data.guards.find(g => g.name === breakItem.guard);
-                                const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                                const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
-                                const isOldTask = breakItem.actualTime && !isLatestTask(breakItem.guard, breakItem.id, "break");
-                                return (
-                                <div
-                                  key={breakItem.id}
-                                  onMouseDown={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
-                                  onMouseUp={handleLongPressEnd}
-                                  onMouseLeave={handleLongPressEnd}
-                                  onTouchStart={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
-                                  onTouchEnd={handleLongPressEnd}
-                                  style={{ 
-                                    backgroundColor: isTamach ? getGuardColor(breakItem.guard) : `${getGuardColor(breakItem.guard)}30`,
-                                    borderColor: getGuardColor(breakItem.guard),
-                                    borderStyle: isCustomShift ? 'dashed' : 'solid',
-                                    color: isTamach ? 'hsl(var(--background))' : getGuardColor(breakItem.guard)
-                                  }}
+                               {breaks.filter(breakItem => !breakItem.actualTime || isInTimeRange(breakItem.actualTime)).map((breakItem) => {
+                                 const iPhone = isIPhone();
+                                 const isTamach = isGuardTamach(breakItem.guard);
+                                 const guardData = data.guards.find(g => g.name === breakItem.guard);
+                                 const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
+                                 const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
+                                 const isOldTask = breakItem.actualTime && !isLatestTask(breakItem.guard, breakItem.id, "break");
+                                 return (
+                                 <div
+                                   key={breakItem.id}
+                                   onMouseDown={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
+                                   onMouseUp={handleLongPressEnd}
+                                   onMouseLeave={handleLongPressEnd}
+                                   onTouchStart={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
+                                   onTouchEnd={handleLongPressEnd}
+                                   style={{ 
+                                     backgroundColor: iPhone ? 'transparent' : (isTamach ? getGuardColor(breakItem.guard) : `${getGuardColor(breakItem.guard)}30`),
+                                     borderColor: getGuardColor(breakItem.guard),
+                                     borderStyle: isCustomShift ? 'dashed' : 'solid',
+                                     color: iPhone ? getGuardColor(breakItem.guard) : (isTamach ? 'hsl(var(--background))' : getGuardColor(breakItem.guard))
+                                   }}
                                    className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                                 >
                                    <div className="flex items-center gap-2">
