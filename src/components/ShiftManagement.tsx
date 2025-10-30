@@ -44,6 +44,12 @@ interface ShiftManagementProps {}
 const ShiftManagement = ({}: ShiftManagementProps) => {
   const data = getGuardsData();
   
+  // Detect if running on iPhone
+  const isIPhone = () => {
+    if (typeof window === 'undefined') return false;
+    return /iPhone/i.test(navigator.userAgent);
+  };
+
   // Get guard color from stored data
   const getGuardColor = (guardName: string) => {
     const guard = data.guards.find(g => g.name === guardName);
@@ -901,7 +907,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                               }}
                                             >
                                               <div className="min-h-[60px] h-[60px] flex flex-wrap gap-1 content-start overflow-hidden">
-                                                {cellAssignments.map((assignment) => (
+                                                {cellAssignments.map((assignment) => {
+                                                  const iPhone = isIPhone();
+                                                  const guardColor = getGuardColor(assignment.guard);
+                                                  return (
                                                   <div
                                                     key={assignment.id}
                                                     onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
@@ -911,10 +920,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                     onTouchEnd={handleLongPressEnd}
                                                     onClick={() => handleSetActualTime(assignment.id, "schedule")}
                                                     style={{
-                                                      backgroundColor: getGuardColor(assignment.guard),
-                                                      borderColor: getGuardColor(assignment.guard)
+                                                      backgroundColor: iPhone ? 'transparent' : guardColor,
+                                                      borderColor: guardColor,
+                                                      color: iPhone ? guardColor : 'white'
                                                     }}
-                                                    className={`px-2 py-0.5 text-xs rounded border cursor-pointer hover:opacity-80 transition-opacity text-white font-medium ${
+                                                    className={`px-2 py-0.5 text-xs rounded border-2 cursor-pointer hover:opacity-80 transition-opacity font-medium ${
                                                       assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule")
                                                         ? "line-through opacity-50"
                                                         : ""
@@ -929,7 +939,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                       )}
                                                     </span>
                                                   </div>
-                                                ))}
+                                                  );
+                                                })}
                                               </div>
                                             </TableCell>
                                           );
