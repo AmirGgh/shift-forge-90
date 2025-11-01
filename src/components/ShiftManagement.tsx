@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getGuardsData, saveGuardsData, getShiftSettings } from "@/utils/storage";
-import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS } from "@/types/guards";
+import { Assignment, PatrolAssignment, MealAssignment, BreakAssignment, POSTS, PATROLS, HIGHLIGHTED_POSTS } from "@/types/guards";
 import { Clock, MapPin, ChevronDown, UtensilsCrossed, Coffee, CheckCircle2, AlertTriangle, History, PersonStanding, Moon, Sun, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -877,7 +877,13 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                   <TableRow className="border-b-2 border-border">
                                     <TableHead className="text-right font-semibold min-w-[80px] border-l-2 border-border">שעה</TableHead>
                                     {POSTS.map((post) => (
-                                      <TableHead key={post} className="text-right font-semibold min-w-[120px] border-l-2 border-border">
+                                      <TableHead 
+                                        key={post} 
+                                        className="text-right font-semibold min-w-[72px] border-l-2 border-border"
+                                        style={{
+                                          backgroundColor: HIGHLIGHTED_POSTS.includes(post) ? 'hsl(var(--accent) / 0.15)' : undefined
+                                        }}
+                                      >
                                         {post}
                                       </TableHead>
                                     ))}
@@ -900,6 +906,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                             <TableCell 
                                               key={post} 
                                               className="p-2 border-l-2 border-border"
+                                              style={{
+                                                backgroundColor: HIGHLIGHTED_POSTS.includes(post) ? 'hsl(var(--accent) / 0.15)' : undefined
+                                              }}
                                               onDragOver={handleDragOver}
                                               onDrop={(e) => {
                                                 e.preventDefault();

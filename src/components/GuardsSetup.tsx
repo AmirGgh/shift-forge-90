@@ -32,7 +32,8 @@ const SHIFT_TYPES = [
   "תמך 7-19",
   "תמך 8-20",
   "ערב 14-22",
-  "ערב 15-23"
+  "ערב 15-23",
+  "חמוש"
 ];
 
 const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
