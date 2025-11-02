@@ -18,16 +18,16 @@ export const useAlertMonitor = () => {
       const now = new Date();
       const currentAlerts: Alert[] = [];
 
-      // Get the latest active task for each guard
-      const guardLatestTasks = new Map<string, { type: string; post: string; actualTime: string; thresholdMinutes: number }>();
+      // מאבטח יכול להיות רק בפעילות אחת - מחפשים את הפעילות האחרונה לפי actualTime
+      const guardLatestActivity = new Map<string, { type: string; post: string; actualTime: string; thresholdMinutes: number }>();
 
-      // Collect all tasks with actualTime
+      // אוספים את כל הפעילויות ושומרים רק את האחרונה לכל מאבטח
       data.assignments.forEach(assignment => {
         if (!assignment.actualTime) return;
         const time = new Date(assignment.actualTime).getTime();
-        const current = guardLatestTasks.get(assignment.guard);
+        const current = guardLatestActivity.get(assignment.guard);
         if (!current || new Date(current.actualTime).getTime() < time) {
-          guardLatestTasks.set(assignment.guard, {
+          guardLatestActivity.set(assignment.guard, {
             type: 'post',
             post: `עמדה: ${assignment.post}`,
             actualTime: assignment.actualTime,
@@ -39,9 +39,9 @@ export const useAlertMonitor = () => {
       data.patrols?.forEach(patrol => {
         if (!patrol.actualTime) return;
         const time = new Date(patrol.actualTime).getTime();
-        const current = guardLatestTasks.get(patrol.guard);
+        const current = guardLatestActivity.get(patrol.guard);
         if (!current || new Date(current.actualTime).getTime() < time) {
-          guardLatestTasks.set(patrol.guard, {
+          guardLatestActivity.set(patrol.guard, {
             type: 'patrol',
             post: `פטרול: ${patrol.patrol}`,
             actualTime: patrol.actualTime,
@@ -53,9 +53,9 @@ export const useAlertMonitor = () => {
       data.breaks.forEach(breakAssignment => {
         if (!breakAssignment.actualTime) return;
         const time = new Date(breakAssignment.actualTime).getTime();
-        const current = guardLatestTasks.get(breakAssignment.guard);
+        const current = guardLatestActivity.get(breakAssignment.guard);
         if (!current || new Date(current.actualTime).getTime() < time) {
-          guardLatestTasks.set(breakAssignment.guard, {
+          guardLatestActivity.set(breakAssignment.guard, {
             type: 'break',
             post: "הפסקה",
             actualTime: breakAssignment.actualTime,
@@ -67,9 +67,9 @@ export const useAlertMonitor = () => {
       data.meals.forEach(meal => {
         if (!meal.actualTime) return;
         const time = new Date(meal.actualTime).getTime();
-        const current = guardLatestTasks.get(meal.guard);
+        const current = guardLatestActivity.get(meal.guard);
         if (!current || new Date(current.actualTime).getTime() < time) {
-          guardLatestTasks.set(meal.guard, {
+          guardLatestActivity.set(meal.guard, {
             type: 'meal',
             post: "אוכל",
             actualTime: meal.actualTime,
@@ -78,15 +78,16 @@ export const useAlertMonitor = () => {
         }
       });
 
-      // Check only the latest task for each guard
-      guardLatestTasks.forEach((task, guard) => {
-        const taskTime = new Date(task.actualTime);
-        const durationMinutes = (now.getTime() - taskTime.getTime()) / (1000 * 60);
+      // בודקים רק את הפעילות האחרונה של כל מאבטח
+      guardLatestActivity.forEach((activity, guard) => {
+        const activityTime = new Date(activity.actualTime);
+        const durationMinutes = (now.getTime() - activityTime.getTime()) / (1000 * 60);
         
-        if (durationMinutes >= task.thresholdMinutes) {
+        // מתריעים רק אם עבר מספיק זמן מהפעילות האחרונה
+        if (durationMinutes >= activity.thresholdMinutes) {
           currentAlerts.push({
             guard: guard,
-            post: task.post,
+            post: activity.post,
             duration: Math.floor(durationMinutes)
           });
         }
