@@ -93,42 +93,7 @@ export const useAlertMonitor = () => {
         }
       });
 
-      // Show toasts for new alerts only
-      currentAlerts.forEach(alert => {
-        const alertKey = `${alert.guard}-${alert.post}-${Math.floor(alert.duration / 5)}`; // Group by 5-minute intervals
-        
-        if (!shownAlertsRef.current.has(alertKey)) {
-          shownAlertsRef.current.add(alertKey);
-          toast.error(
-            `התראה: ${alert.guard} ${alert.post} כבר ${alert.duration} דקות!`,
-            {
-              duration: 5000,
-              icon: "⚠️",
-              style: {
-                background: 'hsl(0 84.2% 60.2%)',
-                color: 'white',
-                border: '1px solid hsl(0 84.2% 50%)'
-              }
-            }
-          );
-        }
-      });
-
-      // Clean up old shown alerts that are no longer active
-      const currentAlertKeys = new Set(
-        currentAlerts.map(alert => `${alert.guard}-${alert.post}-${Math.floor(alert.duration / 5)}`)
-      );
-      
-      shownAlertsRef.current.forEach(key => {
-        const baseKey = key.split('-').slice(0, -1).join('-');
-        const isStillActive = Array.from(currentAlertKeys).some(currentKey => 
-          currentKey.startsWith(baseKey)
-        );
-        
-        if (!isStillActive) {
-          shownAlertsRef.current.delete(key);
-        }
-      });
+      // התראות popup מבוטלות - ניתן להפעיל בעתיד אם צריך
     };
 
     // Check immediately
