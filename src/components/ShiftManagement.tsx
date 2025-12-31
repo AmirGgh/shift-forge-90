@@ -916,10 +916,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                               }}
                                             >
                                               <div className="min-h-[60px] h-[60px] flex flex-wrap gap-1 content-start overflow-hidden">
-                                                {cellAssignments.map((assignment) => {
-                                                  const iPhone = isIPhone();
-                                                  const guardColor = getGuardColor(assignment.guard);
-                                                  return (
+                                                {cellAssignments.map((assignment) => (
                                                   <div
                                                     key={assignment.id}
                                                     onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
@@ -928,28 +925,23 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                     onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
                                                     onTouchEnd={handleLongPressEnd}
                                                     onClick={() => handleSetActualTime(assignment.id, "schedule")}
-                                                    style={{
-                                                      backgroundColor: iPhone ? 'transparent' : guardColor,
-                                                      borderColor: guardColor,
-                                                      color: iPhone ? guardColor : 'white'
-                                                    }}
-                                                    className={`px-2 py-0.5 text-xs rounded border-2 cursor-pointer hover:opacity-80 transition-opacity font-medium ${
+                                                    className={`px-2 py-0.5 text-xs rounded cursor-pointer hover:opacity-80 transition-opacity font-medium ${
                                                       assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule")
                                                         ? "line-through opacity-50"
                                                         : ""
                                                     }`}
+                                                    style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
                                                   >
                                                     <span className="flex items-center gap-1">
                                                       {assignment.guard}
                                                       {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
-                                                        <span className="text-[13px] opacity-90 font-semibold" style={{ color: 'hsl(210 40% 70%)' }}>
+                                                        <span className="text-[13px] font-semibold" style={{ color: 'white' }}>
                                                           {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
                                                         </span>
                                                       )}
                                                     </span>
                                                   </div>
-                                                  );
-                                                })}
+                                                ))}
                                               </div>
                                             </TableCell>
                                           );
@@ -988,11 +980,6 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                          className="min-h-[40px] bg-background/30 border-2 border-dashed border-foreground rounded-lg p-2 hover:border-primary transition-colors"
                                        >
                                           {getAssignmentsForPatrol(patrol).map((assignment) => {
-                                           const iPhone = isIPhone();
-                                           const isTamach = isGuardTamach(assignment.guard);
-                                           const guardData = data.guards.find(g => g.name === assignment.guard);
-                                           const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                                           const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
                                            const isOldTask = assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "patrol");
                                            return (
                                            <div
@@ -1002,13 +989,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                              onMouseLeave={handleLongPressEnd}
                                              onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
                                              onTouchEnd={handleLongPressEnd}
-                                             style={{ 
-                                               backgroundColor: iPhone ? 'transparent' : (isTamach ? getGuardColor(assignment.guard) : `${getGuardColor(assignment.guard)}30`),
-                                               borderColor: getGuardColor(assignment.guard),
-                                               borderStyle: isCustomShift ? 'dashed' : 'solid',
-                                               color: iPhone ? getGuardColor(assignment.guard) : (isTamach ? 'hsl(var(--background))' : getGuardColor(assignment.guard))
-                                             }}
-                                             className="inline-flex items-center gap-1 px-1 py-0.5 border-2 rounded m-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                                             className="inline-flex items-center gap-1 px-1 py-0.5 rounded m-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                                             style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
                                           >
                                              <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{assignment.guard}</span>
                                              {assignment.actualTime ? (
@@ -1029,7 +1011,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                />
                                              )}
                                              {assignment.actualTime && (
-                                               <span className="text-[13px] font-semibold" style={{ color: 'hsl(210 40% 70%)' }}>{formatTime(assignment.actualTime)}</span>
+                                               <span className="text-[13px] font-semibold" style={{ color: 'white' }}>{formatTime(assignment.actualTime)}</span>
                                              )}
                                            </div>
                                           );
@@ -1064,11 +1046,6 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               className="space-y-2"
                             >
                                {meals.filter(meal => !meal.actualTime || isInTimeRange(meal.actualTime)).map((meal) => {
-                                 const iPhone = isIPhone();
-                                 const isTamach = isGuardTamach(meal.guard);
-                                 const guardData = data.guards.find(g => g.name === meal.guard);
-                                 const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                                 const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
                                  const isOldTask = meal.actualTime && !isLatestTask(meal.guard, meal.id, "meal");
                                  return (
                                  <div
@@ -1078,13 +1055,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                    onMouseLeave={handleLongPressEnd}
                                    onTouchStart={() => handleLongPressStart(meal.id, meal.guard, "meal")}
                                    onTouchEnd={handleLongPressEnd}
-                                   style={{ 
-                                     backgroundColor: iPhone ? 'transparent' : (isTamach ? getGuardColor(meal.guard) : `${getGuardColor(meal.guard)}30`),
-                                     borderColor: getGuardColor(meal.guard),
-                                     borderStyle: isCustomShift ? 'dashed' : 'solid',
-                                     color: iPhone ? getGuardColor(meal.guard) : (isTamach ? 'hsl(var(--background))' : getGuardColor(meal.guard))
-                                   }}
-                                   className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                   className="flex items-center justify-between px-4 py-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                   style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
                                 >
                                    <div className="flex items-center gap-2">
                                      <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{meal.guard}</span>
@@ -1106,7 +1078,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                        />
                                      )}
                                      {meal.actualTime && (
-                                       <span className="text-[13px] font-semibold" style={{ color: 'hsl(210 40% 70%)' }}>{formatTime(meal.actualTime)}</span>
+                                       <span className="text-[13px] font-semibold" style={{ color: 'white' }}>{formatTime(meal.actualTime)}</span>
                                      )}
                                    </div>
                                 </div>
@@ -1134,11 +1106,6 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               className="space-y-2"
                             >
                                {breaks.filter(breakItem => !breakItem.actualTime || isInTimeRange(breakItem.actualTime)).map((breakItem) => {
-                                 const iPhone = isIPhone();
-                                 const isTamach = isGuardTamach(breakItem.guard);
-                                 const guardData = data.guards.find(g => g.name === breakItem.guard);
-                                 const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                                 const isCustomShift = !SHIFT_TYPES.includes(guardData?.shiftType || "");
                                  const isOldTask = breakItem.actualTime && !isLatestTask(breakItem.guard, breakItem.id, "break");
                                  return (
                                  <div
@@ -1148,13 +1115,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                    onMouseLeave={handleLongPressEnd}
                                    onTouchStart={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
                                    onTouchEnd={handleLongPressEnd}
-                                   style={{ 
-                                     backgroundColor: iPhone ? 'transparent' : (isTamach ? getGuardColor(breakItem.guard) : `${getGuardColor(breakItem.guard)}30`),
-                                     borderColor: getGuardColor(breakItem.guard),
-                                     borderStyle: isCustomShift ? 'dashed' : 'solid',
-                                     color: iPhone ? getGuardColor(breakItem.guard) : (isTamach ? 'hsl(var(--background))' : getGuardColor(breakItem.guard))
-                                   }}
-                                   className="flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                   className="flex items-center justify-between px-4 py-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                   style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
                                 >
                                    <div className="flex items-center gap-2">
                                      <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{breakItem.guard}</span>
@@ -1176,7 +1138,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                        />
                                      )}
                                      {breakItem.actualTime && (
-                                       <span className="text-[13px] font-semibold" style={{ color: 'hsl(210 40% 70%)' }}>{formatTime(breakItem.actualTime)}</span>
+                                       <span className="text-[13px] font-semibold" style={{ color: 'white' }}>{formatTime(breakItem.actualTime)}</span>
                                      )}
                                    </div>
                                 </div>
