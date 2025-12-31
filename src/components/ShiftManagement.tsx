@@ -838,13 +838,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             <div className="mb-6 pb-6 border-b border-border/30">
               <h3 className="text-lg font-semibold text-foreground mb-3">מאבטחים במשמרת</h3>
               <div className="flex flex-wrap gap-2">
-                {data.guards.map((guard) => {
-                  const isTamach = guard.shiftType?.includes("תמך");
-                  const SHIFT_TYPES = ["בוקר 6-14", "בוקר 7-15", "תמך 7-19", "תמך 8-20", "ערב 14-22", "ערב 15-23"];
-                  const isInShiftList = SHIFT_TYPES.includes(guard.shiftType || "");
-                  const isCustomShift = !isInShiftList;
-                  
-                  return (
+              {data.guards.map((guard) => {
+                return (
                     <div
                       key={guard.name}
                       draggable
@@ -852,10 +847,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                       onDragEnd={() => setDraggedGuard(null)}
                       data-effect-allowed="move"
                       style={{ 
-                        backgroundColor: isTamach ? guard.color : `${guard.color}20`,
-                        borderColor: guard.color,
-                        borderStyle: isCustomShift ? 'dashed' : 'solid',
-                        color: isTamach ? '#FFFFFF' : guard.color
+                        backgroundColor: 'hsl(210 40% 70%)',
+                        borderColor: 'hsl(210 40% 70%)',
+                        borderStyle: 'solid',
+                        color: 'white'
                       }}
                       className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium touch-none"
                     >

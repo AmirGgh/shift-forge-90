@@ -240,41 +240,37 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
           <Card className="p-6 shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
             <h2 className="text-xl font-semibold mb-4 text-foreground">רשימת מאבטחים ({guards.length})</h2>
             <div className="space-y-2">
-              {guards.map((guard, index) => {
-                const isTamach = guard.shiftType?.includes("תמך");
-                const isInShiftList = SHIFT_TYPES.includes(guard.shiftType || "");
-                const isCustomShift = !isInShiftList;
-                
-                return (
+            {guards.map((guard, index) => {
+              return (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 bg-background/50 rounded-lg border transition-colors"
+                    className="flex items-center justify-between p-3 bg-background/50 rounded-lg border-2 transition-colors"
                     style={{ 
-                      borderColor: editingIndex === index ? 'hsl(var(--primary))' : guard.color,
-                      backgroundColor: isTamach ? guard.color : (editingIndex === index ? 'hsl(var(--accent) / 0.1)' : undefined),
-                      borderWidth: editingIndex === index ? '2px' : '2px',
-                      borderStyle: isCustomShift ? 'dashed' : 'solid'
+                      borderColor: editingIndex === index ? 'hsl(var(--primary))' : 'hsl(210 40% 70%)',
+                      borderStyle: 'solid'
                     }}
                   >
                     <div className="flex items-center gap-3 flex-wrap">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: guard.color }} />
-                      <span 
-                        className="font-medium" 
-                        style={{ color: isTamach ? '#FFFFFF' : undefined }}
-                      >
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: 'hsl(210 40% 70%)' }} 
+                      />
+                      <span className="font-medium">
                         {guard.name}
                       </span>
                       {guard.certified && (
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          isTamach ? 'bg-background/20 text-background' : 'bg-accent/20 text-accent'
-                        }`}>
+                        <span 
+                          className="text-xs px-2 py-1 rounded-full"
+                          style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
+                        >
                           מוסמך
                         </span>
                       )}
                       {guard.shiftType && (
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          isTamach ? 'bg-background/20 text-background' : 'bg-primary/20 text-primary'
-                        }`}>
+                        <span 
+                          className="text-xs px-2 py-1 rounded-full"
+                          style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
+                        >
                           {guard.shiftType}
                         </span>
                       )}
@@ -284,11 +280,7 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEdit(index)}
-                        className={`transition-colors ${
-                          isTamach 
-                            ? 'hover:bg-background/20 text-background hover:text-background' 
-                            : 'hover:bg-accent/20 hover:text-accent'
-                        }`}
+                        className="transition-colors hover:bg-accent/20 hover:text-accent"
                       >
                         <Edit2 className="w-4 h-4" />
                       </Button>
@@ -296,11 +288,7 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(index)}
-                        className={`transition-colors ${
-                          isTamach 
-                            ? 'hover:bg-background/20 text-background hover:text-background' 
-                            : 'hover:bg-destructive/20 hover:text-destructive'
-                        }`}
+                        className="transition-colors hover:bg-destructive/20 hover:text-destructive"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
