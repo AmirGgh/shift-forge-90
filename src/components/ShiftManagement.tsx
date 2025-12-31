@@ -729,10 +729,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     }
   };
 
-  // Generate hours array (7:45 to 19:45)
+  // Generate hours array (7:00 to 19:00, increments of 1 hour)
   const ALL_HOURS = Array.from({ length: 13 }, (_, i) => {
     const hour = 7 + i;
-    return `${hour}:45`;
+    return `${hour}:00`;
   });
 
   // Filter hours based on view
@@ -751,7 +751,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       const [hourStr] = ALL_HOURS[i].split(':');
       const hour = parseInt(hourStr);
       
-      if (currentHour > hour || (currentHour === hour && currentMinutes >= 45)) {
+      if (currentHour > hour || (currentHour === hour && currentMinutes >= 0)) {
         // Return the index relative to the filtered HOURS array
         const indexInFiltered = HOURS.indexOf(ALL_HOURS[i]);
         return indexInFiltered;
@@ -942,7 +942,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                     <span className="flex items-center gap-1">
                                                       {assignment.guard}
                                                       {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
-                                                        <span className="text-[9px] opacity-70">
+                                                        <span className="text-[13px] opacity-90 font-semibold" style={{ color: 'hsl(210 40% 70%)' }}>
                                                           {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
                                                         </span>
                                                       )}
@@ -1029,7 +1029,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                />
                                              )}
                                              {assignment.actualTime && (
-                                               <span className="text-xs opacity-70">{formatTime(assignment.actualTime)}</span>
+                                               <span className="text-[13px] font-semibold" style={{ color: 'hsl(210 40% 70%)' }}>{formatTime(assignment.actualTime)}</span>
                                              )}
                                            </div>
                                           );
@@ -1106,7 +1106,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                        />
                                      )}
                                      {meal.actualTime && (
-                                       <span className="text-xs opacity-70">{formatTime(meal.actualTime)}</span>
+                                       <span className="text-[13px] font-semibold" style={{ color: 'hsl(210 40% 70%)' }}>{formatTime(meal.actualTime)}</span>
                                      )}
                                    </div>
                                 </div>
@@ -1176,7 +1176,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                        />
                                      )}
                                      {breakItem.actualTime && (
-                                       <span className="text-xs opacity-70">{formatTime(breakItem.actualTime)}</span>
+                                       <span className="text-[13px] font-semibold" style={{ color: 'hsl(210 40% 70%)' }}>{formatTime(breakItem.actualTime)}</span>
                                      )}
                                    </div>
                                 </div>
