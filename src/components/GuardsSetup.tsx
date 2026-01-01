@@ -246,14 +246,14 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
                     key={index}
                     className="flex items-center justify-between p-3 bg-background/50 rounded-lg border-2 transition-colors"
                     style={{ 
-                      borderColor: editingIndex === index ? 'hsl(var(--primary))' : 'hsl(210 40% 70%)',
+                      borderColor: editingIndex === index ? 'hsl(var(--primary))' : 'hsl(var(--label-bg))',
                       borderStyle: 'solid'
                     }}
                   >
                     <div className="flex items-center gap-3 flex-wrap">
                       <div 
                         className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: 'hsl(210 40% 70%)' }} 
+                        style={{ backgroundColor: 'hsl(var(--label-bg))' }} 
                       />
                       <span className="font-medium">
                         {guard.name}
@@ -261,7 +261,7 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
                       {guard.certified && (
                         <span 
                           className="text-xs px-2 py-1 rounded-full"
-                          style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
+                          style={{ backgroundColor: 'hsl(var(--label-bg))', color: 'white' }}
                         >
                           מוסמך
                         </span>
@@ -269,7 +269,7 @@ const GuardsSetup = ({ onComplete }: GuardsSetupProps) => {
                       {guard.shiftType && (
                         <span 
                           className="text-xs px-2 py-1 rounded-full"
-                          style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
+                          style={{ backgroundColor: 'hsl(var(--label-bg))', color: 'white' }}
                         >
                           {guard.shiftType}
                         </span>

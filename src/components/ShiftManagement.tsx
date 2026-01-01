@@ -847,8 +847,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                       onDragEnd={() => setDraggedGuard(null)}
                       data-effect-allowed="move"
                       style={{ 
-                        backgroundColor: 'hsl(210 40% 70%)',
-                        borderColor: 'hsl(210 40% 70%)',
+                        backgroundColor: 'hsl(var(--label-bg))',
+                        borderColor: 'hsl(var(--label-bg))',
                         borderStyle: 'solid',
                         color: 'white'
                       }}
@@ -910,7 +910,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                 handleDropSchedule(post, hour);
                                               }}
                                             >
-                                              <div className="min-h-[60px] h-[60px] flex flex-wrap gap-1 content-start overflow-hidden">
+                                              <div className="min-h-[42px] h-[42px] flex flex-wrap gap-1 content-start overflow-hidden">
                                                 {cellAssignments.map((assignment) => (
                                                   <div
                                                     key={assignment.id}
@@ -925,10 +925,10 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                                         ? "line-through opacity-50"
                                                         : ""
                                                     }`}
-                                                    style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
+                                                    style={{ backgroundColor: 'hsl(var(--label-bg))', color: 'white' }}
                                                   >
-                                                    <span className="flex items-center gap-1">
-                                                      {assignment.guard}
+                                                    <span className="flex flex-col items-center">
+                                                      <span>{assignment.guard}</span>
                                                       {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
                                                         <span className="text-[13px] font-semibold" style={{ color: 'white' }}>
                                                           {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
@@ -985,7 +985,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                              onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "patrol")}
                                              onTouchEnd={handleLongPressEnd}
                                              className="inline-flex items-center gap-1 px-1 py-0.5 rounded m-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
-                                             style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
+                                             style={{ backgroundColor: 'hsl(var(--label-bg))', color: 'white' }}
                                           >
                                              <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{assignment.guard}</span>
                                              {assignment.actualTime ? (
@@ -1051,7 +1051,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                    onTouchStart={() => handleLongPressStart(meal.id, meal.guard, "meal")}
                                    onTouchEnd={handleLongPressEnd}
                                    className="flex items-center justify-between px-4 py-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                                   style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
+                                   style={{ backgroundColor: 'hsl(var(--label-bg))', color: 'white' }}
                                 >
                                    <div className="flex items-center gap-2">
                                      <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{meal.guard}</span>
@@ -1111,7 +1111,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                    onTouchStart={() => handleLongPressStart(breakItem.id, breakItem.guard, "break")}
                                    onTouchEnd={handleLongPressEnd}
                                    className="flex items-center justify-between px-4 py-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                                   style={{ backgroundColor: 'hsl(210 40% 70%)', color: 'white' }}
+                                   style={{ backgroundColor: 'hsl(var(--label-bg))', color: 'white' }}
                                 >
                                    <div className="flex items-center gap-2">
                                      <span className={`font-medium ${isOldTask ? 'line-through opacity-60' : ''}`}>{breakItem.guard}</span>

@@ -54,6 +54,9 @@ All colors MUST be HSL.
     --shadow-glow: 0 0 20px hsl(217 91% 60% / 0.15);
     --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.06), 0 2px 4px -1px hsl(0 0% 0% / 0.04);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Label color for light mode - matte pastel blue */
+    --label-bg: 210 40% 70%;
   }
 
   .dark {
@@ -100,6 +103,9 @@ All colors MUST be HSL.
     --gradient-card: linear-gradient(135deg, hsl(222 47% 8%), hsl(222 47% 10%));
     --shadow-glow: 0 0 20px hsl(217 91% 60% / 0.15);
     --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -1px hsl(0 0% 0% / 0.2);
+    
+    /* Label color for dark mode - regular blue */
+    --label-bg: 217 91% 60%;
   }
 }
 
