@@ -859,6 +859,9 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                   );
                 })}
               </div>
+              <div className="mt-3 text-sm text-muted-foreground">
+                זמני חילוף לובי עמידה: 9:30, 11:00, 14:30, 16:30
+              </div>
             </div>
 
             {/* Posts Table */}
@@ -1029,6 +1032,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                   <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                     <UtensilsCrossed className="w-5 h-5" />
                     אוכל
+                    <span className="text-sm font-normal text-muted-foreground">- 8:30, 12:00</span>
                   </h3>
                         <Card className="p-4 border-border/30 bg-background/30"
                           onDragOver={handleDragOver}
