@@ -220,7 +220,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   const [alertsKey, setAlertsKey] = useState(0); // Force re-render for alerts
   const [scheduleView, setScheduleView] = useState<"morning" | "evening">("morning");
   
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     loadData();
