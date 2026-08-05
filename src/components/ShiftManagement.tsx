@@ -1323,7 +1323,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             {/* Alerts View */}
             {mainView === "alerts" && (
               <div className="space-y-4">
-                <Card className="p-1 border-border/30 bg-background/30">
+                <Card className="p-4 border-border/30 bg-background/30">
+
                   {getAlerts().length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
                       אין התראות כרגע
