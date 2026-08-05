@@ -181,9 +181,73 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         });
       }
     });
-    
+
+    // ===== התראות מתוזמנות: פטרולים וחילופי לובי עמידה =====
+    const toDate = (hhmm: string) => {
+      const [h, m] = hhmm.split(":").map(Number);
+      const d = new Date(now);
+      d.setHours(h, m, 0, 0);
+      return d;
+    };
+    const isSameDay = (iso: string) => {
+      const d = new Date(iso);
+      return d.toDateString() === now.toDateString();
+    };
+
+    const PATROL_SCHEDULE: Array<{ name: string; time: string }> = [
+      { name: "פ.ע-7", time: "07:00" },
+      { name: "פ.ת-7", time: "07:00" },
+      { name: "RL-9", time: "09:00" },
+      { name: "RL-13", time: "13:00" },
+      { name: "פ.ע-15", time: "15:00" },
+      { name: "פ.ת-15", time: "15:00" },
+      { name: "RL-16:30", time: "16:30" },
+      { name: "RL-19:30", time: "19:30" },
+      { name: "פ.ת-21", time: "21:00" },
+      { name: "פ.ע-21", time: "21:00" },
+    ];
+
+    const WINDOW_MINUTES = 60;
+
+    PATROL_SCHEDULE.forEach(({ name, time }) => {
+      const scheduled = toDate(time);
+      const diff = (now.getTime() - scheduled.getTime()) / (1000 * 60);
+      if (diff < 0 || diff > WINDOW_MINUTES) return;
+      const done = patrols.some(
+        p => p.patrol === name && p.actualTime && isSameDay(p.actualTime) &&
+             new Date(p.actualTime).getTime() >= scheduled.getTime() - 30 * 60 * 1000
+      );
+      if (!done) {
+        alerts.push({
+          guard: "פטרול",
+          post: `יש לבצע ${name} (${time})`,
+          duration: Math.floor(diff),
+          scheduled: true,
+        });
+      }
+    });
+
+    ["09:30", "11:30", "14:30", "16:30"].forEach(time => {
+      const scheduled = toDate(time);
+      const diff = (now.getTime() - scheduled.getTime()) / (1000 * 60);
+      if (diff < 0 || diff > WINDOW_MINUTES) return;
+      const done = scheduleAssignments.some(
+        s => s.post === "לובי עמידה" && s.actualTime && isSameDay(s.actualTime) &&
+             new Date(s.actualTime).getTime() >= scheduled.getTime() - 15 * 60 * 1000
+      );
+      if (!done) {
+        alerts.push({
+          guard: "לובי עמידה",
+          post: `יש לבצע חילוף (${time})`,
+          duration: Math.floor(diff),
+          scheduled: true,
+        });
+      }
+    });
+
     return alerts;
   };
+
   const [availableGuards, setAvailableGuards] = useState<string[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [patrols, setPatrols] = useState<PatrolAssignment[]>([]);
