@@ -109,7 +109,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   const getAlerts = () => {
     const settings = getShiftSettings();
     const now = new Date();
-    const alerts: Array<{ guard: string; post: string; duration: number }> = [];
+    const alerts: Array<{ guard: string; post: string; duration: number; scheduled?: boolean }> = [];
+
     
     // Get the latest active task for each guard (filtered by time range)
     const guardLatestTasks = new Map<string, { post: string; actualTime: string; thresholdMinutes: number }>();
@@ -180,9 +181,73 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         });
       }
     });
-    
+
+    // ===== התראות מתוזמנות: פטרולים וחילופי לובי עמידה =====
+    const toDate = (hhmm: string) => {
+      const [h, m] = hhmm.split(":").map(Number);
+      const d = new Date(now);
+      d.setHours(h, m, 0, 0);
+      return d;
+    };
+    const isSameDay = (iso: string) => {
+      const d = new Date(iso);
+      return d.toDateString() === now.toDateString();
+    };
+
+    const PATROL_SCHEDULE: Array<{ name: string; time: string }> = [
+      { name: "פ.ע-7", time: "07:00" },
+      { name: "פ.ת-7", time: "07:00" },
+      { name: "RL-9", time: "09:00" },
+      { name: "RL-13", time: "13:00" },
+      { name: "פ.ע-15", time: "15:00" },
+      { name: "פ.ת-15", time: "15:00" },
+      { name: "RL-16:30", time: "16:30" },
+      { name: "RL-19:30", time: "19:30" },
+      { name: "פ.ת-21", time: "21:00" },
+      { name: "פ.ע-21", time: "21:00" },
+    ];
+
+    const WINDOW_MINUTES = 60;
+
+    PATROL_SCHEDULE.forEach(({ name, time }) => {
+      const scheduled = toDate(time);
+      const diff = (now.getTime() - scheduled.getTime()) / (1000 * 60);
+      if (diff < 0 || diff > WINDOW_MINUTES) return;
+      const done = patrols.some(
+        p => p.patrol === name && p.actualTime && isSameDay(p.actualTime) &&
+             new Date(p.actualTime).getTime() >= scheduled.getTime() - 30 * 60 * 1000
+      );
+      if (!done) {
+        alerts.push({
+          guard: "פטרול",
+          post: `יש לבצע ${name} (${time})`,
+          duration: Math.floor(diff),
+          scheduled: true,
+        });
+      }
+    });
+
+    ["09:30", "11:30", "14:30", "16:30"].forEach(time => {
+      const scheduled = toDate(time);
+      const diff = (now.getTime() - scheduled.getTime()) / (1000 * 60);
+      if (diff < 0 || diff > WINDOW_MINUTES) return;
+      const done = scheduleAssignments.some(
+        s => s.post === "לובי עמידה" && s.actualTime && isSameDay(s.actualTime) &&
+             new Date(s.actualTime).getTime() >= scheduled.getTime() - 15 * 60 * 1000
+      );
+      if (!done) {
+        alerts.push({
+          guard: "לובי עמידה",
+          post: `יש לבצע חילוף (${time})`,
+          duration: Math.floor(diff),
+          scheduled: true,
+        });
+      }
+    });
+
     return alerts;
   };
+
   const [availableGuards, setAvailableGuards] = useState<string[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [patrols, setPatrols] = useState<PatrolAssignment[]>([]);
@@ -761,12 +826,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-4 md:p-8" dir="rtl">
-      <div className="max-w-full mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-1 md:p-2" dir="rtl">
+      <div className="max-w-full mx-auto space-y-2">
 
         {/* Main Navigation */}
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
-          <div className="p-6">
+          <div className="p-2">
             <div className="flex gap-2 items-center justify-center mb-6">
               <Button
                 variant={mainView === "posts" ? "default" : "outline"}
@@ -860,7 +925,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                 })}
               </div>
               <div className="mt-3 text-sm text-muted-foreground">
-                זמני חילוף לובי עמידה: 9:30, 11:00, 14:30, 16:30
+                זמני חילוף לובי עמידה: 9:30, 11:30, 14:30, 16:30
               </div>
             </div>
 
@@ -868,7 +933,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             {mainView === "posts" && (
                         <div className="space-y-4">
                           {/* Schedule Table */}
-                          <Card className="p-6 border-border/30 bg-background/30">
+                          <Card className="p-1 border-border/30 bg-background/30">
                             <div className="overflow-x-auto">
                               <Table className="border-2 border-border">
                                 <TableHeader>
@@ -956,7 +1021,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
 
             {/* Patrols Table */}
             {mainView === "patrols" && (
-                        <Card className="p-6 border-border/30 bg-background/30">
+                        <Card className="p-1 border-border/30 bg-background/30">
                           <div className="overflow-x-auto">
                             <table className="w-full">
                               <thead>
@@ -1258,7 +1323,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             {/* Alerts View */}
             {mainView === "alerts" && (
               <div className="space-y-4">
-                <Card className="p-6 border-border/30 bg-background/30">
+                <Card className="p-4 border-border/30 bg-background/30">
+
                   {getAlerts().length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
                       אין התראות כרגע
@@ -1284,7 +1350,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 <span className="font-medium text-foreground">{alert.post}</span>
                               </div>
                               <div className="text-sm text-muted-foreground mt-1">
-                                נמצא בעמדה {alert.duration} דקות
+                                {alert.scheduled ? `באיחור של ${alert.duration} דקות` : `נמצא בעמדה ${alert.duration} דקות`}
                               </div>
                             </div>
                           </div>
