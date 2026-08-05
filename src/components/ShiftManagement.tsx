@@ -109,7 +109,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   const getAlerts = () => {
     const settings = getShiftSettings();
     const now = new Date();
-    const alerts: Array<{ guard: string; post: string; duration: number }> = [];
+    const alerts: Array<{ guard: string; post: string; duration: number; scheduled?: boolean }> = [];
+
     
     // Get the latest active task for each guard (filtered by time range)
     const guardLatestTasks = new Map<string, { post: string; actualTime: string; thresholdMinutes: number }>();
