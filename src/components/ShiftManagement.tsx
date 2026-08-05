@@ -826,12 +826,12 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-4 md:p-8" dir="rtl">
-      <div className="max-w-full mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background to-background/95 p-1 md:p-2" dir="rtl">
+      <div className="max-w-full mx-auto space-y-2">
 
         {/* Main Navigation */}
         <Card className="shadow-[var(--shadow-card)] border-border/50 bg-gradient-to-br from-card to-card/80">
-          <div className="p-6">
+          <div className="p-2">
             <div className="flex gap-2 items-center justify-center mb-6">
               <Button
                 variant={mainView === "posts" ? "default" : "outline"}
@@ -925,7 +925,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                 })}
               </div>
               <div className="mt-3 text-sm text-muted-foreground">
-                זמני חילוף לובי עמידה: 9:30, 11:00, 14:30, 16:30
+                זמני חילוף לובי עמידה: 9:30, 11:30, 14:30, 16:30
               </div>
             </div>
 
@@ -933,7 +933,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             {mainView === "posts" && (
                         <div className="space-y-4">
                           {/* Schedule Table */}
-                          <Card className="p-6 border-border/30 bg-background/30">
+                          <Card className="p-1 border-border/30 bg-background/30">
                             <div className="overflow-x-auto">
                               <Table className="border-2 border-border">
                                 <TableHeader>
@@ -1021,7 +1021,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
 
             {/* Patrols Table */}
             {mainView === "patrols" && (
-                        <Card className="p-6 border-border/30 bg-background/30">
+                        <Card className="p-1 border-border/30 bg-background/30">
                           <div className="overflow-x-auto">
                             <table className="w-full">
                               <thead>
@@ -1323,7 +1323,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             {/* Alerts View */}
             {mainView === "alerts" && (
               <div className="space-y-4">
-                <Card className="p-6 border-border/30 bg-background/30">
+                <Card className="p-1 border-border/30 bg-background/30">
                   {getAlerts().length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
                       אין התראות כרגע
@@ -1349,7 +1349,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 <span className="font-medium text-foreground">{alert.post}</span>
                               </div>
                               <div className="text-sm text-muted-foreground mt-1">
-                                נמצא בעמדה {alert.duration} דקות
+                                {alert.scheduled ? `באיחור של ${alert.duration} דקות` : `נמצא בעמדה ${alert.duration} דקות`}
                               </div>
                             </div>
                           </div>
