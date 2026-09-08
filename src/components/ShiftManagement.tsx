@@ -284,6 +284,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   const [tasksView, setTasksView] = useState<"posts" | "patrols" | "meals" | "breaks">("posts");
   const [alertsKey, setAlertsKey] = useState(0); // Force re-render for alerts
   const [scheduleView, setScheduleView] = useState<"morning" | "evening">("morning");
+  const [postPicker, setPostPicker] = useState<{ guard: string; hour: string } | null>(null);
   
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
