@@ -1512,6 +1512,40 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Post Picker Dialog */}
+      <AlertDialog open={!!postPicker} onOpenChange={(open) => !open && setPostPicker(null)}>
+        <AlertDialogContent className="bg-card border-border/50">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground text-right">
+              בחירת עמדה
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              {postPicker && (
+                <span className="text-foreground">
+                  <span className="font-bold text-primary">{postPicker.guard}</span> בשעה {postPicker.hour}
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid grid-cols-2 gap-2 max-h-[50vh] overflow-y-auto" dir="rtl">
+            {POSTS.map((post) => (
+              <Button
+                key={post}
+                variant="outline"
+                onClick={() => postPicker && assignSchedulePost(postPicker.guard, postPicker.hour, post)}
+              >
+                {post}
+              </Button>
+            ))}
+          </div>
+          <AlertDialogFooter>
+            <Button variant="ghost" onClick={() => setPostPicker(null)} className="w-full">
+              ביטול
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
