@@ -385,6 +385,34 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     setDraggedGuard(null);
   };
 
+  const getGuardHourAssignments = (guard: string, hour: string) =>
+    scheduleAssignments.filter(a => a.guard === guard && a.hour === hour);
+
+  const assignSchedulePost = (guardName: string, hour: string, post: string) => {
+    const storeData = getGuardsData();
+    const guard = storeData.guards.find(g => g.name === guardName);
+    const restrictedPosts = ["דסק 15", "דסק לובי"];
+
+    if (!guard?.certified && restrictedPosts.includes(post)) {
+      toast.error(`לא ניתן להציב מאבטח לא מוסמך ב${post}`);
+      return;
+    }
+
+    const newSchedule: ScheduleAssignment = {
+      id: `${Date.now()}-${Math.random()}`,
+      guard: guardName,
+      post,
+      hour,
+      time: new Date().toISOString()
+    };
+    const newScheduleAssignments = [...scheduleAssignments, newSchedule];
+    setScheduleAssignments(newScheduleAssignments);
+    (storeData as any).scheduleAssignments = newScheduleAssignments;
+    saveGuardsData(storeData);
+    toast.success(`${guardName} הוצב ב${post} בשעה ${hour}`);
+    setPostPicker(null);
+  };
+
   const handleLongPressStart = (id: string, guard: string, type: "post" | "patrol" | "meal" | "break" | "schedule") => {
     longPressTimer.current = setTimeout(() => {
       setDeleteTarget({ guard, target: id, type });
