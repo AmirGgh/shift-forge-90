@@ -961,86 +961,94 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             {/* Posts Table */}
             {mainView === "posts" && (
                         <div className="space-y-4">
-                          {/* Schedule Table */}
+                          {/* Schedule Table: guards as rows, hours as columns */}
                           <Card className="p-1 border-border/30 bg-background/30">
                             <div className="overflow-x-auto">
                               <Table className="border-2 border-border">
                                 <TableHeader>
                                   <TableRow className="border-b-2 border-border">
-                                    <TableHead className="text-right font-semibold min-w-[80px] border-l-2 border-border">שעה</TableHead>
-                                    {POSTS.map((post) => (
-                                      <TableHead 
-                                        key={post} 
-                                        className="text-right font-semibold min-w-[72px] border-l-2 border-border"
-                                        style={{
-                                          backgroundColor: HIGHLIGHTED_POSTS.includes(post) ? 'hsl(var(--accent) / 0.15)' : undefined
-                                        }}
+                                    <TableHead className="text-right font-semibold min-w-[90px] border-l-2 border-border">מאבטח</TableHead>
+                                    {HOURS.map((hour, index) => (
+                                      <TableHead
+                                        key={hour}
+                                        className={`text-right font-semibold min-w-[90px] border-l-2 border-border ${index === getCurrentHourIndex() ? "bg-primary/20" : ""}`}
                                       >
-                                        {post}
+                                        {hour}
                                       </TableHead>
                                     ))}
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {HOURS.map((hour, index) => {
-                                    const isCurrentHour = index === getCurrentHourIndex();
-                                    return (
-                                      <TableRow 
-                                        key={hour}
-                                        className={`border-b-2 border-border ${isCurrentHour ? "bg-primary/20 hover:bg-primary/30" : ""}`}
-                                      >
-                                        <TableCell className="font-medium border-l-2 border-border">
-                                          {hour}
-                                        </TableCell>
-                                        {POSTS.map((post) => {
-                                          const cellAssignments = getScheduleAssignments(post, hour);
-                                          return (
-                                            <TableCell 
-                                              key={post} 
-                                              className="p-2 border-l-2 border-border"
-                                              style={{
-                                                backgroundColor: HIGHLIGHTED_POSTS.includes(post) ? 'hsl(var(--accent) / 0.15)' : undefined
-                                              }}
-                                              onDragOver={handleDragOver}
-                                              onDrop={(e) => {
-                                                e.preventDefault();
-                                                handleDropSchedule(post, hour);
-                                              }}
-                                            >
-                                              <div className="min-h-[42px] h-[42px] flex flex-wrap gap-1 content-start overflow-hidden">
-                                                {cellAssignments.map((assignment) => (
-                                                  <div
-                                                    key={assignment.id}
-                                                    onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
-                                                    onMouseUp={handleLongPressEnd}
-                                                    onMouseLeave={handleLongPressEnd}
-                                                    onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
-                                                    onTouchEnd={handleLongPressEnd}
-                                                    onClick={() => handleSetActualTime(assignment.id, "schedule")}
-                                                    className={`px-2 py-0.5 text-xs rounded cursor-pointer hover:opacity-80 transition-opacity font-medium ${
-                                                      assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule")
-                                                        ? "line-through opacity-50"
-                                                        : ""
-                                                    }`}
-                                                    style={{ backgroundColor: 'hsl(var(--label-bg))', color: 'white' }}
-                                                  >
-                                                    <span className="flex flex-col items-center">
-                                                      <span>{assignment.guard}</span>
-                                                      {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
-                                                        <span className="text-[13px] font-semibold" style={{ color: 'white' }}>
-                                                          {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
-                                                        </span>
-                                                      )}
-                                                    </span>
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            </TableCell>
-                                          );
-                                        })}
-                                      </TableRow>
-                                    );
-                                  })}
+                                  {data.guards.map((guard) => (
+                                    <TableRow key={guard.name} className="border-b-2 border-border">
+                                      <TableCell className="font-medium border-l-2 border-border whitespace-nowrap">
+                                        {guard.name}
+                                      </TableCell>
+                                      {HOURS.map((hour, index) => {
+                                        const cellAssignments = getGuardHourAssignments(guard.name, hour);
+                                        return (
+                                          <TableCell
+                                            key={hour}
+                                            className={`p-1 border-l-2 border-border align-top cursor-pointer ${index === getCurrentHourIndex() ? "bg-primary/10" : ""}`}
+                                            onClick={() => {
+                                              if (cellAssignments.length === 0) {
+                                                setPostPicker({ guard: guard.name, hour });
+                                              }
+                                            }}
+                                          >
+                                            <div className="min-h-[42px] flex flex-col gap-1">
+                                              {cellAssignments.map((assignment) => (
+                                                <div
+                                                  key={assignment.id}
+                                                  onMouseDown={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                                  onMouseUp={handleLongPressEnd}
+                                                  onMouseLeave={handleLongPressEnd}
+                                                  onTouchStart={() => handleLongPressStart(assignment.id, assignment.guard, "schedule")}
+                                                  onTouchEnd={handleLongPressEnd}
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSetActualTime(assignment.id, "schedule");
+                                                  }}
+                                                  className={`px-2 py-0.5 text-xs rounded cursor-pointer hover:opacity-80 transition-opacity font-medium text-center ${
+                                                    assignment.actualTime && !isLatestTask(assignment.guard, assignment.id, "schedule")
+                                                      ? "line-through opacity-50"
+                                                      : ""
+                                                  }`}
+                                                  style={{
+                                                    backgroundColor: HIGHLIGHTED_POSTS.includes(assignment.post)
+                                                      ? 'hsl(var(--accent))'
+                                                      : 'hsl(var(--label-bg))',
+                                                    color: 'white'
+                                                  }}
+                                                >
+                                                  <span className="flex flex-col items-center">
+                                                    <span>{assignment.post}</span>
+                                                    {assignment.actualTime && isLatestTask(assignment.guard, assignment.id, "schedule") && (
+                                                      <span className="text-[13px] font-semibold" style={{ color: 'white' }}>
+                                                        {new Date(assignment.actualTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                                                      </span>
+                                                    )}
+                                                  </span>
+                                                </div>
+                                              ))}
+                                              {cellAssignments.length > 0 && (
+                                                <button
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setPostPicker({ guard: guard.name, hour });
+                                                  }}
+                                                  className="text-[11px] text-muted-foreground hover:text-foreground"
+                                                >
+                                                  +
+                                                </button>
+                                              )}
+                                            </div>
+                                          </TableCell>
+                                        );
+                                      })}
+                                    </TableRow>
+                                  ))}
                                 </TableBody>
                               </Table>
                             </div>
