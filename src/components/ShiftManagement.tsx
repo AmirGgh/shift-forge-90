@@ -928,35 +928,40 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
               )}
             </div>
 
-            {/* Guards Bank - Always visible */}
+            {/* Guards Bank - hidden in posts table view */}
             <div className="mb-6 pb-6 border-b border-border/30">
-              <h3 className="text-lg font-semibold text-foreground mb-3">מאבטחים במשמרת</h3>
-              <div className="flex flex-wrap gap-2">
-              {data.guards.map((guard) => {
-                return (
-                    <div
-                      key={guard.name}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, guard.name)}
-                      onDragEnd={() => setDraggedGuard(null)}
-                      data-effect-allowed="move"
-                      style={{ 
-                        backgroundColor: 'hsl(var(--label-bg))',
-                        borderColor: 'hsl(var(--label-bg))',
-                        borderStyle: 'solid',
-                        color: 'white'
-                      }}
-                      className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium touch-none"
-                    >
-                      {guard.name}
-                    </div>
-                  );
-                })}
-              </div>
+              {mainView !== "posts" && (
+                <>
+                  <h3 className="text-lg font-semibold text-foreground mb-3">מאבטחים במשמרת</h3>
+                  <div className="flex flex-wrap gap-2">
+                  {data.guards.map((guard) => {
+                    return (
+                        <div
+                          key={guard.name}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, guard.name)}
+                          onDragEnd={() => setDraggedGuard(null)}
+                          data-effect-allowed="move"
+                          style={{ 
+                            backgroundColor: 'hsl(var(--label-bg))',
+                            borderColor: 'hsl(var(--label-bg))',
+                            borderStyle: 'solid',
+                            color: 'white'
+                          }}
+                          className="px-4 py-2 border-2 rounded-lg cursor-move hover:opacity-80 transition-opacity font-medium touch-none"
+                        >
+                          {guard.name}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
               <div className="mt-3 text-sm text-muted-foreground">
                 זמני חילוף לובי עמידה: 9:30, 11:30, 14:30, 16:30
               </div>
             </div>
+
 
             {/* Posts Table */}
             {mainView === "posts" && (
