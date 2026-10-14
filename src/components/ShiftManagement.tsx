@@ -972,7 +972,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               <Table className="border-2 border-border">
                                 <TableHeader>
                                   <TableRow className="border-b-2 border-border">
-                                    <TableHead className="sticky right-0 z-20 bg-background text-right font-semibold min-w-[90px] border-l-2 border-border shadow-[-2px_0_0_hsl(var(--border))]">מאבטח</TableHead>
+                                    <TableHead className="sticky right-0 z-20 bg-background text-right font-semibold w-[62px] min-w-[62px] max-w-[62px] border-l-2 border-border shadow-[-2px_0_0_hsl(var(--border))]">מאבטח</TableHead>
                                     {HOURS.map((hour, index) => (
                                       <TableHead
                                         key={hour}
