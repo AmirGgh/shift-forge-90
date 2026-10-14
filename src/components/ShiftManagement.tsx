@@ -972,7 +972,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                               <Table className="border-2 border-border">
                                 <TableHeader>
                                   <TableRow className="border-b-2 border-border">
-                                    <TableHead className="sticky right-0 z-20 bg-background text-right font-semibold min-w-[90px] border-l-2 border-border shadow-[-2px_0_0_hsl(var(--border))]">מאבטח</TableHead>
+                                    <TableHead className="sticky right-0 z-20 bg-background text-right font-semibold w-[58px] min-w-[58px] max-w-[58px] border-l-2 border-border shadow-[-2px_0_0_hsl(var(--border))]">מאבטח</TableHead>
                                     {HOURS.map((hour, index) => (
                                       <TableHead
                                         key={hour}
@@ -986,8 +986,8 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                 <TableBody>
                                   {data.guards.map((guard) => (
                                     <TableRow key={guard.name} className="border-b-2 border-border">
-                                      <TableCell className="sticky right-0 z-10 bg-background font-medium border-l-2 border-border whitespace-nowrap shadow-[-2px_0_0_hsl(var(--border))]">
-                                        {guard.name}
+                                      <TableCell className="sticky right-0 z-10 bg-background font-medium border-l-2 border-border shadow-[-2px_0_0_hsl(var(--border))] w-[58px] min-w-[58px] max-w-[58px] p-1 align-middle">
+                                        <span className="block text-[11px] leading-tight break-words text-center" title={guard.name}>{guard.name}</span>
                                       </TableCell>
                                       {HOURS.map((hour, index) => {
                                         const cellAssignments = getGuardHourAssignments(guard.name, hour);
