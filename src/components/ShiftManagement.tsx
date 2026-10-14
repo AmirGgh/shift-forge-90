@@ -163,7 +163,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
         guardLatestTasks.set(meal.guard, {
           post: "אוכל",
           actualTime: meal.actualTime,
-          thresholdMinutes: settings.mealThresholdMinutes
+          thresholdMinutes: (meal as any).duration ?? settings.mealThresholdMinutes
         });
       }
     });
@@ -285,6 +285,11 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
   const [alertsKey, setAlertsKey] = useState(0); // Force re-render for alerts
   const [scheduleView, setScheduleView] = useState<"morning" | "evening">("morning");
   const [postPicker, setPostPicker] = useState<{ guard: string; hour: string } | null>(null);
+  const [nowTick, setNowTick] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
   
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -602,7 +607,7 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
     setDeleteTarget(null);
   };
 
-  const handleConfirmAssignment = () => {
+  const handleConfirmAssignment = (mealDuration?: number) => {
     if (!pendingAssignment) return;
 
     const data = getGuardsData();
@@ -640,15 +645,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
       data.patrols = newPatrols;
       toast.success(`${pendingAssignment.guard} הוצב ב${pendingAssignment.target}`);
     } else if (pendingAssignment.type === "meal") {
-      const newMeal: MealAssignment = {
+      const newMeal = {
         id: `${Date.now()}-${Math.random()}`,
         guard: pendingAssignment.guard,
-        time: new Date().toISOString()
-      };
+        time: new Date().toISOString(),
+        duration: mealDuration ?? 30
+      } as MealAssignment;
       const newMeals = [...meals, newMeal];
       setMeals(newMeals);
       data.meals = newMeals;
-      toast.success(`${pendingAssignment.guard} הוצב באוכל`);
+      toast.success(`${pendingAssignment.guard} הוצב באוכל (${mealDuration ?? 30} דק')`);
     } else if (pendingAssignment.type === "break") {
       const newBreak: BreakAssignment = {
         id: `${Date.now()}-${Math.random()}`,
@@ -1186,6 +1192,14 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
                                      {meal.actualTime && (
                                        <span className="text-[13px] font-semibold" style={{ color: 'white' }}>{formatTime(meal.actualTime)}</span>
                                      )}
+                                     {(meal as any).duration && (() => {
+                                       const dur = (meal as any).duration as number;
+                                       if (!meal.actualTime) return <span className="text-[12px] opacity-80">({dur} דק')</span>;
+                                       const remaining = Math.round((new Date(meal.actualTime).getTime() + dur * 60000 - nowTick) / 1000);
+                                       if (remaining <= 0) return <span className="text-[13px] font-bold text-destructive">הסתיים</span>;
+                                       const m = Math.floor(remaining / 60), s = remaining % 60;
+                                       return <span className="text-[13px] font-bold tabular-nums">⏳ {m}:{s.toString().padStart(2, "0")}</span>;
+                                     })()}
                                    </div>
                                 </div>
                                 );
@@ -1422,9 +1436,16 @@ const ShiftManagement = ({}: ShiftManagementProps) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row-reverse gap-2">
-            <Button onClick={handleConfirmAssignment} className="flex-1">
-              אישור
-            </Button>
+            {pendingAssignment?.type === "meal" ? (
+              <>
+                <Button onClick={() => handleConfirmAssignment(20)} className="flex-1">20 דק'</Button>
+                <Button onClick={() => handleConfirmAssignment(30)} className="flex-1">30 דק'</Button>
+              </>
+            ) : (
+              <Button onClick={() => handleConfirmAssignment()} className="flex-1">
+                אישור
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => setPendingAssignment(null)}
